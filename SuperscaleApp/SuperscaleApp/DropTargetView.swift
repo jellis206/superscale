@@ -7,6 +7,7 @@ import UniformTypeIdentifiers
 
 struct DropTargetView: View {
     let onDrop: ([URL]) -> Void
+    var isImportEnabled = true
     @State private var isTargeted = false
 
     var body: some View {
@@ -27,6 +28,7 @@ struct DropTargetView: View {
             .font(.callout)
             .foregroundStyle(Color.accentColor)
             .accessibilityIdentifier("fileChooser")
+            .disabled(!isImportEnabled)
 
             Text("PNG, JPEG, TIFF, HEIC")
                 .font(.caption)
@@ -46,6 +48,7 @@ struct DropTargetView: View {
     }
 
     private func openFileChooser() {
+        guard isImportEnabled else { return }
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [.png, .jpeg, .tiff, .heic]
         panel.allowsMultipleSelection = false
@@ -57,6 +60,7 @@ struct DropTargetView: View {
     }
 
     private func handleProviders(_ providers: [NSItemProvider]) -> Bool {
+        guard isImportEnabled else { return false }
         for provider in providers {
             _ = provider.loadObject(ofClass: URL.self) { url, _ in
                 guard let url else { return }

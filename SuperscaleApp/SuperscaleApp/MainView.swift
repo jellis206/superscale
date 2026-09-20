@@ -2,9 +2,11 @@
 // ABOUTME: Holds the base image a filter reads and the candidate a filter produced.
 
 import FalGenerationKit
+import ImageIO
 import SuperscaleKit
 import SuperscaleUXCore
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct MainView: View {
     @ObservedObject var viewModel: UpscaleViewModel
@@ -40,6 +42,12 @@ struct MainView: View {
     /// What that warning is standing in front of: a clear, or an open that would replace the picture.
     @State private var pendingAction: PendingAction = .clear
     @State private var didLoadDefaults = false
+    #if DEBUG
+        @ObservedObject private var testRequestLedger = UITestRequestLedger.shared
+        @State private var exportTestContinuation: CheckedContinuation<Void, Never>?
+        @State private var exportTestPhase = ""
+        @State private var dispatchingTestReplacements = false
+    #endif
     /// The workspace's state. The graph decides which asset is read and which is shown; the view
     /// model renders whichever one it is handed.
     ///
@@ -96,6 +104,10 @@ struct MainView: View {
                     // of its own. The label is the channel this platform carries on a container
                     // declaring `children: .contain`, which is what guide 3.18 already said.
                     .accessibilityLabel(canvasAccessibilityLabel)
+                    .simultaneousGesture(
+                        TapGesture().onEnded {
+                            NSApp.keyWindow?.makeFirstResponder(nil)
+                        })
                 Divider()
                 FilterPanel(
                     selection: $selection,
@@ -139,6 +151,7 @@ struct MainView: View {
                     })
         }
         .navigationTitle(windowTitle)
+        .background(WorkspaceClipboardCommands(onCopy: commands.requestCopy, onPaste: commands.requestPaste))
         .onAppear(perform: loadDefaults)
         .onChange(of: viewModel.inputURL) { _, url in adoptImportedImage(url) }
         // Cmd+N (#145) and Cmd+O (#143), arriving as requests because the menu cannot see the lock
@@ -148,6 +161,12 @@ struct MainView: View {
         .onChange(of: commands.openRequests) { _, _ in requestOpen() }
         .onChange(of: commands.copyRequests) { _, _ in copyDisplayedPicture() }
         .onChange(of: commands.pasteRequests) { _, _ in pastePicture() }
+        .onChange(of: commands.saveRequests) { _, _ in saveDisplayedPicture() }
+        .onChange(of: commands.saveAllRequests) { _, _ in saveAll() }
+        .onChange(of: commands.recentRequests) { _, _ in
+            if let session = commands.recentSession { openRecent(session) }
+        }
+        .onChange(of: workspace.lockedIterations.count) { _, count in commands.hasLocks = count > 0 }
         .onChange(of: coordinatorOutputPath) { _, _ in adoptFilterResult() }
         .onChange(of: coordinatorFailureMessage) { _, message in reportFilterFailure(message) }
         .onChange(of: workspace.showsBase) { _, _ in displayChosenAsset() }
@@ -209,6 +228,7 @@ struct MainView: View {
     /// panel. The author named two of the three; a warning that fires on some routes and not others
     /// teaches a habit that then fails, which is worse than not warning at all.
     private func requestClear() {
+        guard allows(.clear) else { return }
         if unsavedLockedIterations.isEmpty {
             performClear()
         } else {
@@ -222,6 +242,7 @@ struct MainView: View {
     /// The panel lives here rather than in the scene because opening replaces the working picture,
     /// and whether that costs the user anything is a question only this view can answer.
     private func requestOpen() {
+        guard allows(.openImage) else { return }
         if unsavedLockedIterations.isEmpty {
             presentOpenPanel()
         } else {
@@ -269,6 +290,7 @@ struct MainView: View {
     /// the configured generated root rather than a scratch location, which is the rule #116
     /// established --- one resolution for every directory the application writes to.
     private func pastePicture() {
+        guard allows(.pasteImage) else { return }
         guard viewModel.originalImage == nil else { return }
         guard let image = NSImage(pasteboard: .general) else { return }
         guard let tiff = image.tiffRepresentation,
@@ -291,6 +313,7 @@ struct MainView: View {
     }
 
     private func presentOpenPanel() {
+        guard allows(.fileChooser) else { return }
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [.png, .jpeg, .tiff, .heic]
         panel.allowsMultipleSelection = false
@@ -298,8 +321,186 @@ struct MainView: View {
         panel.message = "Choose an image to upscale"
 
         guard panel.runModal() == .OK, let url = panel.url else { return }
-        viewModel.handleDrop(urls: [url])
+        importFiles([url], action: .fileChooser)
     }
+
+    private func allows(_ action: WorkspaceAction) -> Bool {
+        let accepted = ImageExport.allows(action, isSavingAll: commands.isSavingAll)
+        #if DEBUG
+            if dispatchingTestReplacements {
+                testRequestLedger.attemptedReplacements.append(action.rawValue)
+                if accepted { testRequestLedger.acceptedReplacements.append(action.rawValue) }
+            }
+        #endif
+        return accepted
+    }
+
+    private func importFiles(_ urls: [URL], action: WorkspaceAction) {
+        guard allows(action) else { return }
+        viewModel.handleDrop(urls: urls)
+    }
+
+    private func openRecent(_ session: GenerationSessionRecord) {
+        guard allows(.openRecent) else { return }
+        do {
+            _ = try WorkspaceModel.workingImage(for: session)
+            guard let source = session.upscaleSource else {
+                throw WorkspaceError.sessionImageMissing(session.generatedAssetPath ?? "unknown path")
+            }
+            viewModel.upscale(source)
+        } catch { viewModel.report(error) }
+    }
+
+    private func saveDisplayedPicture() {
+        guard let image = displayedImage else { return }
+        let sourceURL = currentlyDisplayedFileURL ?? viewModel.inputURL
+        let directory = settingsState.outputFolder
+        // Menu requests arrive during SwiftUI's update. Present the native modal after that update.
+        Task { @MainActor in
+            viewModel.saveAs(image: image, sourceURL: sourceURL, defaultDirectory: directory)
+        }
+    }
+
+    private func saveAll() {
+        guard allows(.saveAll), !workspace.lockedIterations.isEmpty else { return }
+        commands.isSavingAll = true
+        let locks = workspace.lockedIterations.map { ExportLock(id: $0.id.uuidString, sourceURL: $0.fileURL) }
+        let cached = viewModel.cachedExportImages
+        #if DEBUG
+            testRequestLedger.exportBatches.append(locks.map(\.id))
+        #endif
+        Task { @MainActor in
+            defer { commands.isSavingAll = false }
+            // Explicit worker isolation keeps stored reads, decoding, encoding and writes off the UI actor.
+            let items = await Task.detached { ImageExport.snapshot(locks: locks, renderings: cached) }.value
+            do {
+                let result = try await ImageExport.run(
+                    items, destination: resolveExportDestination,
+                    export: { plan, folder in
+                        #if DEBUG
+                            await suspendTestExport(at: "releaseSaveAllTestExport")
+                            let failingName =
+                                exportTestMode == "save-all-one-file" ? plan.last?.filename : nil
+                        #else
+                            let failingName: String? = nil
+                        #endif
+                        return await Task.detached {
+                            ImageExport.export(
+                                plan, to: folder, encodePNG: PlatformImageExport.png,
+                                writeExclusive: { data, url in
+                                    if url.lastPathComponent == failingName {
+                                        throw CocoaError(.fileWriteNoPermission)
+                                    }
+                                    try data.write(to: url, options: .withoutOverwriting)
+                                })
+                        }.value
+                    })
+                guard let result else { return }
+                #if DEBUG
+                    await suspendTestExport(at: "reconcileSaveAllTestExport")
+                #endif
+                viewModel.recordSavedExports(result)
+                reportExport(result)
+                #if DEBUG
+                    testRequestLedger.exportOutputs = Dictionary(
+                        uniqueKeysWithValues: result.successes.map {
+                            ($0.lock.id, $0.outputURL.lastPathComponent)
+                        })
+                    await suspendTestExport(at: "finishSaveAllTestExport")
+                #endif
+            } catch {
+                viewModel.report(
+                    "Could not use the export folder. Choose a writable folder in Settings and retry.")
+            }
+        }
+    }
+
+    private func resolveExportDestination() async throws -> URL? {
+        guard let downloads = GenerationPreferences.defaultOutputFolder else {
+            throw CocoaError(.fileNoSuchFile)
+        }
+        var intent = settingsState.outputFolderIntent(defaultDownloads: downloads)
+        #if DEBUG
+            if ProcessInfo.processInfo.environment["SUPERSCALE_UI_TEST_ROOT"] != nil,
+                let path = ProcessInfo.processInfo.environment["SUPERSCALE_UI_TEST_OUTPUT_FOLDER"]
+            {
+                intent = .storedAvailable(URL(fileURLWithPath: path, isDirectory: true))
+            }
+        #endif
+        let requested: URL
+        switch intent {
+        case .defaultDownloads(let url), .storedAvailable(let url), .storedUnavailable(let url):
+            requested = url
+        }
+        // Permission metadata alone may miss a macOS privacy denial. Probe on the file worker.
+        let writable = await Task.detached { PlatformImageExport.canWrite(to: requested) }.value
+        var choseDirectory = false
+        return try ImageExport.destination(
+            for: intent,
+            isWritable: { choseDirectory ? FileManager.default.isWritableFile(atPath: $0.path) : writable },
+            isDirectory: { url in
+                var directory: ObjCBool = false
+                return FileManager.default.fileExists(atPath: url.path, isDirectory: &directory)
+                    && directory.boolValue
+            },
+            choose: { startingDirectory in
+                let panel = NSOpenPanel()
+                panel.canChooseFiles = false
+                panel.canChooseDirectories = true
+                panel.canCreateDirectories = true
+                panel.allowsMultipleSelection = false
+                panel.directoryURL = startingDirectory
+                panel.message = "Choose a writable folder for Save All"
+                guard panel.runModal() == .OK else { return nil }
+                choseDirectory = true
+                return panel.url
+            }, persist: settingsState.saveOutputFolder)
+    }
+
+    private func reportExport(_ result: ExportResult) {
+        if result.failures.isEmpty {
+            viewModel.noticeMessage = "Saved \(result.successes.count) images."
+        } else {
+            let failures = result.failures.map { "\($0.filename): \($0.reason)" }.joined(separator: "\n")
+            viewModel.report("\(result.successes.count) saved, \(result.failures.count) failed.\n\(failures)")
+        }
+    }
+
+    #if DEBUG
+        private var exportTestMode: String? {
+            guard ProcessInfo.processInfo.environment["SUPERSCALE_UI_TEST_ROOT"] != nil,
+                ProcessInfo.processInfo.environment["SUPERSCALE_UI_TEST_GENERATED_IMAGE"] != nil
+            else { return nil }
+            return ProcessInfo.processInfo.environment["SUPERSCALE_UI_TEST_FAIL"]
+        }
+
+        private func suspendTestExport(at phase: String) async {
+            guard exportTestMode == "save-all-suspended" else { return }
+            await withCheckedContinuation { continuation in
+                exportTestContinuation = continuation
+                exportTestPhase = phase
+            }
+        }
+
+        private func resumeTestExport() {
+            let continuation = exportTestContinuation
+            exportTestContinuation = nil
+            exportTestPhase = ""
+            continuation?.resume()
+        }
+
+        private func dispatchTestReplacements() {
+            dispatchingTestReplacements = true
+            defer { dispatchingTestReplacements = false }
+            saveAll()
+            requestClear()
+            requestOpen()
+            if let session = try? sessionStore.sessions().first { openRecent(session) }
+            pastePicture()
+            presentOpenPanel()
+            importFiles([storageRoots.generated.appendingPathComponent("test-drop.png")], action: .fileDrop)
+        }
+    #endif
 
     // MARK: - Canvas
 
@@ -452,7 +653,9 @@ struct MainView: View {
                 resultView(image: displayedImage ?? base)
             }
         } else {
-            DropTargetView(onDrop: viewModel.handleDrop)
+            DropTargetView(
+                onDrop: { importFiles($0, action: .fileDrop) },
+                isImportEnabled: !commands.isSavingAll)
         }
     }
 
@@ -495,7 +698,10 @@ struct MainView: View {
                 .padding(16)
                 .accessibilityIdentifier("workingImage")
 
-            DropTargetView(onDrop: viewModel.handleDrop)
+            DropTargetView(
+                onDrop: { importFiles($0, action: .fileDrop) },
+                isImportEnabled: !commands.isSavingAll
+            )
                 .opacity(0.01)
         }
     }
@@ -549,6 +755,7 @@ struct MainView: View {
     /// Separate from `requestClear()` so the warning has exactly one thing to confirm and the
     /// three routes have exactly one thing to call.
     private func performClear() {
+        guard allows(.clear) else { return }
         viewModel.clearPicture()
         workspace.clear()
         loadedBaseImage = nil
@@ -819,7 +1026,11 @@ struct MainView: View {
                 "The filter returned a different shape from the picture that was sent."
         }
 
-        upscale(source, arrival: .filterResult)
+        do {
+            try display(candidate)
+        } catch {
+            viewModel.report(error)
+        }
     }
 
     /// Promotes the candidate to base, so the next filter builds on it.
@@ -922,6 +1133,14 @@ struct MainView: View {
     private func loadDefaults() {
         guard !didLoadDefaults else { return }
         didLoadDefaults = true
+        #if DEBUG
+            if ProcessInfo.processInfo.environment["SUPERSCALE_UI_TEST_ROOT"] != nil,
+                let output = ProcessInfo.processInfo.environment["SUPERSCALE_UI_TEST_OUTPUT_FOLDER"]
+            {
+                // Test-local input only; changing this in-memory property does not persist a preference.
+                settingsState.outputFolder = URL(fileURLWithPath: output, isDirectory: true)
+            }
+        #endif
         selection = FilterSelection(filters: settingsState.promptPackCatalogue.packs)
         if let defaultFilterID = settingsState.defaultPromptPackID {
             selection.choose(defaultFilterID)
@@ -1003,12 +1222,15 @@ struct MainView: View {
             // minimum turns the scale off. A filtered result just paid for could not be written to
             // disk. Compare stays bound to `result`, because with nothing derived there is nothing
             // to compare against.
-            if viewModel.savableImage != nil {
+            if displayedImage != nil {
                 Button("Save As…") {
-                    viewModel.saveAs(defaultDirectory: settingsState.outputFolder)
+                    saveDisplayedPicture()
                 }
                 .accessibilityIdentifier("saveButton")
             }
+            Button("Save All", action: saveAll)
+                .disabled(workspace.lockedIterations.isEmpty || commands.isSavingAll)
+                .accessibilityIdentifier("saveAllButton")
 
             // Putting the picture away, and the author's third report (#135).
             //
@@ -1028,7 +1250,7 @@ struct MainView: View {
                 Button("Clear Image") {
                     requestClear()
                 }
-                .disabled(viewModel.isProcessing || isSubmittingFilter)
+                .disabled(viewModel.isProcessing || isSubmittingFilter || commands.isSavingAll)
                 .help("Put this picture away and go back to the drop target")
                 // How much a clear would cost, published rather than inferred. A test asking
                 // "should this have warned" otherwise has to reason about the graph from outside,
@@ -1110,6 +1332,13 @@ struct MainView: View {
                     .foregroundStyle(.clear)
                     .accessibilityValue("\(UITestRequestLedger.shared.generationRequests)")
                     .accessibilityIdentifier("generationRequestCount")
+                    Text("\(testRequestLedger.upscaleRequests)")
+                        .foregroundStyle(.clear)
+                        .accessibilityIdentifier("upscaleRequestCount")
+                    Text("\(testRequestLedger.uploadRequests)")
+                        .foregroundStyle(.clear)
+                        .accessibilityIdentifier("uploadRequestCount")
+                    imageActionTestState
             }
 #endif
         }
@@ -1122,6 +1351,61 @@ struct MainView: View {
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("appStatusBar")
     }
+
+    #if DEBUG
+        @ViewBuilder
+        private var imageActionTestState: some View {
+            Group {
+                Text("\(testRequestLedger.exportBatches.count)")
+                    .accessibilityIdentifier("saveAllBatchCount")
+                Text(testRequestLedger.exportBatches.last?.joined(separator: ",") ?? "none")
+                    .accessibilityIdentifier("saveAllBatchIDs")
+                Text(testJSON(testRequestLedger.exportOutputs))
+                    .accessibilityIdentifier("saveAllOutputMap")
+                Text(
+                    testJSON(
+                        Dictionary(
+                            uniqueKeysWithValues: workspace.lockedIterations.map {
+                                (
+                                    $0.id.uuidString,
+                                    $0.fileURL.deletingPathExtension().lastPathComponent + ".png"
+                                )
+                            }))
+                )
+                .accessibilityIdentifier("lockedOutputNames")
+                Text(
+                    workspace.lockedIterations.filter { viewModel.savedSourceURLs.contains($0.fileURL) }
+                        .map { $0.id.uuidString }.joined(separator: ",")
+                )
+                .accessibilityIdentifier("savedLockIDs")
+                Text(
+                    workspace.selectedIteration.flatMap { try? workspace.graph.asset(for: $0).id.uuidString }
+                        ?? "none"
+                )
+                .accessibilityIdentifier("selectedLockID")
+                Text(testRequestLedger.attemptedReplacements.joined(separator: ","))
+                    .accessibilityIdentifier("attemptedReplacementRoutes")
+                Text(
+                    testRequestLedger.acceptedReplacements.isEmpty
+                        ? "none" : testRequestLedger.acceptedReplacements.joined(separator: ",")
+                )
+                .accessibilityIdentifier("acceptedReplacementRoutes")
+            }
+            .foregroundStyle(.clear)
+            .frame(width: 1)
+            if !exportTestPhase.isEmpty {
+                Button("Continue export", action: resumeTestExport)
+                    .accessibilityIdentifier(exportTestPhase)
+                Button("Attempt replacement", action: dispatchTestReplacements)
+                    .accessibilityIdentifier("dispatchReplacementTestRequests")
+            }
+        }
+
+        private func testJSON(_ value: [String: String]) -> String {
+            guard let data = try? JSONEncoder().encode(value) else { return "invalid" }
+            return String(decoding: data, as: UTF8.self)
+        }
+    #endif
 
     private var statusText: String {
         if viewModel.isProcessing { return viewModel.progressMessage }
@@ -1208,13 +1492,14 @@ struct MainView: View {
     }
 
     private func handleDropProviders(_ providers: [NSItemProvider]) -> Bool {
+        guard allows(.fileDrop) else { return false }
         let supportedExtensions = ["png", "jpg", "jpeg", "tiff", "tif", "heic"]
         for provider in providers {
             _ = provider.loadObject(ofClass: URL.self) { url, _ in
                 guard let url else { return }
                 if supportedExtensions.contains(url.pathExtension.lowercased()) {
                     DispatchQueue.main.async {
-                        viewModel.handleDrop(urls: [url])
+                        importFiles([url], action: .fileDrop)
                     }
                 }
             }
@@ -1253,4 +1538,86 @@ private func previewSettingsState() -> GenerationSettingsState {
         preferencesStore: GenerationPreferencesStore(),
         loadingCatalogue: { try PromptPackCatalogue.bundled() }
     )
+}
+
+/// Routes standard image shortcuts only in this workspace window, leaving editable responders native.
+private struct WorkspaceClipboardCommands: NSViewRepresentable {
+    let onCopy: () -> Void
+    let onPaste: () -> Void
+
+    func makeCoordinator() -> Coordinator { Coordinator() }
+
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        context.coordinator.install(in: view)
+        return view
+    }
+
+    func updateNSView(_ view: NSView, context: Context) {
+        context.coordinator.onCopy = onCopy
+        context.coordinator.onPaste = onPaste
+    }
+
+    static func dismantleNSView(_ view: NSView, coordinator: Coordinator) {
+        coordinator.removeMonitor()
+    }
+
+    @MainActor
+    final class Coordinator {
+        var onCopy: () -> Void = {}
+        var onPaste: () -> Void = {}
+        private var monitor: Any?
+
+        func install(in view: NSView) {
+            monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self, weak view] event in
+                guard let self, let window = view?.window, event.window === window,
+                    event.modifierFlags.intersection([.command, .control, .option, .shift]) == .command
+                else { return event }
+                if let text = window.firstResponder as? NSTextView, text.isEditable { return event }
+                if let text = window.firstResponder as? NSTextField, text.isEditable { return event }
+                switch event.charactersIgnoringModifiers?.lowercased() {
+                case "c":
+                    self.onCopy()
+                    return nil
+                case "v":
+                    self.onPaste()
+                    return nil
+                default: return event
+                }
+            }
+        }
+
+        func removeMonitor() {
+            if let monitor { NSEvent.removeMonitor(monitor) }
+            monitor = nil
+        }
+    }
+}
+
+/// Platform image conversion is called only by the export worker.
+private enum PlatformImageExport {
+    static func canWrite(to directory: URL) -> Bool {
+        let probe = directory.appendingPathComponent(".superscale-access-\(UUID().uuidString)")
+        do {
+            try Data().write(to: probe, options: .withoutOverwriting)
+            try FileManager.default.removeItem(at: probe)
+            return true
+        } catch { return false }
+    }
+
+    static func png(_ data: Data) throws -> Data {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+            let image = CGImageSourceCreateImageAtIndex(source, 0, nil)
+        else {
+            throw CocoaError(.fileReadCorruptFile)
+        }
+        let output = NSMutableData()
+        guard
+            let destination = CGImageDestinationCreateWithData(
+                output, UTType.png.identifier as CFString, 1, nil)
+        else { throw CocoaError(.fileWriteUnknown) }
+        CGImageDestinationAddImage(destination, image, nil)
+        guard CGImageDestinationFinalize(destination) else { throw CocoaError(.fileWriteUnknown) }
+        return output as Data
+    }
 }

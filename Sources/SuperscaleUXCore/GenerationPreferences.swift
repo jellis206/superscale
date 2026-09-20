@@ -81,6 +81,20 @@ public final class GenerationPreferencesStore {
         )
     }
 
+    /// Preserve a missing operator selection even though load() supplies the legacy Downloads fallback.
+    public func outputFolderIntent(defaultDownloads: URL) -> OutputFolderIntent {
+        guard let path = defaults.string(forKey: Key.outputFolder) else {
+            return .defaultDownloads(defaultDownloads)
+        }
+        let url = URL(fileURLWithPath: path, isDirectory: false)
+        return folderValidator(url) ? .storedAvailable(url) : .storedUnavailable(url)
+    }
+
+    public func saveOutputFolder(_ url: URL) throws {
+        guard folderValidator(url) else { throw GenerationPreferencesError.invalidOutputFolder(url) }
+        defaults.set(url.path, forKey: Key.outputFolder)
+    }
+
     public func save(_ preferences: GenerationPreferences) throws {
         if let outputFolder = preferences.outputFolder, !folderValidator(outputFolder) {
             throw GenerationPreferencesError.invalidOutputFolder(outputFolder)

@@ -1,0 +1,902 @@
+version: 1
+audits:
+    - work_item: W151
+      gate: definition
+      session_id: ""
+      harness: codex
+      model: claude-opus-5
+      configured:
+        harness: codex
+        model: claude-opus-5
+      external_round: 1
+      status: identity-missing
+      updated: "2026-09-20T08:25:35Z"
+      history:
+        - cache_key: sha256:479042a36266a4539862898e7c8294dfcfaac690c2a00e44815c4f83495b9f3d
+          harness: codex
+          model: claude-opus-5
+          incident: runner-error
+          evidence:
+            - path: /Users/tadhg.obrien/.agents/sdlc/ARCHITECTURE.md
+              sha256: bd7a66ffd967010eefb8dc7abe64b059994c7b0f44ed5f5c30ec73e354f5b7f7
+              bytes: 8154
+            - path: /Users/tadhg.obrien/.agents/sdlc/CODING.md
+              sha256: a69a5d3b7ce3604b093703d72ab0de1bb6d607f140baab17292d209054fe902f
+              bytes: 13502
+            - path: /Users/tadhg.obrien/.agents/sdlc/DOCUMENTATION.md
+              sha256: d8696dca9f4ed75cc8487e064a8c6756a418bbe623e55bcde0bc58996b011c9c
+              bytes: 7652
+            - path: /Users/tadhg.obrien/.agents/sdlc/ORG-SCHEMA.md
+              sha256: 4c93e9ebfd051a1caa3a3a456ef20228c4403f3ca00726ed1ac4c93676ac26cc
+              bytes: 4915
+            - path: /Users/tadhg.obrien/.agents/sdlc/TESTING.md
+              sha256: 04a5798f1c77dfd9e0c4690bc43bbc4e7733ac7a18662e17d4f6cd8785f96858
+              bytes: 16237
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.sdlc/project.yaml
+              sha256: 822aea32ae06c8419fc78ec85e183084ceb5cb23c20746890dbf35daf0968994
+              bytes: 708
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/GenerationPreferences.swift
+              sha256: 0bd1a90a5ef9151696d8821d1a9d1808de50a87b7d9d39ddabc1a7c582f026ad
+              bytes: 5328
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/RenderingStore.swift
+              sha256: ac341b874518127275888a4fbda373715532f49fd023f5383dea32835bf68e5f
+              bytes: 4648
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleApp/MainView.swift
+              sha256: 4509517b4d8a4e4feb376fb7f65139a89df49bdc84117922483a72a78fe8c2c0
+              bytes: 66138
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleApp/SuperscaleApp.swift
+              sha256: 122f1f2e09b742d99e42dc5985bd71909b192ad48f71c1b342dd8bcca940c574
+              bytes: 27536
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleApp/UpscaleViewModel.swift
+              sha256: 8f8ba657b63d35df2f05d75a6d04f1c2797def4e90bf0a06c7b0d106041b224d
+              bytes: 48620
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleAppUITests/SuperscaleAppUITests.swift
+              sha256: ccea07881bc3a547e996ba48dd19bd88c5f2d58190ff3de338eff7cf8e5381de
+              bytes: 305142
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/docs/ARCHITECTURE.md
+              sha256: c92f8c9ee28afba2e212c5447aa5b120af85880afca6a002ad62dc025dd04e26
+              bytes: 19515
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/docs/IMPLEMENTATION_GUIDE_v2.md
+              sha256: cbcb43efe642b6acf96f0dc31e4c23627e38c4306cf621abb1e82975aae1f88c
+              bytes: 121758
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/docs/VISION.md
+              sha256: 22ed38837e2754f4c5b7cb92960cbff165d7a22c08a29465d4e5dc977971c41f
+              bytes: 12342
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/docs/work.org
+              sha256: d5a91f550140c80851f1fb33fbb08c75d540777b8cb6b4209405310bc9876ecc
+              bytes: 395561
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/specs/151-reliable-image-actions/audits.org
+              sha256: acb4f2a0388a2ce1a4d5001a0884c5a4ab51684e7435d6f829e17a6af5d92d3e
+              bytes: 7863
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/specs/151-reliable-image-actions/spec.org
+              sha256: fa8f66d02c8219b116b05c83f90300715193dc7309e7e282e715ed4228f0fbf7
+              bytes: 48835
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/specs/151-reliable-image-actions/validation.org
+              sha256: 71c36e77aa07a78d8e9e0431c87a0dc3dff98dd6a776d0f8010d80f4de3cf9d6
+              bytes: 4144
+          round: 1
+          updated: "2026-09-20T08:25:35Z"
+    - readiness_check: delivery-code
+      work_item: W151
+      gate: implementation
+      session_id: 01a0bf61-5900-7e10-84d2-477682fae230
+      harness: codex
+      model: gpt-5.6-sol
+      configured:
+        harness: codex
+        model: claude-opus-5
+      previous_sessions:
+        - session_id: 01a0bf61-506e-7592-8552-ed256d4b77f6
+          harness: codex
+          model: claude-opus-5
+          reason: start-failed-fallback
+          updated: "2026-09-20T15:13:43Z"
+      external_round: 5
+      status: passed
+      updated: "2026-09-20T22:30:22Z"
+      revision: 9fbdea9703e9744ef98b4359274f1ca35d767fd5 plus supplied W151 working-tree delta
+      verdict: PASS
+      response: |-
+        GATE: delivery-code
+        REVISION: 9fbdea9703e9744ef98b4359274f1ca35d767fd5 plus supplied W151 working-tree delta
+        VERDICT: PASS
+      history:
+        - readiness_check: test-code
+          cache_key: sha256:66c3967608c5665f22784bd9d3ad5f166cccfcf9bcaec31803c7ea8d393e9af0
+          session_id: 01a0bf61-506e-7592-8552-ed256d4b77f6
+          harness: codex
+          model: claude-opus-5
+          incident: start-failed
+          evidence:
+            - path: /Users/tadhg.obrien/.agents/sdlc/ARCHITECTURE.md
+              sha256: bd7a66ffd967010eefb8dc7abe64b059994c7b0f44ed5f5c30ec73e354f5b7f7
+              bytes: 8154
+            - path: /Users/tadhg.obrien/.agents/sdlc/AUDITS.md
+              sha256: c08600318790748242a803d2e6cf166f51025e134170701a6b1fb18edf21d0aa
+              bytes: 14809
+            - path: /Users/tadhg.obrien/.agents/sdlc/CODING.md
+              sha256: a69a5d3b7ce3604b093703d72ab0de1bb6d607f140baab17292d209054fe902f
+              bytes: 13502
+            - path: /Users/tadhg.obrien/.agents/sdlc/MAIN.md
+              sha256: 6560e15ae577d79ba0fa565eaba53f1a94c57f00e9b1c3b3278291e19bf22dd8
+              bytes: 11718
+            - path: /Users/tadhg.obrien/.agents/sdlc/ORG-SCHEMA.md
+              sha256: 4c93e9ebfd051a1caa3a3a456ef20228c4403f3ca00726ed1ac4c93676ac26cc
+              bytes: 4915
+            - path: /Users/tadhg.obrien/.agents/sdlc/TESTING.md
+              sha256: 04a5798f1c77dfd9e0c4690bc43bbc4e7733ac7a18662e17d4f6cd8785f96858
+              bytes: 16237
+            - path: /Users/tadhg.obrien/.agents/sdlc/technologies/SWIFT.md
+              sha256: 7e6b015b26d3bcdb834a49760d377cffc8e60ad20df0e3ec7f7a5e81116ccd92
+              bytes: 5197
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-core-red.log
+              sha256: 91279c7afee62c997edc82f71d159e5877e6e8deb41a1d2b923b0d83d5cc86e1
+              bytes: 14129
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-red.log
+              sha256: ebab7d0c2ad0655d5a8a4b94ac21f5d44ecb8aac13004ddbd93161af0c4efdaa
+              bytes: 190414
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-rt9-red.log
+              sha256: 68a255c8d244559f0753d2b3978e7750bdfb4c4be27d90886b956109e65689e2
+              bytes: 60102
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.sdlc/project.yaml
+              sha256: 822aea32ae06c8419fc78ec85e183084ceb5cb23c20746890dbf35daf0968994
+              bytes: 708
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Makefile
+              sha256: b0a1b2d0cac9215560e59401b07054461e763bdf37cb9241e971fa3219355891
+              bytes: 6061
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Package.swift
+              sha256: a3c88a95b7ffb163abb66af3702ac9ca5647304f043e1ab22455198841216d93
+              bytes: 2122
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/GenerationPreferences.swift
+              sha256: 14e92caa648a64a72db5cee71a137470f91d507ae8eb7cee6aae99fa4ff53893
+              bytes: 5544
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/GenerationSettingsState.swift
+              sha256: d4cbd4fd7b53c90694c93c3b107dfb2ea3427d7b65b2070db7b6158ae8efe711
+              bytes: 12848
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/ImageExport.swift
+              sha256: 796fcf9862dc5d87d96964cc84d51430b86174f345c311e0edae6870d113da8a
+              bytes: 3022
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/RenderingStore.swift
+              sha256: d75d6e9d014a227cd03e19d9e9e91c15288e7c22cc740dca481e82e086d8f912
+              bytes: 4930
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/WorkspaceState.swift
+              sha256: 6ee294c8caf3d9e39c8d139e5d112756fe00c6d1172c866c8769558cf2e0354d
+              bytes: 15435
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleApp/DropTargetView.swift
+              sha256: 0827c36eb65f15788f5e245ac7406bbd8c3d36802d600de421e7725683153c8b
+              bytes: 2667
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleApp/MainView.swift
+              sha256: 9e21a16634f11936db1aded52451001d685c4c8db6838075eed918a338fbd37a
+              bytes: 66978
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleApp/SuperscaleApp.swift
+              sha256: e59d58a37964211914a5775fd559af5468bccc3545d57f29f8fdb6143e2a9f5c
+              bytes: 31373
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleApp/UpscaleViewModel.swift
+              sha256: 8f8ba657b63d35df2f05d75a6d04f1c2797def4e90bf0a06c7b0d106041b224d
+              bytes: 48620
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleAppUITests/SuperscaleAppUITests.swift
+              sha256: 21caf30b899f9dd58eef83b18fbf7d8f25b8bbc24ddc2ab464e17f257758b2e7
+              bytes: 322149
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Tests/SuperscaleUXCoreTests/ImageExportTests.swift
+              sha256: a8c0268195cb2b7db761c19fc36e8a4035b050f40d1483d5940280a8c2a1fc0c
+              bytes: 11957
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/docs/ARCHITECTURE.md
+              sha256: c92f8c9ee28afba2e212c5447aa5b120af85880afca6a002ad62dc025dd04e26
+              bytes: 19515
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/docs/IMPLEMENTATION_GUIDE_v2.md
+              sha256: cbcb43efe642b6acf96f0dc31e4c23627e38c4306cf621abb1e82975aae1f88c
+              bytes: 121758
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/docs/VISION.md
+              sha256: 22ed38837e2754f4c5b7cb92960cbff165d7a22c08a29465d4e5dc977971c41f
+              bytes: 12342
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/docs/work.org
+              sha256: 4d32929e546cd9ee1ccd2c94c8a218ff311fe6501190ad8c48784365e64570d1
+              bytes: 395561
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/specs/151-reliable-image-actions/spec.org
+              sha256: 89128f8562ec79b5e0cb9966696ec1977e9edb6ae24e954ba3f1df184b6bdfbf
+              bytes: 50983
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/specs/151-reliable-image-actions/validation.org
+              sha256: ece272ee4748c2325366985e3a27d5f364e57335a3d325808af3506d3ee71994
+              bytes: 8997
+          round: 1
+          updated: "2026-09-20T15:13:40Z"
+        - readiness_check: test-code
+          cache_key: sha256:66c3967608c5665f22784bd9d3ad5f166cccfcf9bcaec31803c7ea8d393e9af0
+          session_id: 01a0bf61-5900-7e10-84d2-477682fae230
+          harness: codex
+          model: gpt-5.6-sol
+          evidence:
+            - path: /Users/tadhg.obrien/.agents/sdlc/ARCHITECTURE.md
+              sha256: bd7a66ffd967010eefb8dc7abe64b059994c7b0f44ed5f5c30ec73e354f5b7f7
+              bytes: 8154
+            - path: /Users/tadhg.obrien/.agents/sdlc/AUDITS.md
+              sha256: c08600318790748242a803d2e6cf166f51025e134170701a6b1fb18edf21d0aa
+              bytes: 14809
+            - path: /Users/tadhg.obrien/.agents/sdlc/CODING.md
+              sha256: a69a5d3b7ce3604b093703d72ab0de1bb6d607f140baab17292d209054fe902f
+              bytes: 13502
+            - path: /Users/tadhg.obrien/.agents/sdlc/MAIN.md
+              sha256: 6560e15ae577d79ba0fa565eaba53f1a94c57f00e9b1c3b3278291e19bf22dd8
+              bytes: 11718
+            - path: /Users/tadhg.obrien/.agents/sdlc/ORG-SCHEMA.md
+              sha256: 4c93e9ebfd051a1caa3a3a456ef20228c4403f3ca00726ed1ac4c93676ac26cc
+              bytes: 4915
+            - path: /Users/tadhg.obrien/.agents/sdlc/TESTING.md
+              sha256: 04a5798f1c77dfd9e0c4690bc43bbc4e7733ac7a18662e17d4f6cd8785f96858
+              bytes: 16237
+            - path: /Users/tadhg.obrien/.agents/sdlc/technologies/SWIFT.md
+              sha256: 7e6b015b26d3bcdb834a49760d377cffc8e60ad20df0e3ec7f7a5e81116ccd92
+              bytes: 5197
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-core-red.log
+              sha256: 91279c7afee62c997edc82f71d159e5877e6e8deb41a1d2b923b0d83d5cc86e1
+              bytes: 14129
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-red.log
+              sha256: ebab7d0c2ad0655d5a8a4b94ac21f5d44ecb8aac13004ddbd93161af0c4efdaa
+              bytes: 190414
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-rt9-red.log
+              sha256: 68a255c8d244559f0753d2b3978e7750bdfb4c4be27d90886b956109e65689e2
+              bytes: 60102
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.sdlc/project.yaml
+              sha256: 822aea32ae06c8419fc78ec85e183084ceb5cb23c20746890dbf35daf0968994
+              bytes: 708
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Makefile
+              sha256: b0a1b2d0cac9215560e59401b07054461e763bdf37cb9241e971fa3219355891
+              bytes: 6061
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Package.swift
+              sha256: a3c88a95b7ffb163abb66af3702ac9ca5647304f043e1ab22455198841216d93
+              bytes: 2122
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/GenerationPreferences.swift
+              sha256: 14e92caa648a64a72db5cee71a137470f91d507ae8eb7cee6aae99fa4ff53893
+              bytes: 5544
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/GenerationSettingsState.swift
+              sha256: d4cbd4fd7b53c90694c93c3b107dfb2ea3427d7b65b2070db7b6158ae8efe711
+              bytes: 12848
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/ImageExport.swift
+              sha256: 796fcf9862dc5d87d96964cc84d51430b86174f345c311e0edae6870d113da8a
+              bytes: 3022
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/RenderingStore.swift
+              sha256: d75d6e9d014a227cd03e19d9e9e91c15288e7c22cc740dca481e82e086d8f912
+              bytes: 4930
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/WorkspaceState.swift
+              sha256: 6ee294c8caf3d9e39c8d139e5d112756fe00c6d1172c866c8769558cf2e0354d
+              bytes: 15435
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleApp/DropTargetView.swift
+              sha256: 0827c36eb65f15788f5e245ac7406bbd8c3d36802d600de421e7725683153c8b
+              bytes: 2667
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleApp/MainView.swift
+              sha256: 9e21a16634f11936db1aded52451001d685c4c8db6838075eed918a338fbd37a
+              bytes: 66978
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleApp/SuperscaleApp.swift
+              sha256: e59d58a37964211914a5775fd559af5468bccc3545d57f29f8fdb6143e2a9f5c
+              bytes: 31373
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleApp/UpscaleViewModel.swift
+              sha256: 8f8ba657b63d35df2f05d75a6d04f1c2797def4e90bf0a06c7b0d106041b224d
+              bytes: 48620
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleAppUITests/SuperscaleAppUITests.swift
+              sha256: 21caf30b899f9dd58eef83b18fbf7d8f25b8bbc24ddc2ab464e17f257758b2e7
+              bytes: 322149
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Tests/SuperscaleUXCoreTests/ImageExportTests.swift
+              sha256: a8c0268195cb2b7db761c19fc36e8a4035b050f40d1483d5940280a8c2a1fc0c
+              bytes: 11957
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/docs/ARCHITECTURE.md
+              sha256: c92f8c9ee28afba2e212c5447aa5b120af85880afca6a002ad62dc025dd04e26
+              bytes: 19515
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/docs/IMPLEMENTATION_GUIDE_v2.md
+              sha256: cbcb43efe642b6acf96f0dc31e4c23627e38c4306cf621abb1e82975aae1f88c
+              bytes: 121758
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/docs/VISION.md
+              sha256: 22ed38837e2754f4c5b7cb92960cbff165d7a22c08a29465d4e5dc977971c41f
+              bytes: 12342
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/docs/work.org
+              sha256: 4d32929e546cd9ee1ccd2c94c8a218ff311fe6501190ad8c48784365e64570d1
+              bytes: 395561
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/specs/151-reliable-image-actions/spec.org
+              sha256: 89128f8562ec79b5e0cb9966696ec1977e9edb6ae24e954ba3f1df184b6bdfbf
+              bytes: 50983
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/specs/151-reliable-image-actions/validation.org
+              sha256: ece272ee4748c2325366985e3a27d5f364e57335a3d325808af3506d3ee71994
+              bytes: 8997
+          round: 2
+          revision: 9fbdea9703e9744ef98b4359274f1ca35d767fd5 plus supplied W151 working tree
+          verdict: FAIL
+          response: "GATE: test-code\nREVISION: 9fbdea9703e9744ef98b4359274f1ca35d767fd5 plus supplied W151 working tree\nVERDICT: FAIL\n\nFINDINGS:\n\n1. **RT151.4 does not prove that saving a locked iteration marks that lock saved.** `test_keyboardSaveWritesUnupscaledResultAndMarksLockSaved_W151_RT4` first saves the candidate while unlocked, then locks the same candidate. The earlier save can already satisfy the saved-source guard, so the final `0 unsaved` assertion can pass even if the locked Save As performs no reconciliation.  \n   **Remediation:** Exercise the locked case in an independent workspace. Establish that the lock is unsaved before Save As, save it, then assert that its unsaved state is cleared.\n\n2. **RT151.5 cannot distinguish correct lock membership or one-batch dispatch.** Both locks use identical generated pixels, while the test asserts only cumulative file count and shared pixels. Exporting one lock twice, omitting another, or splitting an invocation into multiple batches can pass. The selected iteration identity is also not directly asserted.  \n   **Remediation:** Record the injected export boundary and assert that each entry point produces exactly one invocation containing the ordered lock identifiers exactly once. Use distinguishable lock sources or assert exact lock-to-output mappings, and verify the selected iteration identity remains unchanged.\n\n3. **RT151.7 does not enforce exclusive collision allocation.** The collision test permits an implementation to inspect filesystem existence and choose `_1` before calling `writeExclusive`. That passes while retaining the prohibited time-of-check/time-of-use race.  \n   **Remediation:** Make the exclusive-writer double report the collision and record attempts. Assert an attempted exclusive creation of the original filename followed by the numeric-suffix retry, with the existing file unchanged.\n\n4. **RT151.8 omits defined coordinator behaviour.** The tests stop at a returned destination URL. They do not prove that an accepted choice is revalidated as a writable directory, starts exactly one batch, or that cancellation starts no batch and performs no writes. An implementation that returns any chooser result without calling `isDirectory` or `isWritable` can pass.  \n   **Remediation:** Add exporter and write ledgers around all four defined destination cases. Assert validation of the accepted directory, one chooser and one batch where accepted, and no persistence, batch, or write after cancellation.\n\n5. **RT151.9 uses a circular oracle for the cached-upscale case.** The test copies the displayed image and saves that copy as its expected rendering. Copy and Save As can therefore both select the wrong original image and still pass.  \n   **Remediation:** Compare the saved upscale against independently known fixture dimensions and pixels, and assert that it differs from the stored source.\n\n6. **RT151.10 does not identify which lock failed or was saved.** Checking that the report contains `.png` does not prove it identifies the failed filename. Checking only `1 unsaved` permits the failed lock to be marked saved while the successful lock remains unsaved.  \n   **Remediation:** Use distinct, predictable outputs; induce failure for one named lock; assert the exact failed filename in the report and verify successful and failed saved-state identities separately.\n\n7. **RT151.11’s defensive-dispatch probe can be a no-op.** Clicking `dispatchReplacementTestRequests` followed only by unchanged-state assertions does not prove that every actual replacement handler was invoked and refused. The tests also do not observe the required ordering that reconciliation and reporting precede action re-enablement.  \n   **Remediation:** Record each attempted real handler route and assert every specified route was attempted once and none accepted. Add an observable post-export phase proving controls remain gated through saved-state reconciliation and reporting, then reopen.\n\n8. **The bulk GUI execution command is inaccurately recorded.** The log shows eight method-specific `-only-testing` selectors, but RT151.1 through RT151.5 and RT151.10 through RT151.11 record a class-level selector that was not the command executed. This violates the requirement to state exactly what ran.  \n   **Remediation:** Record the actual eight-selector command, or an exact repository-owned command that executed that selection. Rerun every RT materially changed by the remediations above and replace its RED evidence with the intended assertion failure."
+          updated: "2026-09-20T15:13:43Z"
+        - readiness_check: test-code
+          cache_key: sha256:781d07d84d6b442f2d49192ba05f4962955b76b09fdefda80355596933a8caa6
+          session_id: 01a0bf61-5900-7e10-84d2-477682fae230
+          harness: codex
+          model: gpt-5.6-sol
+          evidence:
+            - path: /Users/tadhg.obrien/.agents/sdlc/ARCHITECTURE.md
+              sha256: bd7a66ffd967010eefb8dc7abe64b059994c7b0f44ed5f5c30ec73e354f5b7f7
+              bytes: 8154
+            - path: /Users/tadhg.obrien/.agents/sdlc/AUDITS.md
+              sha256: c08600318790748242a803d2e6cf166f51025e134170701a6b1fb18edf21d0aa
+              bytes: 14809
+            - path: /Users/tadhg.obrien/.agents/sdlc/CODING.md
+              sha256: a69a5d3b7ce3604b093703d72ab0de1bb6d607f140baab17292d209054fe902f
+              bytes: 13502
+            - path: /Users/tadhg.obrien/.agents/sdlc/MAIN.md
+              sha256: 6560e15ae577d79ba0fa565eaba53f1a94c57f00e9b1c3b3278291e19bf22dd8
+              bytes: 11718
+            - path: /Users/tadhg.obrien/.agents/sdlc/ORG-SCHEMA.md
+              sha256: 4c93e9ebfd051a1caa3a3a456ef20228c4403f3ca00726ed1ac4c93676ac26cc
+              bytes: 4915
+            - path: /Users/tadhg.obrien/.agents/sdlc/TESTING.md
+              sha256: 04a5798f1c77dfd9e0c4690bc43bbc4e7733ac7a18662e17d4f6cd8785f96858
+              bytes: 16237
+            - path: /Users/tadhg.obrien/.agents/sdlc/technologies/SWIFT.md
+              sha256: 7e6b015b26d3bcdb834a49760d377cffc8e60ad20df0e3ec7f7a5e81116ccd92
+              bytes: 5197
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-core-red-remediated.log
+              sha256: a447542039222810acf40aa4d6107b512a442763b09c15c98580b60757361f13
+              bytes: 21304
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-core-red.log
+              sha256: 91279c7afee62c997edc82f71d159e5877e6e8deb41a1d2b923b0d83d5cc86e1
+              bytes: 14129
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-red-remediated.log
+              sha256: 645297aed277d290f912afa8d52953b5eb32621f3ffb198dd36f72498dcb1953
+              bytes: 166159
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-red.log
+              sha256: ebab7d0c2ad0655d5a8a4b94ac21f5d44ecb8aac13004ddbd93161af0c4efdaa
+              bytes: 190414
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-rt9-red.log
+              sha256: 68a255c8d244559f0753d2b3978e7750bdfb4c4be27d90886b956109e65689e2
+              bytes: 60102
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.sdlc/project.yaml
+              sha256: 822aea32ae06c8419fc78ec85e183084ceb5cb23c20746890dbf35daf0968994
+              bytes: 708
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Makefile
+              sha256: b0a1b2d0cac9215560e59401b07054461e763bdf37cb9241e971fa3219355891
+              bytes: 6061
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Package.swift
+              sha256: a3c88a95b7ffb163abb66af3702ac9ca5647304f043e1ab22455198841216d93
+              bytes: 2122
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/GenerationPreferences.swift
+              sha256: 14e92caa648a64a72db5cee71a137470f91d507ae8eb7cee6aae99fa4ff53893
+              bytes: 5544
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/GenerationSettingsState.swift
+              sha256: d4cbd4fd7b53c90694c93c3b107dfb2ea3427d7b65b2070db7b6158ae8efe711
+              bytes: 12848
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/ImageExport.swift
+              sha256: ad1c9fac52193aa6a4a73f1fb81718213ba460fac5525a5be684218465659867
+              bytes: 3351
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/RenderingStore.swift
+              sha256: d75d6e9d014a227cd03e19d9e9e91c15288e7c22cc740dca481e82e086d8f912
+              bytes: 4930
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/WorkspaceState.swift
+              sha256: 6ee294c8caf3d9e39c8d139e5d112756fe00c6d1172c866c8769558cf2e0354d
+              bytes: 15435
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleApp/DropTargetView.swift
+              sha256: 0827c36eb65f15788f5e245ac7406bbd8c3d36802d600de421e7725683153c8b
+              bytes: 2667
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleApp/MainView.swift
+              sha256: b57d6de3ad8d881d698255c2330ab804ac565647fdf455f817c3893d17b22e2b
+              bytes: 68806
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleApp/SuperscaleApp.swift
+              sha256: 56589549752437c62205e9269fbc3bb69b7dc7a86c0f2f2bf70b9303ad4c938a
+              bytes: 31661
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleApp/UpscaleViewModel.swift
+              sha256: 8f8ba657b63d35df2f05d75a6d04f1c2797def4e90bf0a06c7b0d106041b224d
+              bytes: 48620
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleAppUITests/SuperscaleAppUITests.swift
+              sha256: 9107bb81babbbacb33c2c12514257e286a2eec23f833b7a3ce3b461f31a8ab7b
+              bytes: 325588
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Tests/SuperscaleUXCoreTests/ImageExportTests.swift
+              sha256: d5545b507f88c9402e7541b43d158d1c75772adc8a99b36270332a39ebf0836c
+              bytes: 16391
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/docs/ARCHITECTURE.md
+              sha256: c92f8c9ee28afba2e212c5447aa5b120af85880afca6a002ad62dc025dd04e26
+              bytes: 19515
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/docs/IMPLEMENTATION_GUIDE_v2.md
+              sha256: cbcb43efe642b6acf96f0dc31e4c23627e38c4306cf621abb1e82975aae1f88c
+              bytes: 121758
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/docs/VISION.md
+              sha256: 22ed38837e2754f4c5b7cb92960cbff165d7a22c08a29465d4e5dc977971c41f
+              bytes: 12342
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/docs/work.org
+              sha256: 4d32929e546cd9ee1ccd2c94c8a218ff311fe6501190ad8c48784365e64570d1
+              bytes: 395561
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/specs/151-reliable-image-actions/spec.org
+              sha256: 89128f8562ec79b5e0cb9966696ec1977e9edb6ae24e954ba3f1df184b6bdfbf
+              bytes: 50983
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/specs/151-reliable-image-actions/validation.org
+              sha256: 525dedc8c537cf2b941f38c52aa3322ececba508b065a3004e27a6d3251fb994
+              bytes: 14609
+          round: 3
+          revision: 9fbdea9703e9744ef98b4359274f1ca35d767fd5 plus supplied W151 working tree
+          verdict: PROVISIONAL PASS
+          response: |-
+            GATE: test-code
+            REVISION: 9fbdea9703e9744ef98b4359274f1ca35d767fd5 plus supplied W151 working tree
+            VERDICT: PROVISIONAL PASS
+
+            CONDITIONS:
+
+            1. In RT151.4, assert that each Cmd+S invocation opens exactly one Save As dialogue and that no dialogue remains after saving or cancelling. `firstMatch` existence alone does not establish the specified single-dialogue behaviour.
+
+            2. In RT151.9, assert that `curtainDivider` exists after `enterComparison()` before executing the curtain-visible cases. The helper currently returns silently or continues when the curtain fails to appear, allowing those cases to repeat the non-curtain path.
+
+            3. Apply only these mechanical assertion changes, rerun RT151.4 and RT151.9 to confirm compilation and intended RED, and update their execution evidence.
+          updated: "2026-09-20T15:26:34Z"
+        - readiness_check: delivery-code
+          cache_key: sha256:fc28ecc04dc0d6475b41293a5a420982714678b7679a279d1c30cb63f195f405
+          session_id: 01a0bf61-5900-7e10-84d2-477682fae230
+          harness: codex
+          model: gpt-5.6-sol
+          evidence:
+            - path: /Users/tadhg.obrien/.agents/sdlc/ARCHITECTURE.md
+              sha256: bd7a66ffd967010eefb8dc7abe64b059994c7b0f44ed5f5c30ec73e354f5b7f7
+              bytes: 8154
+            - path: /Users/tadhg.obrien/.agents/sdlc/AUDITS.md
+              sha256: c08600318790748242a803d2e6cf166f51025e134170701a6b1fb18edf21d0aa
+              bytes: 14809
+            - path: /Users/tadhg.obrien/.agents/sdlc/CODING.md
+              sha256: a69a5d3b7ce3604b093703d72ab0de1bb6d607f140baab17292d209054fe902f
+              bytes: 13502
+            - path: /Users/tadhg.obrien/.agents/sdlc/DOCUMENTATION.md
+              sha256: d8696dca9f4ed75cc8487e064a8c6756a418bbe623e55bcde0bc58996b011c9c
+              bytes: 7652
+            - path: /Users/tadhg.obrien/.agents/sdlc/MAIN.md
+              sha256: 6560e15ae577d79ba0fa565eaba53f1a94c57f00e9b1c3b3278291e19bf22dd8
+              bytes: 11718
+            - path: /Users/tadhg.obrien/.agents/sdlc/MARKDOWN.md
+              sha256: 2fce6c8ecbcb0f9710e22b1b7ff6587542d9fd390f3fa06dff0e53cd6d90cf68
+              bytes: 1342
+            - path: /Users/tadhg.obrien/.agents/sdlc/ORG-SCHEMA.md
+              sha256: 4c93e9ebfd051a1caa3a3a456ef20228c4403f3ca00726ed1ac4c93676ac26cc
+              bytes: 4915
+            - path: /Users/tadhg.obrien/.agents/sdlc/TESTING.md
+              sha256: 04a5798f1c77dfd9e0c4690bc43bbc4e7733ac7a18662e17d4f6cd8785f96858
+              bytes: 16237
+            - path: /Users/tadhg.obrien/.agents/sdlc/technologies/SWIFT.md
+              sha256: 7e6b015b26d3bcdb834a49760d377cffc8e60ad20df0e3ec7f7a5e81116ccd92
+              bytes: 5197
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-baseline-paste.log
+              sha256: ffd6a9d232578e199de7f0607e35d1fe1bd738106b5b5ea3a1d9f3edd3f100bf
+              bytes: 405967
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-core-green.log
+              sha256: d4bfeda9e166e28e5bf9d8199960b6d35fe7e7113e03875e7bc8dec81b749eaa
+              bytes: 5348
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-core-red-remediated.log
+              sha256: a447542039222810acf40aa4d6107b512a442763b09c15c98580b60757361f13
+              bytes: 21304
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-core-red.log
+              sha256: 91279c7afee62c997edc82f71d159e5877e6e8deb41a1d2b923b0d83d5cc86e1
+              bytes: 14129
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-debug-build.log
+              sha256: 179d20ae72401b0891f332c12ed534b375df001c85a9272c7c30bcdcc37a3914
+              bytes: 101763
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-auth-retry-2.log
+              sha256: 23cebbecf8df3463c8e0e36a82926a2fed4f7c30af1c32e3c9481900225c74ff
+              bytes: 111029
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-conditions-red.log
+              sha256: cc8575ba35f24303ec98b93066b4f6f3ead9dec980d3e027a004b119cc88645e
+              bytes: 70534
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-final-five.log
+              sha256: 79e9ac41b59b693361fe8246ca0b1bc3f5e2d5edb6ae89177dee50944490cb2b
+              bytes: 217359
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-red-remediated.log
+              sha256: 645297aed277d290f912afa8d52953b5eb32621f3ffb198dd36f72498dcb1953
+              bytes: 166159
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-red.log
+              sha256: ebab7d0c2ad0655d5a8a4b94ac21f5d44ecb8aac13004ddbd93161af0c4efdaa
+              bytes: 190414
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-regression-final.log
+              sha256: 8d042256b2385ce341fa3c524a14f203b506a77ae01c22d8d78597729fc87c76
+              bytes: 130838
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-regression.log
+              sha256: 3c59c96ee36eb5667e7ba6fc656d3c6701963db610910ff5cd4790acfef98f8e
+              bytes: 180840
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-remediation.log
+              sha256: 7581ed1959aa33cdfa53081bfe945eea0ebe157f6f49a418dea1a0b0addd9dd3
+              bytes: 219307
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-rt9-red.log
+              sha256: 68a255c8d244559f0753d2b3978e7750bdfb4c4be27d90886b956109e65689e2
+              bytes: 60102
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-visible-menus.log
+              sha256: 1d3265adcb15ba6f49273e4810b04ae04b3cd0b05312c3ae2075c6ec81900343
+              bytes: 111946
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-regression.log
+              sha256: 38a4714f734c3befd83c2e32c66ee9b27af643adf304b32a8b8b3edf2aafe741
+              bytes: 170625
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-release-final-3.log
+              sha256: 629959a4255ca2c1a89122b6deb80100dfc6e671bee7beda4f380cc650764884
+              bytes: 110108
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-release-final.log
+              sha256: e50253d60201a2f9754f126dd1a693d7efa54400153b5e93834c9691a6dca55a
+              bytes: 110108
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.sdlc/project.yaml
+              sha256: 822aea32ae06c8419fc78ec85e183084ceb5cb23c20746890dbf35daf0968994
+              bytes: 708
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Makefile
+              sha256: b0a1b2d0cac9215560e59401b07054461e763bdf37cb9241e971fa3219355891
+              bytes: 6061
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Package.swift
+              sha256: a3c88a95b7ffb163abb66af3702ac9ca5647304f043e1ab22455198841216d93
+              bytes: 2122
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/AssetGraph.swift
+              sha256: 98eb4f1f06e97291602deef12dfa9308ce289eb6e92a646d0bbc1eb793a918cd
+              bytes: 31034
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/GUIUpscaleCoordinator.swift
+              sha256: c07be13e3c702db590e39b0a790f003d97197de0750760b0daed786c414e3bc4
+              bytes: 11216
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/GenerationPreferences.swift
+              sha256: 036bbf8761b330737271cd3d4da90bfbe35a8ac227e760794d54247db4702ece
+              bytes: 6032
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/GenerationSettingsState.swift
+              sha256: 0072423ee996e34e15bcfdef6a8ad80071195fefb487e0aeb91dec44de108257
+              bytes: 13257
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/ImageExport.swift
+              sha256: 8f164aa4137dd154524c8d17c6bd8fa44a1cbb3143188b7efd00af60982b6714
+              bytes: 8149
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/RenderingStore.swift
+              sha256: b84e8cee166991dfe44792532c1f70dba2dd4e5d1cb1ca4f41b4c25df29d4b6f
+              bytes: 5617
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/WorkspaceState.swift
+              sha256: 6ee294c8caf3d9e39c8d139e5d112756fe00c6d1172c866c8769558cf2e0354d
+              bytes: 15435
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleApp/DropTargetView.swift
+              sha256: c444dcd09a3d76f34976bbf45f9839438d80d8863ed8273a414a4dfaff383e20
+              bytes: 2836
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleApp/MainView.swift
+              sha256: 35d4c1cf87606ee06f01ed9667cab0a584d7e855961c75d4345a1531594c00cf
+              bytes: 82645
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleApp/SuperscaleApp.swift
+              sha256: 41dea97da25dc3be48e53aeb5eac002a309f1edfc3f522622298122bfccd9d8c
+              bytes: 32409
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleApp/UpscaleViewModel.swift
+              sha256: ab974236e5921042ef54d15a283af7152c52d4e9b83c39c43a618cefa5edc1a6
+              bytes: 48849
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleAppUITests/SuperscaleAppUITests.swift
+              sha256: 4bbacedb2abbc5384fa2e36a5e17169dd88f3f4f8eb009475556ea0d0f6f98da
+              bytes: 329080
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Tests/SuperscaleUXCoreTests/ImageExportTests.swift
+              sha256: d5545b507f88c9402e7541b43d158d1c75772adc8a99b36270332a39ebf0836c
+              bytes: 16391
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/docs/ARCHITECTURE.md
+              sha256: bde26a2f670f0c094d2d09b6121b2d6ee83182c26c6d3fb1636078f6bb3243a8
+              bytes: 20940
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/docs/IMPLEMENTATION_GUIDE_v2.md
+              sha256: 67b9785d637c751dac53761f2dbbec1fc5161378b2ee36a80a0415d7e18c5407
+              bytes: 125482
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/docs/VISION.md
+              sha256: 22ed38837e2754f4c5b7cb92960cbff165d7a22c08a29465d4e5dc977971c41f
+              bytes: 12342
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/docs/work.org
+              sha256: 4d32929e546cd9ee1ccd2c94c8a218ff311fe6501190ad8c48784365e64570d1
+              bytes: 395561
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/specs/151-reliable-image-actions/spec.org
+              sha256: 66987c19df80fd5e284d01d1b9529a0271a47045451f6781bbb5476597f081ae
+              bytes: 54329
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/specs/151-reliable-image-actions/validation.org
+              sha256: 6d529f33206a65b63aea4910579ef0d5c65800019ce852490e1270fc0309a1ec
+              bytes: 22084
+          round: 4
+          revision: 9fbdea9703e9744ef98b4359274f1ca35d767fd5 plus supplied W151 working-tree delta
+          verdict: FAIL
+          response: |-
+            GATE: delivery-code
+            REVISION: 9fbdea9703e9744ef98b4359274f1ca35d767fd5 plus supplied W151 working-tree delta
+            VERDICT: FAIL
+
+            FINDINGS:
+
+            1. `spec.org` and `validation.org` duplicate audit process and status outside harness-owned `audits.yaml`, including definition-verdict history, pending/completed audit stages, and delivery-review narration. This directly violates the audit-record ownership rule and the documentation contract. Remediation: remove audit status, verdict, continuation, and reviewer narration from these files; retain execution evidence in `validation.org`, operator-authorized decisions in the specification, and audit history only in `audits.yaml`.
+
+            2. AC151.2 requires the visible Paste Image command to import onto a blank canvas, but the relevant maintained regression `test_pastingBringsAPictureInOnABlankCanvas_RT144_3_and_RT144_5` currently fails because the menu action does not dispatch. RT151.2 exercises only `Cmd+V`, so its GREEN result does not cover the failed visible-command route. The baseline log proves this was not introduced by W151, but does not satisfy the signed W151 behaviour. Remediation: correct either the menu dispatch or any demonstrated test-boundary defect, retain a behavioural assertion through the visible menu, and obtain current GREEN evidence.
+
+            3. The implementation violates the approved single-owner keyboard-routing design. `WorkspaceClipboardCommands` intercepts `Cmd+C` and `Cmd+V`, while the separate Copy Image and Paste Image menu actions still declare the same `.keyboardShortcut` key equivalents. The signed design requires one dispatcher and explicitly says the separately labelled image actions carry no competing key equivalents. Remediation: centralize each shortcut under one owner, preserve native editable-text precedence and menu discoverability, then rerun RT151.1–RT151.3 and the affected menu regressions.
+          updated: "2026-09-20T21:33:45Z"
+        - readiness_check: delivery-code
+          cache_key: sha256:b498dc99ee81f052a967bc850e0da6ffc4f4e651c1f38ac7d79e6ce625aed984
+          session_id: 01a0bf61-5900-7e10-84d2-477682fae230
+          harness: codex
+          model: gpt-5.6-sol
+          evidence:
+            - path: /Users/tadhg.obrien/.agents/sdlc/ARCHITECTURE.md
+              sha256: bd7a66ffd967010eefb8dc7abe64b059994c7b0f44ed5f5c30ec73e354f5b7f7
+              bytes: 8154
+            - path: /Users/tadhg.obrien/.agents/sdlc/AUDITS.md
+              sha256: c08600318790748242a803d2e6cf166f51025e134170701a6b1fb18edf21d0aa
+              bytes: 14809
+            - path: /Users/tadhg.obrien/.agents/sdlc/CODING.md
+              sha256: a69a5d3b7ce3604b093703d72ab0de1bb6d607f140baab17292d209054fe902f
+              bytes: 13502
+            - path: /Users/tadhg.obrien/.agents/sdlc/DOCUMENTATION.md
+              sha256: d8696dca9f4ed75cc8487e064a8c6756a418bbe623e55bcde0bc58996b011c9c
+              bytes: 7652
+            - path: /Users/tadhg.obrien/.agents/sdlc/MAIN.md
+              sha256: 6560e15ae577d79ba0fa565eaba53f1a94c57f00e9b1c3b3278291e19bf22dd8
+              bytes: 11718
+            - path: /Users/tadhg.obrien/.agents/sdlc/MARKDOWN.md
+              sha256: 2fce6c8ecbcb0f9710e22b1b7ff6587542d9fd390f3fa06dff0e53cd6d90cf68
+              bytes: 1342
+            - path: /Users/tadhg.obrien/.agents/sdlc/ORG-SCHEMA.md
+              sha256: 4c93e9ebfd051a1caa3a3a456ef20228c4403f3ca00726ed1ac4c93676ac26cc
+              bytes: 4915
+            - path: /Users/tadhg.obrien/.agents/sdlc/TESTING.md
+              sha256: 04a5798f1c77dfd9e0c4690bc43bbc4e7733ac7a18662e17d4f6cd8785f96858
+              bytes: 16237
+            - path: /Users/tadhg.obrien/.agents/sdlc/technologies/SHELL.md
+              sha256: c1a56e020ef7b66c166ef80346bc2df67a039c6145bbca38961a127cefad1fed
+              bytes: 11225
+            - path: /Users/tadhg.obrien/.agents/sdlc/technologies/SWIFT.md
+              sha256: 7e6b015b26d3bcdb834a49760d377cffc8e60ad20df0e3ec7f7a5e81116ccd92
+              bytes: 5197
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-baseline-paste.log
+              sha256: ffd6a9d232578e199de7f0607e35d1fe1bd738106b5b5ea3a1d9f3edd3f100bf
+              bytes: 405967
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-clipboard-host-final.log
+              sha256: 0d2675dcbc33c4535b695bbba3732864fbdcc6e365147359355dc3a798918197
+              bytes: 101382
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-core-green.log
+              sha256: d4bfeda9e166e28e5bf9d8199960b6d35fe7e7113e03875e7bc8dec81b749eaa
+              bytes: 5348
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-core-red-remediated.log
+              sha256: a447542039222810acf40aa4d6107b512a442763b09c15c98580b60757361f13
+              bytes: 21304
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-core-red.log
+              sha256: 91279c7afee62c997edc82f71d159e5877e6e8deb41a1d2b923b0d83d5cc86e1
+              bytes: 14129
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-debug-build.log
+              sha256: 179d20ae72401b0891f332c12ed534b375df001c85a9272c7c30bcdcc37a3914
+              bytes: 101763
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-auth-retry-2.log
+              sha256: 23cebbecf8df3463c8e0e36a82926a2fed4f7c30af1c32e3c9481900225c74ff
+              bytes: 111029
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-conditions-red.log
+              sha256: cc8575ba35f24303ec98b93066b4f6f3ead9dec980d3e027a004b119cc88645e
+              bytes: 70534
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-final-five.log
+              sha256: 79e9ac41b59b693361fe8246ca0b1bc3f5e2d5edb6ae89177dee50944490cb2b
+              bytes: 217359
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-red-remediated.log
+              sha256: 645297aed277d290f912afa8d52953b5eb32621f3ffb198dd36f72498dcb1953
+              bytes: 166159
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-red.log
+              sha256: ebab7d0c2ad0655d5a8a4b94ac21f5d44ecb8aac13004ddbd93161af0c4efdaa
+              bytes: 190414
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-regression-final.log
+              sha256: 8d042256b2385ce341fa3c524a14f203b506a77ae01c22d8d78597729fc87c76
+              bytes: 130838
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-regression.log
+              sha256: 3c59c96ee36eb5667e7ba6fc656d3c6701963db610910ff5cd4790acfef98f8e
+              bytes: 180840
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-remediation.log
+              sha256: 7581ed1959aa33cdfa53081bfe945eea0ebe157f6f49a418dea1a0b0addd9dd3
+              bytes: 219307
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-rt9-red.log
+              sha256: 68a255c8d244559f0753d2b3978e7750bdfb4c4be27d90886b956109e65689e2
+              bytes: 60102
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-gui-visible-menus.log
+              sha256: 1d3265adcb15ba6f49273e4810b04ae04b3cd0b05312c3ae2075c6ec81900343
+              bytes: 111946
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-harness-invalid-option.log
+              sha256: d0bcb17321d5a8e6572da5d24e4342d0cfccd870e32718522e2dabb47abf5202
+              bytes: 19788
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-host-menu-harness.log
+              sha256: 80737a0886ed032a1d6c3659f5ae8915875192266bcb879115bcfe04cacb9109
+              bytes: 54592
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-lint-harness-final.log
+              sha256: 0b83e3bb43f27cc4abcf79480ffe868ddf71eca40a9308f08a582ed8776a69b3
+              bytes: 19045
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-regression.log
+              sha256: 38a4714f734c3befd83c2e32c66ee9b27af643adf304b32a8b8b3edf2aafe741
+              bytes: 170625
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-release-final-3.log
+              sha256: 629959a4255ca2c1a89122b6deb80100dfc6e671bee7beda4f380cc650764884
+              bytes: 110108
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-release-final.log
+              sha256: e50253d60201a2f9754f126dd1a693d7efa54400153b5e93834c9691a6dca55a
+              bytes: 110108
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.build/w151-release-reviewed.log
+              sha256: 3857468a2e5933de5611fb9013d26118dff9cef305e2649c451295f0a9fff69b
+              bytes: 98170
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/.sdlc/project.yaml
+              sha256: 822aea32ae06c8419fc78ec85e183084ceb5cb23c20746890dbf35daf0968994
+              bytes: 708
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Makefile
+              sha256: 617ca27e8e0f1477e9f0d6018b678dcab55b93fa860559c7991ce78acdbda47c
+              bytes: 5974
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Package.swift
+              sha256: a3c88a95b7ffb163abb66af3702ac9ca5647304f043e1ab22455198841216d93
+              bytes: 2122
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/AssetGraph.swift
+              sha256: 98eb4f1f06e97291602deef12dfa9308ce289eb6e92a646d0bbc1eb793a918cd
+              bytes: 31034
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/GUIUpscaleCoordinator.swift
+              sha256: c07be13e3c702db590e39b0a790f003d97197de0750760b0daed786c414e3bc4
+              bytes: 11216
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/GenerationPreferences.swift
+              sha256: 036bbf8761b330737271cd3d4da90bfbe35a8ac227e760794d54247db4702ece
+              bytes: 6032
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/GenerationSettingsState.swift
+              sha256: 0072423ee996e34e15bcfdef6a8ad80071195fefb487e0aeb91dec44de108257
+              bytes: 13257
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/ImageExport.swift
+              sha256: 8f164aa4137dd154524c8d17c6bd8fa44a1cbb3143188b7efd00af60982b6714
+              bytes: 8149
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/RenderingStore.swift
+              sha256: b84e8cee166991dfe44792532c1f70dba2dd4e5d1cb1ca4f41b4c25df29d4b6f
+              bytes: 5617
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Sources/SuperscaleUXCore/WorkspaceState.swift
+              sha256: 6ee294c8caf3d9e39c8d139e5d112756fe00c6d1172c866c8769558cf2e0354d
+              bytes: 15435
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleApp/DropTargetView.swift
+              sha256: c444dcd09a3d76f34976bbf45f9839438d80d8863ed8273a414a4dfaff383e20
+              bytes: 2836
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleApp/MainView.swift
+              sha256: 35d4c1cf87606ee06f01ed9667cab0a584d7e855961c75d4345a1531594c00cf
+              bytes: 82645
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleApp/SuperscaleApp.swift
+              sha256: 24040ccef53004d1a31d52884972ed25e815d4ab4b9304396742b1d8b7558e3d
+              bytes: 32277
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleApp/UpscaleViewModel.swift
+              sha256: ab974236e5921042ef54d15a283af7152c52d4e9b83c39c43a618cefa5edc1a6
+              bytes: 48849
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/SuperscaleApp/SuperscaleAppUITests/SuperscaleAppUITests.swift
+              sha256: 67f0ddd0ad681d29016c595b7eeff91f20a8f969b3e2d951b0abd08187d04789
+              bytes: 330898
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/Tests/SuperscaleUXCoreTests/ImageExportTests.swift
+              sha256: d5545b507f88c9402e7541b43d158d1c75772adc8a99b36270332a39ebf0836c
+              bytes: 16391
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/docs/ARCHITECTURE.md
+              sha256: bde26a2f670f0c094d2d09b6121b2d6ee83182c26c6d3fb1636078f6bb3243a8
+              bytes: 20940
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/docs/IMPLEMENTATION_GUIDE_v2.md
+              sha256: 8972b3bb30867074b66fed0cb0bd46980641680f982026e413e2abfc6f47fd80
+              bytes: 126014
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/docs/VISION.md
+              sha256: 22ed38837e2754f4c5b7cb92960cbff165d7a22c08a29465d4e5dc977971c41f
+              bytes: 12342
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/docs/gui-test-harness-help.md
+              sha256: aa4cfc4708c9ecc1823d73ec6b3d1e21b602ac9bd3c13bf8f0270822b7d68119
+              bytes: 1258
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/docs/work.org
+              sha256: 4d32929e546cd9ee1ccd2c94c8a218ff311fe6501190ad8c48784365e64570d1
+              bytes: 395561
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/scripts/run-gui-tests.swift
+              sha256: 5709a783764a3344d6673abbd290f28f7fff2253942c6b8122251833123ff967
+              bytes: 4242
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/specs/151-reliable-image-actions/spec.org
+              sha256: 76820a5957f5a95181208c519f9e23bb5703b4d603cc3f141e6ae24ac08a10fe
+              bytes: 51113
+            - path: /Users/tadhg.obrien/code/tigoss/superscale/specs/151-reliable-image-actions/validation.org
+              sha256: 7833560f6a586ca63e363497e4e9f0fb38d30eaa3b449e0fa93f114544b9b68b
+              bytes: 22811
+          round: 5
+          revision: 9fbdea9703e9744ef98b4359274f1ca35d767fd5 plus supplied W151 working-tree delta
+          verdict: PASS
+          response: |-
+            GATE: delivery-code
+            REVISION: 9fbdea9703e9744ef98b4359274f1ca35d767fd5 plus supplied W151 working-tree delta
+            VERDICT: PASS
+          updated: "2026-09-20T22:27:41Z"
+legacy:
+    - path: audits.org
+      content: |
+        #+TITLE: W151 - Audit Evidence
+        #+STARTUP: content
+        #+OPTIONS: toc:2 num:nil
+
+        * Definition gate
+
+        ** Local review
+        :PROPERTIES:
+        :ROUND:    1
+        :END:
+
+        - *Artefact:* [[file:spec.org][W151 - Reliable Image Actions]]
+        - *Revision:* SHA-256 =bf894090f042fadd38945938d4ed74bb3a5df8990aa288187b50c7ff90dae08a=
+        - *Audits:* =audit-spec=, =audit-design=, and =audit-test-definitions=
+        - *Verdict:* PASS
+        - *Findings:* None. The specification audit found bounded and falsifiable image-action requirements; the design audit found ownership, failure, security, performance, and compatibility addressed against the current architecture; the test-definition audit found every criterion covered through observable application or pure component boundaries without metered automation.
+        - *Remediation:* During drafting, clarified the active image while the comparison curtain is visible, assigned each pasteboard shortcut one command owner while retaining labelled image actions, and made RT151.4 prove both unlocked and locked non-upscaled FAL results.
+
+        ** External review
+        :PROPERTIES:
+        :CONTEXT:  /root/w151_definition_audit
+        :END:
+
+        - *Artefact:* [[file:spec.org][W151 - Reliable Image Actions]]
+        - *Revision:* SHA-256 =bf894090f042fadd38945938d4ed74bb3a5df8990aa288187b50c7ff90dae08a=
+        - *Audits:* =audit-spec=, =audit-design=, and =audit-test-definitions= in one context
+        - *Verdict:* FAIL
+        - *Findings:*
+          1. *AC151.6 cached-source precedence:* The stored lock was omitted from the resolution comparison, leaving a smaller custom cache entry ambiguous.
+          2. *AC151.8 unavailable stored folder:* Preference loading discarded the failed stored path in favour of Downloads, so Save All could neither distinguish first run nor request access to the intended folder.
+          3. *Save All snapshot stability:* A cache identity could be evicted or forgotten before export resolved its pixels.
+          4. *Save All lifecycle and concurrency:* Repeat activation and completion after workspace replacement were undefined.
+          5. *RT151.6 no-processing evidence:* A pure planner with unused processing spies could not prove the application action started no local or provider work.
+          6. *User-boundary coverage:* Save As selection and surfaces, the File menu Save All entry, and visible partial-failure reporting had incomplete evidence.
+          7. *UT151.1 validation record:* The required =validation.org= PENDING entry was absent.
+        - *Supersedes:* None.
+
+        ** Local review after external remediation
+        :PROPERTIES:
+        :ROUND:    2
+        :END:
+
+        - *Artefact:* [[file:spec.org][W151 - Reliable Image Actions]]
+        - *Revision:* SHA-256 =8505faeea6472a594b4859eeaf75e66f66a9f43abf7de76f5ea630f56fca163f=
+        - *Audits:* =audit-spec=, =audit-design=, and =audit-test-definitions=
+        - *Verdict:* PASS
+        - *Findings:* None. All three local component reviews pass on the remediated revision.
+        - *Remediation:*
+          1. Recorded the operator's cached-source precedence explicitly and tested a smaller cached custom rendering against a larger stored lock.
+          2. Preserved AC95.4 while exposing whether Downloads replaced an unavailable stored choice, with separate first-run, permission-denied, and vanished-folder cases.
+          3. Replaced later cache-identity resolution with immutable encoded bytes captured for the batch.
+          4. Added single-flight state, workspace-session identity, and stale-completion behaviour.
+          5. Added application-boundary evidence that Save All neither starts nor awaits local or provider processing.
+          6. Added coverage for active-image Save As, all Save and Save All surfaces, and user-visible partial failures.
+          7. Created =validation.org= with [[file:validation.org::#ut-151-1-result][UT151.1 - Validate workspace image actions]] marked PENDING.
+
+        ** External review after remediation
+        :PROPERTIES:
+        :CONTEXT:  /root/w151_definition_audit
+        :END:
+
+        - *Artefact:* [[file:spec.org][W151 - Reliable Image Actions]]
+        - *Revision:* SHA-256 =8505faeea6472a594b4859eeaf75e66f66a9f43abf7de76f5ea630f56fca163f=
+        - *Audits:* =audit-spec=, =audit-design=, and =audit-test-definitions= in the retained context
+        - *Verdict:* FAIL
+        - *Findings:*
+          1. *First-use access:* AC151.8 did not define the case where default Downloads itself was unwritable until selected in the chooser.
+          2. *Result ownership:* AC151.7 required every result to be reported, but AC151.10 discarded the report after workspace replacement.
+          3. *Executable application tests:* RT151.10 and RT151.11 named a nonexistent application suite under =make test= rather than an existing reachable boundary.
+        - *Advisory:* Keep stored-file reads, decoding, PNG encoding, and file writes away from the main actor.
+        - *Supersedes:* The preceding FAIL remains part of the audit history.
+
+        ** Local review after second external remediation
+        :PROPERTIES:
+        :ROUND:    3
+        :END:
+
+        - *Artefact:* [[file:spec.org][W151 - Reliable Image Actions]]
+        - *Revision:* SHA-256 =7533de4cd9637757db80c7bcf0a176e33632b713506e1900a6a6a88a0a747925=
+        - *Audits:* =audit-spec=, =audit-design=, and =audit-test-definitions=
+        - *Verdict:* PASS
+        - *Findings:* None. The access cases now include first-run authorization; batch state preserves reporting by refusing every workspace replacement until reconciliation; all application tests use the existing GUI suite and deterministic DEBUG-only seams; and a pure exhaustive action gate covers replacement routes unavailable to XCUITest.
+        - *Remediation:*
+          1. Allowed a denied first-run Downloads directory to be selected again and persisted after the chooser grants access.
+          2. Replaced stale-session result suppression with one short single-flight interval that blocks workspace replacement until every batch result is reported and reconciled.
+          3. Assigned partial-failure and no-processing evidence to =make test-gui=, using extensions of the existing GUI test seam, and assigned exhaustive replacement-event refusal to =make test=.
+          4. Adopted the performance advisory by keeping stored-file reads, image decoding, PNG encoding, and exclusive writes away from the main actor.
+
+        ** External review after second remediation
+        :PROPERTIES:
+        :CONTEXT:  /root/w151_definition_audit
+        :END:
+
+        - *Artefact:* [[file:spec.org][W151 - Reliable Image Actions]]
+        - *Revision:* SHA-256 =7533de4cd9637757db80c7bcf0a176e33632b713506e1900a6a6a88a0a747925=
+        - *Audits:* =audit-spec=, =audit-design=, and =audit-test-definitions= in the retained context
+        - *Verdict:* FAIL
+        - *Findings:* AC151.10, RT151.11, and RT151.12 omitted the existing File > Open Recent replacement route, which bypassed the proposed exhaustive gate and application evidence.
+        - *Supersedes:* The preceding FAIL findings were remediated; this newly identified route remained blocking.
+
+        ** Local review after third external remediation
+        :PROPERTIES:
+        :ROUND:    4
+        :END:
+
+        - *Artefact:* [[file:spec.org][W151 - Reliable Image Actions]]
+        - *Revision:* SHA-256 =238647252cd2d056df2f2bb8b0ad236bb7fc30ca549996ad3cabc96cfe1e23a3=
+        - *Audits:* =audit-spec=, =audit-design=, and =audit-test-definitions=
+        - *Verdict:* PASS
+        - *Findings:* None. Open Recent is now named in the acceptance criterion, GUI scenario, exhaustive action enumeration, edge case, command-routing design, and failure behaviour.
+        - *Remediation:* Route =SuperscaleApp.open(_:)= through a typed =AppCommands= request to the MainView-owned gate, disable its menu while Save All is active, and verify both its application behaviour and its exhaustive pure-gate case.
+
+        ** External review after third remediation
+        :PROPERTIES:
+        :CONTEXT:  /root/w151_definition_audit
+        :END:
+
+        - *Artefact:* [[file:spec.org][W151 - Reliable Image Actions]]
+        - *Revision:* SHA-256 =238647252cd2d056df2f2bb8b0ad236bb7fc30ca549996ad3cabc96cfe1e23a3=
+        - *Audits:* =audit-spec=, =audit-design=, and =audit-test-definitions= in the retained context
+        - *Verdict:* PASS
+        - *Findings:* None.
+        - *Effective result:* The W151 definition gate is PASS. This is independent audit evidence; operator sign-off remains PENDING.
+      migrated: "2026-09-20T08:25:35Z"

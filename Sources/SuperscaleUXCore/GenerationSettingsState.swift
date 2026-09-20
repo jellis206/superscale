@@ -256,6 +256,16 @@ public final class GenerationSettingsState: ObservableObject {
         lastError = nil
     }
 
+    public func outputFolderIntent(defaultDownloads: URL) -> OutputFolderIntent {
+        preferencesStore.outputFolderIntent(defaultDownloads: defaultDownloads)
+    }
+
+    /// Export changes only its destination, without saving unrelated draft settings or credentials.
+    public func saveOutputFolder(_ url: URL) throws {
+        try preferencesStore.saveOutputFolder(url)
+        outputFolder = url
+    }
+
     private var currentPreferences: GenerationPreferences {
         GenerationPreferences(
             outputFolder: outputFolder,

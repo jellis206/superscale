@@ -1,4 +1,8 @@
-<!-- Version: 3.39 | Last updated: 2026-08-31 -->
+---
+title: "Superscale v2: Solution Design and Implementation Guide"
+version: "3.41"
+last-updated: 2026-09-20
+---
 
 # Superscale v2: Solution Design and Implementation Guide
 
@@ -138,6 +142,11 @@ the base when the base is being shown, the derivation otherwise. `Cmd+V` pastes,
 rather than warned about, because a mistyped `Cmd+V` is almost certainly an
 accident and the cheapest correct answer to an accident is that nothing happens.
 A pasted picture enters as an import does and starts a new chain.
+
+Editable text controls keep native copy and paste. The workspace intercepts image
+shortcuts only when its window owns the event and no editable responder owns the
+command. Clicking the canvas releases text focus. Keyboard and menu image actions
+reach the same workspace handlers, which repeat the blank-canvas paste guard.
 
 **Keyboard access to the scale and the face toggle.** `Cmd+2`, `Cmd+4` and
 `Cmd+8` toggle their scale presets, behaving exactly as the buttons do --- the
@@ -401,9 +410,9 @@ The lineage still exists, on each asset's `parentID`. It records what descends
 from what, and I2, I3 and the session filter cache all depend on it. It is simply
 not what the strip is read from.
 
-Saving an earlier iteration upscales it on demand at the current settings,
-because the upscale is deterministic and need not have been kept. This is what
-makes discarding upscales at lock time safe rather than lossy.
+Save As writes the selected image as displayed, including an earlier iteration
+before its upscale finishes. Save All uses only stored files and renderings
+already cached when invoked. Neither save action starts or waits for processing.
 
 The chain is the lineage the asset graph already records, so this needs no
 separate history structure: walking back through locked iterations is walking
@@ -613,9 +622,39 @@ the toggle and installation. v2 changes none of this.
 
 ### 2.6 Saving and session history
 
-Save writes to the configured output folder with a descriptive filename derived
-from the source and the operation. Any locked iteration can be saved, not only
-the current one (2.4).
+**Save As**, through the canvas button, File menu or `Cmd+S`, writes the active
+Filtered or Original image. The same selection applies while the curtain shows
+both pictures. A non-upscaled filter result is saveable immediately. One native
+dialog offers PNG and JPEG; cancellation writes nothing.
+
+**Save All**, beside Save As and in the File menu with `Cmd+Shift+S`, exports the
+ordered `WorkspaceState.lockedIterations` snapshot as PNG. It is unavailable with
+no locks. Any cached rendering for a lock outranks its stored image, even if
+smaller; cached candidates rank by true pixel area and then cache recency. The
+stored file is used only when no cached rendering exists. The four-entry cache
+is unchanged, and immutable batch bytes survive eviction and late processing.
+No save action calls FAL or requests an upscale.
+
+Batch names retain the source stem, add a cached rendering's sizing suffix, and
+retry exclusive creation with numeric suffixes on collision. Existing files are
+never overwritten. Individual read, encode and write failures do not stop later
+locks. The notice reports complete success; the error surface reports saved and
+failed counts with failed filenames. Only successful outputs mark their source
+locks saved for the clear warning.
+
+Save All uses writable Downloads on first run, or the persisted output folder.
+An unavailable stored choice remains distinguishable from the effective Downloads
+fallback. One directory chooser starts there, or at its nearest existing parent;
+an accepted writable replacement is persisted without saving unrelated settings.
+Denied first-run Downloads may itself be selected to grant access. Cancellation
+writes nothing. If all source reads fail, the failures are reported without a
+destination chooser.
+
+From snapshot capture through reconciliation and reporting, Save All disables
+and refuses another batch and every workspace replacement route: Clear, New,
+Open Image, Open Recent, paste, file chooser and file drop. Main-actor code owns
+panels, action state and reporting; workers own stored reads, PNG encoding and
+writes.
 
 **There is no History workspace.** What a user wants mid-session is the locked
 iterations, and those live in the sidebar. Reaching an older piece of work is
@@ -1021,6 +1060,13 @@ They are authorized.
 
 ### 3.9 Interface
 
+Image actions share workspace-owned dispatch through `AppCommands`. Save As
+captures the active image and source identity together, then presents its native
+panel after the SwiftUI command update completes. Save All's active state
+drives both visible availability and defensive handler guards, including Open
+Recent. Its labelled button exposes `saveAllButton`; notices and failures use the
+existing accessible status and error surfaces.
+
 **There is one workspace.** The v1 upscale workspace, extended. Not four modes.
 
 A previous iteration introduced `AppMode` with `upscale`, `generate`, `history`
@@ -1369,6 +1415,17 @@ entries, per-test status marks).
 
 ## 7. Testing
 
+W151 image-action regressions exercise real keyboard events, native save dialogs,
+decoded output pixels, ordered batch membership and saved-lock identities. Pure
+package tests cover immutable cache selection, exclusive collision retries,
+destination validation and cancellation, partial failures and every replacement
+action. GUI tests use local generation and upscale fixtures, temporary output
+folders and DEBUG-only export suspension/failure seams. Request ledgers prove
+that a batch starts no processing; staged completion proves the action gate stays
+closed until saved-state reconciliation and visible reporting finish. Release
+builds cannot activate these seams. UT151.1 remains the operator check of the
+delivered interaction and directory-permission flow.
+
 **A test exercises the entry point a user would.** A test that reads a project
 file and asserts its text contains a sentence is not a test --- it pins prose,
 breaks when a file moves, and stays green while the system misbehaves. Eight
@@ -1502,6 +1559,16 @@ information is not in the log --- it is on the screen, where only a person can
 see it. The 2026-08-26 delivery lost roughly an hour to three hypotheses about
 the suite and the application before the author looked at the machine and found
 an installer prompt (#118).
+
+### Native menu automation
+
+Run GUI regressions with `make test-gui`, which invokes the Swift host harness.
+The Paste Image regression opens and validates the visible Edit menu in XCTest,
+then the host performs that exact menu action through System Events. XCTest
+verifies the resulting import. This avoids an unreliable XCTest menu-click path
+without weakening the test runner's sandbox or adding an application test hook.
+See [GUI test harness usage](gui-test-harness-help.md) for targeted runs and host
+permission requirements.
 
 ### Live-API one-offs are not repeated
 
@@ -1641,6 +1708,10 @@ table on #79 carries every verdict with the author's words.
   applying a filter sends the picture to FAL.
 
 ## Changelog
+
+- **3.41 (2026-09-20):** Documents W151 image keyboard routing, displayed-image
+  Save As, cache-only Save All, destination policy, saved-state reconciliation,
+  replacement guards and regression boundaries.
 
 - **3.40 (2026-09-03):** The current-status entry now points to the canonical
   411-criterion ledger and migration index, while the 2026-08-25 issue-based

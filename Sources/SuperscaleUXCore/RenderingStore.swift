@@ -43,10 +43,30 @@ public final class RenderingStore {
     /// Least recently used first.
     private var recency: [RenderingKey] = []
     private var displayed: RenderingKey?
+    private var exportImages: [RenderingKey: CachedExportImage] = [:]
 
     public init() {}
 
     public var count: Int { entries.count }
+
+    /// Value bytes survive eviction; recency is captured without touching the live cache.
+    public var exportSnapshot: [CachedExportImage] {
+        recency.enumerated().compactMap { index, key in
+            guard let image = exportImages[key] else { return nil }
+            return CachedExportImage(
+                assetID: key.assetID, width: image.width, height: image.height,
+                sizing: image.sizing, recency: index, data: image.data)
+        }
+    }
+
+    public var heldImages: [RenderedImage] { Array(entries.values) }
+
+    public func admit(_ image: RenderedImage, for key: RenderingKey, exportImage: CachedExportImage) {
+        entries[key] = image
+        exportImages[key] = exportImage
+        touch(key)
+        evictIfNeeded()
+    }
 
     /// What is held for a key, without producing anything or disturbing recency.
     public func held(for key: RenderingKey) -> RenderedImage? {
@@ -66,6 +86,7 @@ public final class RenderingStore {
     /// Combine pipeline that publishes when a run completes, in this application's case.
     public func admit(_ image: RenderedImage, for key: RenderingKey) {
         entries[key] = image
+        exportImages.removeValue(forKey: key)
         touch(key)
         evictIfNeeded()
     }
@@ -97,6 +118,7 @@ public final class RenderingStore {
     /// that memory does not carry a picture the user has moved on from until four more arrive.
     public func forget() {
         entries.removeAll()
+        exportImages.removeAll()
         recency.removeAll()
         displayed = nil
     }
@@ -110,6 +132,7 @@ public final class RenderingStore {
         while entries.count > Self.bound {
             guard let victim = recency.first(where: { $0 != displayed }) else { return }
             entries.removeValue(forKey: victim)
+            exportImages.removeValue(forKey: victim)
             recency.removeAll { $0 == victim }
         }
     }

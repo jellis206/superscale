@@ -1,4 +1,8 @@
-<!-- Version: 1.4 | Last updated: 2026-08-25 -->
+---
+title: Superscale v2 Architecture
+version: "1.5"
+last-updated: 2026-09-20
+---
 
 # Superscale v2 Architecture
 
@@ -245,6 +249,27 @@ RT-103.5 pins the absence.
 
 ## Storage
 
+`SuperscaleUXCore.ImageExport` owns immutable batch selection, exclusive filename
+allocation, destination policy and per-lock results. `RenderingStore` supplies
+encoded bytes and true pixel dimensions from its existing four-entry cache,
+associated with stable graph asset identities. Its snapshot does not change
+cache membership or await processing.
+
+`MainView` captures lock membership and owns the Save All lifecycle; `AppCommands`
+exposes that state to menus. Every replacement handler repeats the shared action
+gate. The app's platform adapter encodes PNG on a worker, alongside stored-file
+reads and exclusive writes. Panels, saved-source reconciliation and reporting
+remain on the main actor. Save As captures the selected image and its source
+identity before scheduling its native panel after the SwiftUI command update.
+Successful writes alone update the
+session's saved-source set.
+
+Output preferences preserve the raw operator-selected path separately from the
+effective Downloads fallback. Export can therefore ask for a replacement when a
+stored folder disappears, while other callers retain the existing fallback.
+Selecting an export destination changes only that preference; credentials and
+other draft settings are untouched.
+
 The app should keep generated and processed assets in app-managed storage before
 the user saves final files. The default storage model is plain image files plus
 JSON metadata. A database is unnecessary for the first v2 implementation.
@@ -409,6 +434,9 @@ any future protocol change re-proves through a live OT before the stubs are
 trusted again.
 
 ## Changelog
+
+- **1.5 (2026-09-20):** Records W151 export-policy ownership, immutable cache
+  snapshots, platform worker boundary and workspace action lifecycle.
 
 - **1.4 (2026-08-25):** Rewritten to as-built for the handover. The runtime flow is the filter
   path the application runs (upload to provider storage, edit request, candidate, lock), not the

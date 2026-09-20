@@ -48,7 +48,7 @@ test: ## Run regression tests (excludes slow SSIM quality gate)
 	swift test --skip SSIM_RT064
 
 test-gui: ## Run GUI UI tests via XCUITest
-	xcodebuild test -project SuperscaleApp/SuperscaleApp.xcodeproj -scheme SuperscaleWithTests -destination 'platform=macOS'
+	swift scripts/run-gui-tests.swift
 
 test-ssim: ## Run SSIM quality regression against PyTorch references (~2.5 min)
 	swift test --filter SSIM_RT064

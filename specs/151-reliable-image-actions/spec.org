@@ -2,8 +2,7 @@
 #+SUBTITLE: Unified change specification
 #+STARTUP: overview
 #+OPTIONS: toc:2 num:nil
-#+DEFINITION_GATE: PASS
-#+OPERATOR_SIGNOFF: PENDING
+#+OPERATOR_SIGNOFF: Approved 2026-09-20
 
 * Reliable Image Actions
 :PROPERTIES:
@@ -24,7 +23,7 @@
 - *Unchanged:* Lock membership and ordering remain owned by the asset graph. Save All never runs an upscale, calls FAL, changes the displayed image, changes a lock, or expands the rendering cache. AC95.4 continues to provide Downloads as the effective first-run and invalid-folder fallback.
 - *Edge cases:* Empty canvases, editable text focus, loaded-canvas paste, non-upscaled FAL results, lower-resolution and equal-resolution cache entries, evicted renderings, first-use permission, vanished configured folders, filename collisions, repeated activation, Open Recent and other attempted workspace replacement, cancelled directory selection, and partial write failures are covered.
 - *Decisions:* Save All is a fast cache-only batch, produces PNG files, never overwrites an existing file, continues after per-file failures, and reports the result.
-- *Next step:* Definition gate, then operator sign-off.
+- *Next step:* Delivery and operator validation.
 
 The summary above accurately represents the detailed specification below.
 
@@ -115,7 +114,7 @@ A user can use standard Mac keyboard actions to copy or import an image without 
 :CUSTOM_ID: acceptance-criteria
 :END:
 
-** AC151.1 - Copy the displayed image by keyboard
+** AC151.1 - Copy the displayed image by keyboard :ac:
 :PROPERTIES:
 :CUSTOM_ID: ac-151-1
 :END:
@@ -123,7 +122,7 @@ A user can use standard Mac keyboard actions to copy or import an image without 
 - *Criterion:* Given an image is displayed and no editable control owns the command, =Cmd+C= and the visible Copy Image command place that displayed image on the system pasteboard. Given an empty canvas, image copy is unavailable.
 - *Proven by:* [[#rt-151-1][RT151.1 - Keyboard copy uses the displayed image]].
 
-** AC151.2 - Paste an image only onto a blank canvas
+** AC151.2 - Paste an image only onto a blank canvas :ac:
 :PROPERTIES:
 :CUSTOM_ID: ac-151-2
 :END:
@@ -131,7 +130,7 @@ A user can use standard Mac keyboard actions to copy or import an image without 
 - *Criterion:* Given the canvas is blank and the pasteboard contains a supported image, =Cmd+V= and the visible Paste Image command import it through the normal image-import path. Given any image is loaded, image paste is unavailable and a =Cmd+V= image action leaves the image, candidate, and lock chain unchanged.
 - *Proven by:* [[#rt-151-2][RT151.2 - Keyboard paste respects the blank-canvas guard]].
 
-** AC151.3 - Preserve text clipboard actions
+** AC151.3 - Preserve text clipboard actions :ac:
 :PROPERTIES:
 :CUSTOM_ID: ac-151-3
 :END:
@@ -139,7 +138,7 @@ A user can use standard Mac keyboard actions to copy or import an image without 
 - *Criterion:* Given an editable text control has focus, =Cmd+C= and =Cmd+V= perform the native text operations and do not invoke workspace image copy or paste.
 - *Proven by:* [[#rt-151-3][RT151.3 - Editable text retains native copy and paste]].
 
-** AC151.4 - Save the one displayed image at any resolution
+** AC151.4 - Save the one displayed image at any resolution :ac:
 :PROPERTIES:
 :CUSTOM_ID: ac-151-4
 :END:
@@ -147,7 +146,7 @@ A user can use standard Mac keyboard actions to copy or import an image without 
 - *Criterion:* Given any image is displayed, including a FAL result with no upscale, =Cmd+S= and Save As open one Save As dialogue for the active image selected by the Filtered or Original control, and the written file contains those pixels. The same selection applies while the comparison curtain shows both images. Cancelling writes nothing. Given an empty canvas, Save As is unavailable.
 - *Proven by:* [[#rt-151-4][RT151.4 - Cmd+S saves a non-upscaled displayed FAL result]], [[#rt-151-9][RT151.9 - Save As follows the active image and every availability surface]], and [[#ut-151-1][UT151.1 - Validate workspace image actions]].
 
-** AC151.5 - Invoke Save All as one action
+** AC151.5 - Invoke Save All as one action :ac:
 :PROPERTIES:
 :CUSTOM_ID: ac-151-5
 :END:
@@ -155,7 +154,7 @@ A user can use standard Mac keyboard actions to copy or import an image without 
 - *Criterion:* Given at least one locked iteration, a visible Save All button, the File menu Save All item, and =Cmd+Shift+S= each start one export of every lock in the invocation snapshot. Given no locks, Save All is unavailable. A writable configured folder causes no per-file dialogue and the action does not change the canvas or lock-chain selection.
 - *Proven by:* [[#rt-151-5][RT151.5 - Save All entry points dispatch one batch]] and [[#ut-151-1][UT151.1 - Validate workspace image actions]].
 
-** AC151.6 - Use only the best material already held
+** AC151.6 - Use only the best material already held :ac:
 :PROPERTIES:
 :CUSTOM_ID: ac-151-6
 :END:
@@ -163,7 +162,7 @@ A user can use standard Mac keyboard actions to copy or import an image without 
 - *Criterion:* For every lock in a Save All snapshot, any cached rendering outranks the stored lock image, even when the cached rendering has fewer pixels. Among cached renderings for that lock, the exported source is the one with the greatest true pixel area, using the most recently cached when areas tie. The stored lock image is used only when no rendering is cached. The batch retains the selected pixels independently of later cache eviction or source-collection changes, makes no upscale, generation, filter, upload, or network request, and does not await work in flight.
 - *Proven by:* [[#rt-151-6][RT151.6 - Batch planning selects and retains the operator-ranked cached image]] and [[#rt-151-11][RT151.11 - Save All blocks overlapping work and starts no processing]].
 
-** AC151.7 - Write unique PNG files and retain failure evidence
+** AC151.7 - Write unique PNG files and retain failure evidence :ac:
 :PROPERTIES:
 :CUSTOM_ID: ac-151-7
 :END:
@@ -171,7 +170,7 @@ A user can use standard Mac keyboard actions to copy or import an image without 
 - *Criterion:* Save All writes PNG files whose names retain each selected source stem and identify a cached rendering's sizing. It never replaces an existing destination, adds a numeric suffix on collision, continues after an individual encode or write failure, and reports success and failure counts with the failed outputs identified.
 - *Proven by:* [[#rt-151-7][RT151.7 - Batch export handles naming, collisions, and partial failure]] and [[#rt-151-10][RT151.10 - Partial Save All failure reaches the user]].
 
-** AC151.8 - Resolve destination access once
+** AC151.8 - Resolve destination access once :ac:
 :PROPERTIES:
 :CUSTOM_ID: ac-151-8
 :END:
@@ -179,7 +178,7 @@ A user can use standard Mac keyboard actions to copy or import an image without 
 - *Criterion:* Save All uses a writable folder persisted by Settings. A genuine first run with no stored preference uses writable Downloads without a chooser. If first-run Downloads cannot be written, one chooser opens preselected there and may grant access by selecting that same directory. An invalid or inaccessible stored selection presents one chooser before writing rather than silently using the effective Downloads fallback; the chooser starts at the selected directory when it still exists, otherwise at its nearest existing parent. Accepting a writable directory persists it and runs the batch there, while cancelling writes no files and cancels the batch.
 - *Proven by:* [[#rt-151-8][RT151.8 - Destination fallback is single, persistent, and cancellable]] and [[#ut-151-1][UT151.1 - Validate workspace image actions]].
 
-** AC151.9 - Successful exports satisfy the unsaved-work guard
+** AC151.9 - Successful exports satisfy the unsaved-work guard :ac:
 :PROPERTIES:
 :CUSTOM_ID: ac-151-9
 :END:
@@ -187,7 +186,7 @@ A user can use standard Mac keyboard actions to copy or import an image without 
 - *Criterion:* After Save As or Save All successfully writes a locked iteration, that lock is recorded as saved for the current session. A lock whose export failed remains unsaved, so the existing clear warning still counts it.
 - *Proven by:* [[#rt-151-10][RT151.10 - Partial Save All failure reaches the user]] and [[#rt-151-4][RT151.4 - Cmd+S saves a non-upscaled displayed FAL result]].
 
-** AC151.10 - Keep Save All and workspace replacement single-flight
+** AC151.10 - Keep Save All and workspace replacement single-flight :ac:
 :PROPERTIES:
 :CUSTOM_ID: ac-151-10
 :END:
@@ -200,7 +199,7 @@ A user can use standard Mac keyboard actions to copy or import an image without 
 :CUSTOM_ID: test-definitions
 :END:
 
-** RT151.1 - Keyboard copy uses the displayed image
+** RT151.1 - Keyboard copy uses the displayed image :testdef:
 :PROPERTIES:
 :CUSTOM_ID: rt-151-1
 :END:
@@ -212,7 +211,7 @@ A user can use standard Mac keyboard actions to copy or import an image without 
 - *Expected:* The pasteboard contains an image matching the displayed FAL fixture rather than the source; after clearing the canvas, Copy Image is unavailable.
 - *Retention:* Persistent GUI regression suite under =make test-gui=.
 
-** RT151.2 - Keyboard paste respects the blank-canvas guard
+** RT151.2 - Keyboard paste respects the blank-canvas guard :testdef:
 :PROPERTIES:
 :CUSTOM_ID: rt-151-2
 :END:
@@ -224,7 +223,7 @@ A user can use standard Mac keyboard actions to copy or import an image without 
 - *Expected:* The first shortcut imports the fixture as a source with no prior chain. The second is unavailable and leaves the displayed image and complete lock chain unchanged.
 - *Retention:* Persistent GUI regression suite under =make test-gui=.
 
-** RT151.3 - Editable text retains native copy and paste
+** RT151.3 - Editable text retains native copy and paste :testdef:
 :PROPERTIES:
 :CUSTOM_ID: rt-151-3
 :END:
@@ -236,7 +235,7 @@ A user can use standard Mac keyboard actions to copy or import an image without 
 - *Expected:* Copy places selected text on the pasteboard, Paste edits the field, the pasteboard is not replaced by image data, and the workspace image and chain are unchanged.
 - *Retention:* Persistent GUI regression suite under =make test-gui=.
 
-** RT151.4 - Cmd+S saves a non-upscaled displayed FAL result
+** RT151.4 - Cmd+S saves a non-upscaled displayed FAL result :testdef:
 :PROPERTIES:
 :CUSTOM_ID: rt-151-4
 :END:
@@ -248,7 +247,7 @@ A user can use standard Mac keyboard actions to copy or import an image without 
 - *Expected:* The command is enabled in both cases, one dialogue opens per invocation, each accepted output decodes to the FAL fixture's pixels and dimensions, the locked case records that lock saved, and cancellation adds no file.
 - *Retention:* Persistent GUI regression suite under =make test-gui=.
 
-** RT151.5 - Save All entry points dispatch one batch
+** RT151.5 - Save All entry points dispatch one batch :testdef:
 :PROPERTIES:
 :CUSTOM_ID: rt-151-5
 :END:
@@ -260,7 +259,7 @@ A user can use standard Mac keyboard actions to copy or import an image without 
 - *Expected:* Each entry point dispatches one batch containing every lock exactly once, presents no save dialogue, leaves the canvas and selection unchanged, and every Save All entry point is unavailable in an empty chain.
 - *Retention:* Persistent GUI regression suite under =make test-gui=.
 
-** RT151.6 - Batch planning selects and retains the operator-ranked cached image
+** RT151.6 - Batch planning selects and retains the operator-ranked cached image :testdef:
 :PROPERTIES:
 :CUSTOM_ID: rt-151-6
 :END:
@@ -272,7 +271,7 @@ A user can use standard Mac keyboard actions to copy or import an image without 
 - *Expected:* The snapshot selects the smaller cached custom rendering over its stored lock, selects the greatest-area cache entry where several exist, breaks the equal-area tie by cache recency, and selects the stored lock for the evicted and in-flight cases. Every selected source remains available as stable bytes after eviction and collection replacement, no cache entry is added, and the late completion does not alter the snapshot.
 - *Retention:* Persistent package regression suite under =make test=.
 
-** RT151.7 - Batch export handles naming, collisions, and partial failure
+** RT151.7 - Batch export handles naming, collisions, and partial failure :testdef:
 :PROPERTIES:
 :CUSTOM_ID: rt-151-7
 :END:
@@ -284,7 +283,7 @@ A user can use standard Mac keyboard actions to copy or import an image without 
 - *Expected:* PNG outputs retain their stems, the cached rendering carries its sizing suffix, the collision receives a numeric suffix without changing the existing file, the third export is attempted after the injected failure, only successful lock identifiers are returned for saved-state reconciliation, and the structured result gives accurate counts and identifies the failed output.
 - *Retention:* Persistent package regression suite under =make test=.
 
-** RT151.8 - Destination fallback is single, persistent, and cancellable
+** RT151.8 - Destination fallback is single, persistent, and cancellable :testdef:
 :PROPERTIES:
 :CUSTOM_ID: rt-151-8
 :END:
@@ -296,7 +295,7 @@ A user can use standard Mac keyboard actions to copy or import an image without 
 - *Expected:* Writable first-run Downloads is used without a chooser. Denied first-run Downloads shows one chooser there, accepts the same directory after access is granted, persists it as an explicit choice, and starts one batch. Permission denial on a stored choice shows one chooser at that directory, persists the replacement, and starts one batch there. A vanished selection shows one chooser at its nearest existing parent rather than writing to Downloads; cancellation persists nothing, starts no batch, and writes no files.
 - *Retention:* Persistent package regression suite under =make test=.
 
-** RT151.9 - Save As follows the active image and every availability surface
+** RT151.9 - Save As follows the active image and every availability surface :testdef:
 :PROPERTIES:
 :CUSTOM_ID: rt-151-9
 :END:
@@ -308,7 +307,7 @@ A user can use standard Mac keyboard actions to copy or import an image without 
 - *Expected:* Each written file matches the active selection, not merely the last upscale. The curtain does not change that selection. File menu and canvas control share availability, and both are unavailable on the empty canvas.
 - *Retention:* Persistent GUI regression suite under =make test-gui=.
 
-** RT151.10 - Partial Save All failure reaches the user
+** RT151.10 - Partial Save All failure reaches the user :testdef:
 :PROPERTIES:
 :CUSTOM_ID: rt-151-10
 :END:
@@ -320,7 +319,7 @@ A user can use standard Mac keyboard actions to copy or import an image without 
 - *Expected:* The visible error state reports one success and one failure and identifies the failed filename. The successful lock is recorded saved, the failed lock remains unsaved and counted by the clear warning, and an all-success control run uses the notice state instead. No result is left only inside the exporter.
 - *Retention:* Persistent GUI regression suite under =make test-gui=.
 
-** RT151.11 - Save All blocks overlapping work and starts no processing
+** RT151.11 - Save All blocks overlapping work and starts no processing :testdef:
 :PROPERTIES:
 :CUSTOM_ID: rt-151-11
 :END:
@@ -332,7 +331,7 @@ A user can use standard Mac keyboard actions to copy or import an image without 
 - *Expected:* The second activation starts no batch. The workspace-replacement controls are disabled, defensive command dispatch leaves the chain unchanged, and Save All does not change the recorded local or provider invocation counts or wait for the in-flight upscale. Releasing the exporter presents the aggregate result and reconciles successful locks before Save All and the replacement controls become available again.
 - *Retention:* Persistent GUI regression suite under =make test-gui=.
 
-** RT151.12 - The action gate rejects every replacement route during Save All
+** RT151.12 - The action gate rejects every replacement route during Save All :testdef:
 :PROPERTIES:
 :CUSTOM_ID: rt-151-12
 :END:
@@ -344,7 +343,7 @@ A user can use standard Mac keyboard actions to copy or import an image without 
 - *Expected:* Every action attempted during the batch is refused and the recorder remains empty. After the batch result has been reconciled and reported, the replacement event is accepted. The enumeration is exhaustive, so adding a replacement action requires this test and the gate switch to be updated.
 - *Retention:* Persistent package regression suite under =make test=.
 
-** UT151.1 - Validate workspace image actions
+** UT151.1 - Validate workspace image actions :testdef:
 :PROPERTIES:
 :CUSTOM_ID: ut-151-1
 :END:
@@ -501,6 +500,52 @@ A user can use standard Mac keyboard actions to copy or import an image without 
 
 - *Required reading:* [[file:../../docs/IMPLEMENTATION_GUIDE_v2.md::*2.2 Bringing in an image][=docs/IMPLEMENTATION_GUIDE_v2.md=, sections 2.2, 2.4, 2.6, 3.2, 3.9, and 7]], [[file:../../docs/ARCHITECTURE.md][=docs/ARCHITECTURE.md=]], [[file:../../SuperscaleApp/SuperscaleApp/SuperscaleApp.swift][=SuperscaleApp.swift=]], [[file:../../SuperscaleApp/SuperscaleApp/MainView.swift][=MainView.swift=]], [[file:../../SuperscaleApp/SuperscaleApp/UpscaleViewModel.swift][=UpscaleViewModel.swift=]], [[file:../../Sources/SuperscaleUXCore/RenderingStore.swift][=RenderingStore.swift=]], and [[file:../../Sources/SuperscaleUXCore/GenerationPreferences.swift][=GenerationPreferences.swift=]].
 - *First implementation step:* Write [[#rt-151-3][RT151.3 - Editable text retains native copy and paste]] and [[#rt-151-1][RT151.1 - Keyboard copy uses the displayed image]], then observe the expected RED results before changing command dispatch.
-- *Definition evidence:* [[file:audits.org][=audits.org=]]
-- *Validation evidence:* =validation.org= when [[#ut-151-1][UT151.1 - Validate workspace image actions]] is executed.
+- *Definition evidence:* [[file:audits.yaml][Harness-owned audit record, including migrated legacy review history]].
+- *Validation evidence:* [[file:validation.org][Regression and user-test execution records]].
 - *Documentation impact:* During delivery, update =docs/IMPLEMENTATION_GUIDE_v2.md= sections 2.2, 2.4, 2.6, 3.9, and 7 for the delivered command routing, displayed-image Save As, cache-only Save All policy, and regression boundaries. Update =docs/ARCHITECTURE.md= only if implementation changes the documented module or state ownership. README has no current image-action contract and needs no change unless delivery adds one.
+
+* Hands-off mode decision log
+
+** 2026-09-20T10:30:27Z :hands-off:review:
+
+*** Delivery scope and execution limits
+
+Deliver the signed-off image actions on the current =master= branch. Retain the
+existing requirements and test inventory. Native continuation has a configured
+2,000,000-token limit. No live OT is specified and no metered provider calls are
+authorized for regression execution; use local fixtures. Leave UT151.1 for
+operator participation after delivery.
+
+*** Command ownership and native presentation
+
+Use one workspace-window dispatcher for image shortcuts, yielding to editable
+text responders. Labelled image menu actions carry no competing key equivalents.
+Capture the selected Save As image and source together before scheduling native
+panel presentation after the SwiftUI command update. Route Open Recent through
+the workspace action handler so batch protection covers that entry point.
+
+*** Export ownership and destination access
+
+Retain encoded cache bytes and pixel dimensions within the existing four-entry
+bound. Resolve the batch destination once; run stored reads, encoding, exclusive
+output creation and the directory-access probe on workers. The probe creates
+and removes a uniquely named empty file to check actual destination access.
+Persist only the output-folder preference when a replacement is accepted.
+
+*** Fixture and build choices
+
+Respect the existing graph's inclusion of the original source in a locked chain.
+Use large generated fixtures to avoid unrelated filter-floor raises. Known-color
+upscale fixtures declare sRGB; decode saved PNG pixels directly for the oracle
+to avoid display-profile conversion. Reuse existing local models through the
+model-directory symlink used by =make gui= for custom build directories.
+
+*** Native menu test driver
+
+Keep XCUITest sandboxing and macOS permission settings unchanged. Use the parent
+Swift GUI harness to activate the visible Paste Image menu through System Events
+when requested by the test. The command is fixed, targets the sole Superscale
+process, and returns a bounded result through a temporary test-owned file. The
+XCUITest case still opens Edit, checks availability, and verifies an ordinary
+image import with no prior lock chain. =make test-gui= runs this host harness;
+other UI interactions continue through XCTest.

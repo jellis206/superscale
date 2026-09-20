@@ -619,8 +619,7 @@ final class UpscaleViewModel: ObservableObject {
         result ?? originalImage
     }
 
-    func saveAs(defaultDirectory: URL? = nil) {
-        guard let image = savableImage else { return }
+    func saveAs(image: NSImage, sourceURL: URL?, defaultDirectory: URL? = nil) {
 
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.png, .jpeg]
@@ -648,21 +647,17 @@ final class UpscaleViewModel: ObservableObject {
 
         do {
             try imageData.write(to: url)
-            // **Recorded so a clear can tell paid work from disposable work (#143).**
-            //
-            // Keyed on the *source* being displayed rather than on the file just written, because
-            // the question later asked is "has this locked iteration been saved", and the iteration
-            // is identified by where it lives in the output directory, not by where the user chose
-            // to put a copy.
-            //
-            // `inputURL` is that source for both routes into this method. Displaying a locked
-            // iteration sets it — that is the whole of #111 — so saving while looking at an earlier
-            // iteration records that iteration, and the File menu's Save As records the same thing
-            // without needing the graph the scene cannot reach.
-            if let inputURL { savedSourceURLs.insert(inputURL) }
+            // The workspace captures source identity with its active pixels before opening the panel.
+            if let sourceURL { savedSourceURLs.insert(sourceURL) }
         } catch {
             report("Failed to write file: \(error.localizedDescription)")
         }
+    }
+
+    var cachedExportImages: [CachedExportImage] { renderings.exportSnapshot }
+
+    func recordSavedExports(_ result: ExportResult) {
+        savedSourceURLs.formUnion(result.successes.map { $0.lock.sourceURL })
     }
 
     // MARK: - Private
@@ -912,7 +907,7 @@ final class UpscaleViewModel: ObservableObject {
         let selection = selection ?? scaleSelection
         guard let inputURL, !selection.isOff else { return nil }
         return RenderingKey(
-            assetID: inputURL.path,
+            assetID: currentInputSource?.assetID?.uuidString ?? inputURL.path,
             modelID: selectedModelName,
             sizing: renderingSizingDescription(for: selection),
             facesEnhanced: facesEnhanced)
@@ -930,13 +925,26 @@ final class UpscaleViewModel: ObservableObject {
         return nil
     }
 
-    private func hold(_ image: NSImage, facesEnhanced: Bool, displayed: Bool) {
-        guard let key = renderingKey(facesEnhanced: facesEnhanced) else { return }
+    private func hold(_ image: NSImage, data: Data, facesEnhanced: Bool, displayed: Bool) {
+        guard let key = renderingKey(facesEnhanced: facesEnhanced),
+            let pixels = image.cgImage(forProposedRect: nil, context: nil, hints: nil)
+        else { return }
         let identity = RenderedImage(
             id: "\(key.assetID)|\(key.modelID)|\(key.sizing)|\(key.facesEnhanced)")
         renderedImages[identity.id] = image
-        renderings.admit(identity, for: key)
+        let sizing: String
+        switch scaleSelection {
+        case .preset(let scale): sizing = "\(scale)x"
+        default: sizing = "\(pixels.width)x\(pixels.height)"
+        }
+        renderings.admit(
+            identity, for: key,
+            exportImage: CachedExportImage(
+                assetID: key.assetID, width: pixels.width, height: pixels.height,
+                sizing: sizing, recency: 0, data: data))
         if displayed { renderings.markDisplayed(key) }
+        let retained = Set(renderings.heldImages.map(\.id))
+        renderedImages = renderedImages.filter { retained.contains($0.key) }
     }
 
     private func publish(
@@ -960,10 +968,10 @@ final class UpscaleViewModel: ObservableObject {
         // what the enhancement was applied to. A run without it produces only the one, so toggling
         // enhancement on afterwards is a real rebuild rather than a lookup.
         if let image {
-            hold(image, facesEnhanced: faceEnhanceWasEnabled, displayed: true)
+            hold(image, data: output.imageData, facesEnhanced: faceEnhanceWasEnabled, displayed: true)
         }
-        if faceEnhanceWasEnabled, let preFaceImage {
-            hold(preFaceImage, facesEnhanced: false, displayed: false)
+        if faceEnhanceWasEnabled, let preFaceImage, let data = output.preFaceImageData {
+            hold(preFaceImage, data: data, facesEnhanced: false, displayed: false)
         }
         lastUpscaleModelName = output.resolvedModelName
         lastUpscaleWasAutoDetect = output.wasAutoDetect

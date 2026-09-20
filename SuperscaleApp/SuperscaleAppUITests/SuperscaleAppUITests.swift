@@ -6213,17 +6213,47 @@ final class SuperscaleAppUITests: XCTestCase {
     // second application.
     func test_pastingBringsAPictureInOnABlankCanvas_RT144_3_and_RT144_5() throws {
         let path = try writeFixture(width: 800, height: 600, named: "for-the-pasteboard.png")
-        guard let seed = NSImage(contentsOfFile: path) else {
-            XCTFail("the fixture could not be read")
-            return
-        }
+        let seed = try XCTUnwrap(NSImage(contentsOfFile: path))
         NSPasteboard.general.clearContents()
         NSPasteboard.general.writeObjects([seed])
-
-        let paste = app.menuBars.menuItems["Paste Image"]
+        let edit = app.menuBars.menuBarItems["Edit"]
+        edit.click()
+        let paste = edit.menus.menuItems["Paste Image"]
         XCTAssertTrue(paste.waitForExistence(timeout: 5))
         XCTAssertTrue(paste.isEnabled, "paste should be available on a blank canvas")
-        paste.click()
+        struct MenuRequest: Encodable {
+            let processID: Int32
+            let responsePath: String
+        }
+        struct MenuResponse: Decodable {
+            let succeeded: Bool
+            let detail: String
+        }
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(
+            "superscale-menu-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        addTeardownBlock { try FileManager.default.removeItem(at: directory) }
+        let responseURL = directory.appendingPathComponent("response.json")
+        try Data().write(to: responseURL)
+        let processes = NSRunningApplication.runningApplications(
+            withBundleIdentifier: "com.tadgpaul.superscale")
+        XCTAssertEqual(processes.count, 1, "The native menu driver requires an unambiguous test application")
+        let process = try XCTUnwrap(processes.first)
+        let request = MenuRequest(processID: process.processIdentifier, responsePath: responseURL.path)
+        print("SUPERSCALE_NATIVE_PASTE " + String(decoding: try JSONEncoder().encode(request), as: UTF8.self))
+        var response: MenuResponse?
+        let finished = NSPredicate { _, _ in
+            guard let data = try? Data(contentsOf: responseURL),
+                let result = try? JSONDecoder().decode(MenuResponse.self, from: data)
+            else { return false }
+            response = result
+            return true
+        }
+        XCTAssertEqual(
+            XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: finished, object: nil)], timeout: 15),
+            .completed, "Run this test through make test-gui or scripts/run-gui-tests.swift")
+        let result = try XCTUnwrap(response)
+        XCTAssertTrue(result.succeeded, result.detail)
 
         XCTAssertTrue(
             clearImageButton.waitForExistence(timeout: 15),
@@ -6284,5 +6314,427 @@ final class SuperscaleAppUITests: XCTestCase {
         XCTAssertFalse(
             apply.isEnabled,
             "Apply is offered with an empty canvas and an empty prompt")
+    }
+    // MARK: - W151: keyboard image actions and cache-only batch export
+    private func imageActionsDirectory() throws -> URL {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(
+            "image-actions-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        addTeardownBlock { try FileManager.default.removeItem(at: root) }
+        return root
+    }
+
+    private func launchImageActions(output: URL, mode: String? = nil) {
+        app.terminate()
+        app.launchEnvironment["SUPERSCALE_UI_TEST_OUTPUT_FOLDER"] = output.path
+        app.launchEnvironment["SUPERSCALE_UI_TEST_FAIL"] = mode
+        app.launchEnvironment["SUPERSCALE_UI_TEST_UPSCALE"] = "fixture"
+        app.launch()
+    }
+
+    /// Uses a large, solid source and the distinct photographic generation fixture.
+    /// No floor-raise or metered service is needed to make their pixels distinguishable.
+    private func imageActionsFilter() throws -> String {
+        let source = try writeFixture(width: 1200, height: 1100, named: "source.png")
+        XCTAssertTrue(loadTestImage(path: source))
+        if someScaleIsInEffect { clearScale() }
+        applyFilterOnly("W151 first filter")
+        if someScaleIsInEffect { clearScale() }
+        return source
+    }
+
+    private func focusImageCanvas() {
+        app.activate()
+        element(identifier: "workspaceCanvas").coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.3))
+            .click()
+    }
+
+    private func assertPixels(
+        _ actual: NSImage?, match path: String, file: StaticString = #filePath, line: UInt = #line
+    ) throws {
+        let image = try XCTUnwrap(actual, file: file, line: line)
+        let expected = try XCTUnwrap(NSImage(contentsOfFile: path), file: file, line: line)
+        let a = try XCTUnwrap(
+            image.cgImage(forProposedRect: nil, context: nil, hints: nil), file: file, line: line)
+        let b = try XCTUnwrap(
+            expected.cgImage(forProposedRect: nil, context: nil, hints: nil), file: file, line: line)
+        XCTAssertEqual(a.width, b.width, file: file, line: line)
+        XCTAssertEqual(a.height, b.height, file: file, line: line)
+        guard a.width == b.width, a.height == b.height else { return }
+        let actualPixels = NSBitmapImageRep(cgImage: a)
+        let expectedPixels = NSBitmapImageRep(cgImage: b)
+        for fraction in [0.2, 0.5, 0.8] {
+            let x = Int(Double(a.width - 1) * fraction)
+            let y = Int(Double(a.height - 1) * fraction)
+            let ac = try XCTUnwrap(actualPixels.colorAt(x: x, y: y)?.usingColorSpace(.deviceRGB))
+            let bc = try XCTUnwrap(expectedPixels.colorAt(x: x, y: y)?.usingColorSpace(.deviceRGB))
+            XCTAssertEqual(ac.redComponent, bc.redComponent, accuracy: 0.02, file: file, line: line)
+            XCTAssertEqual(ac.greenComponent, bc.greenComponent, accuracy: 0.02, file: file, line: line)
+            XCTAssertEqual(ac.blueComponent, bc.blueComponent, accuracy: 0.02, file: file, line: line)
+        }
+    }
+
+    private func savePanel(to url: URL) {
+        let panel = app.dialogs.firstMatch
+        XCTAssertTrue(panel.waitForExistence(timeout: 5), "A single native Save As panel must open")
+        XCTAssertEqual(app.dialogs.count, 1)
+        panel.typeKey("g", modifierFlags: [.command, .shift])
+        let location = app.textFields["PathTextField"]
+        XCTAssertTrue(location.waitForExistence(timeout: 3))
+        location.click()
+        location.typeKey("a", modifierFlags: .command)
+        location.typeText(url.path)
+        location.typeKey(.return, modifierFlags: [])
+        let save = panel.buttons["Save"]
+        XCTAssertTrue(save.waitForExistence(timeout: 3))
+        save.click()
+        XCTAssertEqual(app.dialogs.count, 0, "Accepting Save As must close its only dialog")
+        let written = NSPredicate { _, _ in FileManager.default.fileExists(atPath: url.path) }
+        XCTAssertEqual(
+            XCTWaiter.wait(for: [expectation(for: written, evaluatedWith: nil)], timeout: 10), .completed)
+    }
+
+    private func batchFiles(in root: URL, count: Int) throws -> [URL] {
+        let written = NSPredicate { _, _ in
+            (try? FileManager.default.contentsOfDirectory(at: root, includingPropertiesForKeys: nil).filter {
+                $0.pathExtension == "png"
+            }.count) == count
+        }
+        XCTAssertEqual(
+            XCTWaiter.wait(for: [expectation(for: written, evaluatedWith: nil)], timeout: 15), .completed)
+        return try FileManager.default.contentsOfDirectory(at: root, includingPropertiesForKeys: nil).filter {
+            $0.pathExtension == "png"
+        }
+    }
+
+    func test_keyboardCopyUsesDisplayedPixels_W151_RT1() throws {
+        _ = try imageActionsFilter()
+        focusImageCanvas()
+        NSPasteboard.general.clearContents()
+        app.typeKey("c", modifierFlags: .command)
+        try assertPixels(NSImage(pasteboard: .general), match: testImagePath)
+        app.menuBars.menuItems["Copy Image"].click()
+        try assertPixels(NSImage(pasteboard: .general), match: testImagePath)
+        clearImageButton.click()
+        XCTAssertTrue(waitUntilCanvasIsEmpty(), "Clear must empty the canvas before checking Copy")
+        app.menuBars.menuBarItems["Edit"].click()
+        XCTAssertFalse(app.menuBars.menuItems["Copy Image"].isEnabled)
+        app.typeKey(.escape, modifierFlags: [])
+    }
+
+    func test_keyboardPasteImportsOnlyOntoBlankCanvas_W151_RT2() throws {
+        let path = try writeFixture(width: 1200, height: 1100, named: "clipboard-source.png")
+        let image = try XCTUnwrap(NSImage(contentsOfFile: path))
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.writeObjects([image])
+        app.activate()
+        app.typeKey("v", modifierFlags: .command)
+        XCTAssertTrue(clearImageButton.waitForExistence(timeout: 10), "Cmd+V must import on a blank canvas")
+        XCTAssertEqual(clearImageButton.value as? String, "0 unsaved")
+        applyAndLock("W151 pasted source lock")
+        let chain = lockChainEntries.map(\.identifier)
+        XCTAssertFalse(chain.isEmpty)
+        let canvas = element(identifier: "workspaceCanvas").label
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.writeObjects([image])
+        focusImageCanvas()
+        app.typeKey("v", modifierFlags: .command)
+        XCTAssertFalse(app.menuBars.menuItems["Paste Image"].isEnabled)
+        XCTAssertEqual(lockChainEntries.map(\.identifier), chain)
+        XCTAssertEqual(element(identifier: "workspaceCanvas").label, canvas)
+        app.typeKey("c", modifierFlags: .command)
+        try assertPixels(NSImage(pasteboard: .general), match: testImagePath)
+    }
+
+    func test_editablePromptRetainsNativeClipboard_W151_RT3() throws {
+        _ = try imageActionsFilter()
+        let chain = lockChainEntries.map(\.identifier)
+        let field = element(identifier: "generationPromptField")
+        replaceContents(of: field, with: "W151 native text selection")
+        field.typeKey("a", modifierFlags: .command)
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString("paste sentinel", forType: .string)
+        field.typeKey("c", modifierFlags: .command)
+        XCTAssertEqual(NSPasteboard.general.string(forType: .string), "W151 native text selection")
+        XCTAssertNil(NSImage(pasteboard: .general), "Text copy must not dispatch image copy")
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString("replacement native text", forType: .string)
+        field.typeKey("v", modifierFlags: .command)
+        XCTAssertEqual(textContent(of: field), "replacement native text")
+        XCTAssertEqual(lockChainEntries.map(\.identifier), chain)
+        focusImageCanvas()
+        app.menuBars.menuItems["Copy Image"].click()
+        try assertPixels(NSImage(pasteboard: .general), match: testImagePath)
+    }
+
+    func test_keyboardSaveWritesUnupscaledResultAndMarksLockSaved_W151_RT4() throws {
+        let output = try imageActionsDirectory()
+        for locked in [false, true] {
+            launchImageActions(output: output)
+            _ = try imageActionsFilter()
+            if locked { element(identifier: "lockButton").click() }
+            XCTAssertEqual(clearImageButton.value as? String, locked ? "2 unsaved" : "0 unsaved")
+            let lockedID =
+                locked
+                ? lockChainEntries.last?.identifier.replacingOccurrences(of: "lockedIteration-", with: "")
+                : nil
+            focusImageCanvas()
+            let url = output.appendingPathComponent(locked ? "locked.png" : "candidate.png")
+            XCTAssertTrue(app.menuBars.menuItems["Save As…"].isEnabled)
+            app.typeKey("s", modifierFlags: .command)
+            savePanel(to: url)
+            try assertPixels(NSImage(contentsOf: url), match: testImagePath)
+            XCTAssertEqual(clearImageButton.value as? String, locked ? "1 unsaved" : "0 unsaved")
+            if let lockedID {
+                XCTAssertEqual(textContent(of: element(identifier: "savedLockIDs")), lockedID)
+            }
+        }
+        XCTAssertEqual(clearImageButton.value as? String, "1 unsaved", "The original source remains unsaved")
+        app.typeKey("s", modifierFlags: .command)
+        XCTAssertTrue(app.dialogs.firstMatch.waitForExistence(timeout: 5))
+        XCTAssertEqual(app.dialogs.count, 1)
+        app.dialogs.firstMatch.buttons["Cancel"].click()
+        XCTAssertEqual(app.dialogs.count, 0, "Cancellation must close its only dialog")
+        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: output.path).count, 2)
+    }
+
+    func test_saveAllEntryPointsExportEachLockOnce_W151_RT5() throws {
+        let output = try imageActionsDirectory()
+        let generated = try writeFixture(width: 1400, height: 1200, named: "batch-result.png")
+        app.launchEnvironment["SUPERSCALE_UI_TEST_GENERATED_IMAGE"] = generated
+        launchImageActions(output: output)
+        let menu = app.menuBars.menuItems["Save All"]
+        XCTAssertTrue(menu.waitForExistence(timeout: 5), "Save All must be discoverable in File")
+        XCTAssertFalse(menu.isEnabled)
+        XCTAssertFalse(element(identifier: "saveAllButton").isEnabled)
+        let source = try imageActionsFilter()
+        element(identifier: "lockButton").click()
+        applyAndLock("W151 second lock")
+        let chain = lockChainEntries.map(\.identifier)
+        XCTAssertEqual(chain.count, 3, "The chain must contain the original and two filtered locks")
+        let ids = chain.map { $0.replacingOccurrences(of: "lockedIteration-", with: "") }
+        let selected = textContent(of: element(identifier: "selectedLockID"))
+        let expectedNames = try JSONDecoder().decode(
+            [String: String].self, from: Data(textContent(of: element(identifier: "lockedOutputNames")).utf8))
+        let canvas = element(identifier: "workspaceCanvas").label
+        for invocation in 0..<3 {
+            switch invocation {
+            case 0: app.buttons["saveAllButton"].click()
+            case 1: menu.click()
+            default:
+                focusImageCanvas()
+                app.typeKey("s", modifierFlags: [.command, .shift])
+            }
+            _ = try batchFiles(in: output, count: (invocation + 1) * chain.count)
+            XCTAssertEqual(textContent(of: element(identifier: "saveAllBatchCount")), "\(invocation + 1)")
+            XCTAssertEqual(
+                textContent(of: element(identifier: "saveAllBatchIDs")), ids.joined(separator: ","))
+            let mapping = try JSONDecoder().decode(
+                [String: String].self,
+                from: Data(textContent(of: element(identifier: "saveAllOutputMap")).utf8))
+            XCTAssertEqual(Set(mapping.keys), Set(ids))
+            for (id, name) in expectedNames {
+                let stem = (name as NSString).deletingPathExtension
+                XCTAssertEqual(mapping[id], invocation == 0 ? name : "\(stem)_\(invocation).png")
+                let filename = try XCTUnwrap(mapping[id])
+                try assertPixels(
+                    NSImage(contentsOf: output.appendingPathComponent(filename)),
+                    match: id == ids.first ? source : generated)
+            }
+            XCTAssertEqual(textContent(of: element(identifier: "selectedLockID")), selected)
+            XCTAssertEqual(lockChainEntries.map(\.identifier), chain)
+            XCTAssertEqual(element(identifier: "workspaceCanvas").label, canvas)
+            XCTAssertFalse(app.dialogs.firstMatch.exists, "No per-file save panels")
+            XCTAssertTrue(statusBarText(of: "noticeMessage").contains("Saved"))
+        }
+    }
+
+    func test_saveAsFollowsSelectionAcrossMenuCanvasAndCurtain_W151_RT9() throws {
+        let output = try imageActionsDirectory()
+        launchImageActions(output: output)
+        let source = try imageActionsFilter()
+        let toggle = element(identifier: "filterToggle")
+        XCTAssertTrue(toggle.waitForExistence(timeout: 5))
+        for curtain in [false, true] {
+            if curtain {
+                enterComparison()
+                XCTAssertTrue(element(identifier: "curtainDivider").waitForExistence(timeout: 5))
+            }
+            for original in [false, true] {
+                if original { toggle.click() }
+                let url = output.appendingPathComponent("selection-\(curtain)-\(original).png")
+                if original {
+                    app.menuBars.menuItems["Save As…"].click()
+                } else {
+                    app.buttons["saveButton"].click()
+                }
+                savePanel(to: url)
+                try assertPixels(NSImage(contentsOf: url), match: original ? source : testImagePath)
+                if original { toggle.click() }
+            }
+        }
+        chooseScale(2)
+        XCTAssertTrue(waitForUpscaleComplete())
+        let upscaleOutput = output.appendingPathComponent("upscaled.png")
+        app.buttons["saveButton"].click()
+        savePanel(to: upscaleOutput)
+        let encoded = try XCTUnwrap(CGImageSourceCreateWithURL(upscaleOutput as CFURL, nil))
+        let pixels = try XCTUnwrap(CGImageSourceCreateImageAtIndex(encoded, 0, nil))
+        XCTAssertEqual(pixels.width, 480)
+        XCTAssertEqual(pixels.height, 640)
+        let color = try XCTUnwrap(NSBitmapImageRep(cgImage: pixels).colorAt(x: 240, y: 320))
+        XCTAssertEqual(color.redComponent, 0.1, accuracy: 0.02)
+        XCTAssertEqual(color.greenComponent, 0.6, accuracy: 0.02)
+        XCTAssertEqual(color.blueComponent, 0.2, accuracy: 0.02)
+        toggle.click()
+        let originalOutput = output.appendingPathComponent("original-with-cached-upscale.png")
+        app.menuBars.menuItems["Save As…"].click()
+        savePanel(to: originalOutput)
+        try assertPixels(NSImage(contentsOf: originalOutput), match: source)
+        clearImageButton.click()
+        XCTAssertTrue(waitUntilCanvasIsEmpty(), "Clear must empty the canvas before checking Save As")
+        app.menuBars.menuBarItems["File"].click()
+        XCTAssertFalse(app.menuBars.menuItems["Save As…"].isEnabled)
+        app.typeKey(.escape, modifierFlags: [])
+        XCTAssertFalse(app.buttons["saveButton"].exists && app.buttons["saveButton"].isEnabled)
+    }
+
+    func test_partialBatchFailureReportsAndRetainsUnsavedLock_W151_RT10() throws {
+        let generated = try writeFixture(width: 1200, height: 1100, named: "batch-result.png")
+        app.launchEnvironment["SUPERSCALE_UI_TEST_GENERATED_IMAGE"] = generated
+        for fails in [true, false] {
+            let output = try imageActionsDirectory()
+            launchImageActions(output: output, mode: fails ? "save-all-one-file" : nil)
+            _ = try imageActionsFilter()
+            element(identifier: "lockButton").click()
+            applyAndLock("W151 second lock")
+            let ids = lockChainEntries.map {
+                $0.identifier.replacingOccurrences(of: "lockedIteration-", with: "")
+            }
+            XCTAssertEqual(ids.count, 3, "The chain must contain the original and two filtered locks")
+            let names = try JSONDecoder().decode(
+                [String: String].self,
+                from: Data(textContent(of: element(identifier: "lockedOutputNames")).utf8))
+            let failedID = try XCTUnwrap(ids.last)
+            let failedName = try XCTUnwrap(names[failedID])
+            XCTAssertTrue(app.buttons["saveAllButton"].waitForExistence(timeout: 5))
+            app.buttons["saveAllButton"].click()
+            let files = try batchFiles(in: output, count: fails ? 2 : 3)
+            XCTAssertEqual(files.count, fails ? 2 : 3)
+            if fails {
+                XCTAssertTrue(failureAlert.waitForExistence(timeout: 5))
+                let report = spokenText(of: failureAlert)
+                XCTAssertTrue(report.contains("2 saved") && report.contains("1 failed"), report)
+                XCTAssertTrue(report.contains(failedName), "Failure must identify the exact failed output")
+                failureAlert.buttons["OK"].click()
+                XCTAssertEqual(
+                    textContent(of: element(identifier: "savedLockIDs")),
+                    ids.dropLast().joined(separator: ","))
+                XCTAssertFalse(files.contains { $0.lastPathComponent == failedName })
+                XCTAssertEqual(clearImageButton.value as? String, "1 unsaved")
+                clearImageButton.click()
+                XCTAssertTrue(clearWarningAlert.waitForExistence(timeout: 5))
+                XCTAssertTrue(spokenText(of: clearWarningAlert).contains("1 locked iteration"))
+                clearWarningButton("Cancel").click()
+            } else {
+                XCTAssertTrue(statusBarText(of: "noticeMessage").contains("Saved 3"))
+                XCTAssertEqual(clearImageButton.value as? String, "0 unsaved")
+                XCTAssertEqual(
+                    textContent(of: element(identifier: "savedLockIDs")), ids.joined(separator: ","))
+            }
+        }
+    }
+
+    func test_suspendedSaveAllRejectsReplacementAndStartsNoProcessing_W151_RT11() throws {
+        let output = try imageActionsDirectory()
+        launchImageActions(output: output, mode: "save-all-suspended")
+        _ = try imageActionsFilter()
+        element(identifier: "lockButton").click()
+        let chain = lockChainEntries.map(\.identifier)
+        XCTAssertTrue(app.buttons["saveAllButton"].waitForExistence(timeout: 5))
+        app.buttons["scale2x"].click()
+        let local = element(identifier: "upscaleRequestCount")
+        XCTAssertTrue(local.waitForExistence(timeout: 5))
+        let started = NSPredicate { _, _ in Int(self.textContent(of: local)).map { $0 > 0 } ?? false }
+        XCTAssertEqual(
+            XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: started, object: nil)], timeout: 5),
+            .completed, "An ordinary upscale must be in flight before Save All")
+        let localCount = textContent(of: local)
+        let providerCount = textContent(of: element(identifier: "generationRequestCount"))
+        let uploadCount = textContent(of: element(identifier: "uploadRequestCount"))
+        XCTAssertTrue(app.buttons["saveAllButton"].waitForExistence(timeout: 5))
+        app.buttons["saveAllButton"].click()
+        let release = app.buttons["releaseSaveAllTestExport"]
+        XCTAssertTrue(
+            release.waitForExistence(timeout: 5), "Export must start without awaiting the in-flight upscale")
+        XCTAssertFalse(app.buttons["saveAllButton"].isEnabled)
+        XCTAssertFalse(clearImageButton.isEnabled)
+        app.menuBars.menuBarItems["File"].click()
+        for title in ["Save All", "New", "Open Image…"] {
+            XCTAssertFalse(app.menuBars.menuItems[title].isEnabled, "\(title) must be unavailable")
+        }
+        let recentItems = openRecentMenu.descendants(matching: .menuItem).allElementsBoundByIndex
+        XCTAssertFalse(recentItems.isEmpty, "Seeded recent sessions must be present")
+        for item in recentItems { XCTAssertFalse(item.isEnabled, "Recent session must be unavailable") }
+        app.typeKey(.escape, modifierFlags: [])
+        app.menuBars.menuBarItems["Edit"].click()
+        XCTAssertFalse(app.menuBars.menuItems["Paste Image"].isEnabled)
+        app.typeKey(.escape, modifierFlags: [])
+        focusImageCanvas()
+        app.typeKey("s", modifierFlags: [.command, .shift])
+        app.typeKey("n", modifierFlags: .command)
+        app.typeKey("o", modifierFlags: .command)
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.writeObjects([try XCTUnwrap(NSImage(contentsOfFile: testImagePath))])
+        app.typeKey("v", modifierFlags: .command)
+        // The DEBUG dispatch probe exercises delayed requests after menu validation.
+        app.buttons["dispatchReplacementTestRequests"].click()
+        XCTAssertEqual(
+            textContent(of: element(identifier: "attemptedReplacementRoutes")).split(separator: ",").map(
+                String.init
+            ).sorted(),
+            ["saveAll", "clear", "openImage", "openRecent", "pasteImage", "fileChooser", "fileDrop"].sorted())
+        XCTAssertEqual(textContent(of: element(identifier: "acceptedReplacementRoutes")), "none")
+        XCTAssertEqual(lockChainEntries.map(\.identifier), chain)
+        XCTAssertEqual(textContent(of: local), localCount)
+        XCTAssertEqual(textContent(of: element(identifier: "generationRequestCount")), providerCount)
+        XCTAssertEqual(textContent(of: element(identifier: "uploadRequestCount")), uploadCount)
+        XCTAssertEqual(textContent(of: element(identifier: "saveAllBatchCount")), "1")
+        release.click()
+        _ = try batchFiles(in: output, count: chain.count)
+        let reconcile = app.buttons["reconcileSaveAllTestExport"]
+        XCTAssertTrue(reconcile.waitForExistence(timeout: 5))
+        XCTAssertEqual(clearImageButton.value as? String, "\(chain.count) unsaved")
+        XCTAssertFalse(app.buttons["saveAllButton"].isEnabled)
+        XCTAssertFalse(app.menuBars.menuItems["Open Image…"].isEnabled)
+        reconcile.click()
+        let finish = app.buttons["finishSaveAllTestExport"]
+        XCTAssertTrue(finish.waitForExistence(timeout: 5))
+        XCTAssertTrue(statusBarText(of: "noticeMessage").contains("Saved"))
+        XCTAssertEqual(clearImageButton.value as? String, "0 unsaved")
+        XCTAssertFalse(app.buttons["saveAllButton"].isEnabled)
+        XCTAssertFalse(app.menuBars.menuItems["Open Image…"].isEnabled)
+        finish.click()
+        app.menuBars.menuBarItems["File"].click()
+        XCTAssertTrue(app.menuBars.menuItems["Open Image…"].isEnabled)
+        app.typeKey(.escape, modifierFlags: [])
+        XCTAssertTrue(app.buttons["saveAllButton"].isEnabled)
+        XCTAssertEqual(textContent(of: local), localCount)
+        app.menuBars.menuBarItems["File"].click()
+        app.menus.menuItems["Open Recent"].hover()
+        let history = app.menus.menuItems["History fixture"]
+        let visibleHistory = NSPredicate { _, _ in history.frame.width > 0 }
+        XCTAssertEqual(
+            XCTWaiter.wait(
+                for: [XCTNSPredicateExpectation(predicate: visibleHistory, object: nil)], timeout: 5),
+            .completed, "The recent-session submenu must open before selecting its item")
+        XCTAssertTrue(history.isEnabled)
+        XCTAssertGreaterThan(history.frame.width, 0)
+        history.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).click()
+        let replaced = NSPredicate { _, _ in self.lockChainEntries.isEmpty }
+        XCTAssertEqual(
+            XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: replaced, object: nil)], timeout: 5),
+            .completed, "Open Recent must replace the workspace again after export finishes")
+        XCTAssertEqual(clearImageButton.value as? String, "0 unsaved")
     }
 }

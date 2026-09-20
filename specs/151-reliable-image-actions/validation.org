@@ -1,17 +1,204 @@
 #+TITLE: W151 - Validation Evidence
 #+STARTUP: content
 #+OPTIONS: toc:2 num:nil
+#+TODO: AMBER RED | GREEN
+
+* Regression tests
+
+** GREEN RT151.1 - Keyboard copy uses the displayed image :testdef:
+:PROPERTIES:
+:CUSTOM_ID: rt-151-1-result
+:REVISION: 9fbdea9 plus W151 implementation working tree, 2026-09-20 final GUI remediation.
+:COMMAND: swift scripts/run-gui-tests.swift -derivedDataPath .build/w151-gui-preflight -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_keyboardCopyUsesDisplayedPixels_W151_RT1 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_keyboardPasteImportsOnlyOntoBlankCanvas_W151_RT2 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_editablePromptRetainsNativeClipboard_W151_RT3 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_copyingPutsTheDisplayedPictureOnThePasteboard_RT144_1 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_pastingBringsAPictureInOnABlankCanvas_RT144_3_and_RT144_5 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_pasteIsRefusedWithAPictureLoadedAndCopyWithout_RT144_4_and_RT144_6 > .build/w151-clipboard-host-final.log 2>&1
+:EVIDENCE: Final six-case clipboard run passed 2026-09-20 23:26 Europe/Dublin in .build/w151-clipboard-host-final.log. Includes actual visible Paste Image activation and import, image menu availability and W151 native text/keyboard regressions. Earlier evidence: test_keyboardCopyUsesDisplayedPixels_W151_RT1 passed in .build/w151-gui-remediation.log. Earlier evidence: Pre-implementation observation: Cmd+C leaves the clipboard without an image after canvas focus; NSImage unwrap fails. Actual eight-case W151 selection and assertions are recorded in .build/w151-gui-red.log, 2026-09-20 16:06 Europe/Dublin.
+:END:
+
+** GREEN RT151.2 - Keyboard paste respects the blank-canvas guard :testdef:
+:PROPERTIES:
+:CUSTOM_ID: rt-151-2-result
+:REVISION: 9fbdea9 plus W151 implementation working tree, 2026-09-20 final GUI remediation.
+:COMMAND: swift scripts/run-gui-tests.swift -derivedDataPath .build/w151-gui-preflight -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_keyboardCopyUsesDisplayedPixels_W151_RT1 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_keyboardPasteImportsOnlyOntoBlankCanvas_W151_RT2 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_editablePromptRetainsNativeClipboard_W151_RT3 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_copyingPutsTheDisplayedPictureOnThePasteboard_RT144_1 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_pastingBringsAPictureInOnABlankCanvas_RT144_3_and_RT144_5 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_pasteIsRefusedWithAPictureLoadedAndCopyWithout_RT144_4_and_RT144_6 > .build/w151-clipboard-host-final.log 2>&1
+:EVIDENCE: Final six-case clipboard run passed 2026-09-20 23:26 Europe/Dublin in .build/w151-clipboard-host-final.log. Includes actual visible Paste Image activation and import, image menu availability and W151 native text/keyboard regressions. Earlier evidence: test_keyboardPasteImportsOnlyOntoBlankCanvas_W151_RT2 passed in .build/w151-gui-remediation.log. Earlier evidence: Pre-implementation observation: Cmd+V does not import an image onto the blank canvas. Actual eight-case W151 selection and assertions are recorded in .build/w151-gui-red.log, 2026-09-20 16:06 Europe/Dublin.
+:END:
+
+** GREEN RT151.3 - Editable text retains native copy and paste :testdef:
+:PROPERTIES:
+:CUSTOM_ID: rt-151-3-result
+:REVISION: 9fbdea9 plus W151 implementation working tree, 2026-09-20 final GUI remediation.
+:COMMAND: swift scripts/run-gui-tests.swift -derivedDataPath .build/w151-gui-preflight -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_keyboardCopyUsesDisplayedPixels_W151_RT1 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_keyboardPasteImportsOnlyOntoBlankCanvas_W151_RT2 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_editablePromptRetainsNativeClipboard_W151_RT3 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_copyingPutsTheDisplayedPictureOnThePasteboard_RT144_1 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_pastingBringsAPictureInOnABlankCanvas_RT144_3_and_RT144_5 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_pasteIsRefusedWithAPictureLoadedAndCopyWithout_RT144_4_and_RT144_6 > .build/w151-clipboard-host-final.log 2>&1
+:EVIDENCE: Final six-case clipboard run passed 2026-09-20 23:26 Europe/Dublin in .build/w151-clipboard-host-final.log. Includes actual visible Paste Image activation and import, image menu availability and W151 native text/keyboard regressions. Earlier evidence: test_editablePromptRetainsNativeClipboard_W151_RT3 passed in .build/w151-gui-remediation.log. Earlier evidence: Pre-implementation observation: Native prompt text copy/paste and explicit image menu copy pass before implementation. Preservation test is initially GREEN. Actual eight-case W151 selection and assertions are recorded in .build/w151-gui-red.log, 2026-09-20 16:06 Europe/Dublin.
+:END:
+
+** GREEN RT151.4 - Cmd+S saves a non-upscaled displayed FAL result :testdef:
+:PROPERTIES:
+:CUSTOM_ID: rt-151-4-result
+:REVISION: 9fbdea9 plus W151 implementation working tree, 2026-09-20 final GUI remediation.
+:COMMAND: xcodebuild test -project SuperscaleApp/SuperscaleApp.xcodeproj -scheme SuperscaleWithTests -destination 'platform=macOS,arch=arm64' -derivedDataPath .build/w151-gui-preflight -parallel-testing-enabled NO -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_keyboardSaveWritesUnupscaledResultAndMarksLockSaved_W151_RT4 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_saveAllEntryPointsExportEachLockOnce_W151_RT5 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_saveAsFollowsSelectionAcrossMenuCanvasAndCurtain_W151_RT9 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_partialBatchFailureReportsAndRetainsUnsavedLock_W151_RT10 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_suspendedSaveAllRejectsReplacementAndStartsNoProcessing_W151_RT11 > .build/w151-gui-final-five.log 2>&1
+:EVIDENCE: test_keyboardSaveWritesUnupscaledResultAndMarksLockSaved_W151_RT4 passed in .build/w151-gui-final-five.log. Earlier evidence: Pre-implementation observation: Save As menu remains disabled for the non-upscaled FAL result. Strengthened test rerun reaches this intended failure: .build/w151-gui-conditions-red.log, 2026-09-20 16:30 Europe/Dublin. Single-dialog count/closure and explicit curtain-existence assertions compiled in this rerun.
+:END:
+
+** GREEN RT151.5 - Save All entry points dispatch one batch :testdef:
+:PROPERTIES:
+:CUSTOM_ID: rt-151-5-result
+:REVISION: 9fbdea9 plus W151 implementation working tree, 2026-09-20 final GUI remediation.
+:COMMAND: xcodebuild test -project SuperscaleApp/SuperscaleApp.xcodeproj -scheme SuperscaleWithTests -destination 'platform=macOS,arch=arm64' -derivedDataPath .build/w151-gui-preflight -parallel-testing-enabled NO -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_keyboardSaveWritesUnupscaledResultAndMarksLockSaved_W151_RT4 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_saveAllEntryPointsExportEachLockOnce_W151_RT5 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_saveAsFollowsSelectionAcrossMenuCanvasAndCurtain_W151_RT9 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_partialBatchFailureReportsAndRetainsUnsavedLock_W151_RT10 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_suspendedSaveAllRejectsReplacementAndStartsNoProcessing_W151_RT11 > .build/w151-gui-final-five.log 2>&1
+:EVIDENCE: test_saveAllEntryPointsExportEachLockOnce_W151_RT5 passed in .build/w151-gui-final-five.log. Earlier evidence: Pre-implementation observation: File menu has no Save All command. Strengthened test rerun reaches this intended failure: .build/w151-gui-red-remediated.log, 2026-09-20 16:23 Europe/Dublin.
+:END:
+
+** GREEN RT151.6 - Batch planning selects and retains the operator-ranked cached image :testdef:
+:PROPERTIES:
+:CUSTOM_ID: rt-151-6-result
+:REVISION: 9fbdea9 plus W151 implementation working tree, 2026-09-20 16:45 Europe/Dublin.
+:COMMAND: swift test --filter ImageExportTests
+:EVIDENCE: All 12 ImageExportTests pass after implementation; .build/w151-core-green.log, 2026-09-20 16:45 Europe/Dublin. Original intended failures are preserved in .build/w151-core-red-remediated.log.
+:END:
+
+** GREEN RT151.7 - Batch export handles naming, collisions, and partial failure :testdef:
+:PROPERTIES:
+:CUSTOM_ID: rt-151-7-result
+:REVISION: 9fbdea9 plus W151 implementation working tree, 2026-09-20 16:45 Europe/Dublin.
+:COMMAND: swift test --filter ImageExportTests
+:EVIDENCE: All 12 ImageExportTests pass after implementation; .build/w151-core-green.log, 2026-09-20 16:45 Europe/Dublin. Original intended failures are preserved in .build/w151-core-red-remediated.log.
+:END:
+
+** GREEN RT151.8 - Destination fallback is single, persistent, and cancellable :testdef:
+:PROPERTIES:
+:CUSTOM_ID: rt-151-8-result
+:REVISION: 9fbdea9 plus W151 implementation working tree, 2026-09-20 16:45 Europe/Dublin.
+:COMMAND: swift test --filter ImageExportTests
+:EVIDENCE: All 12 ImageExportTests pass after implementation; .build/w151-core-green.log, 2026-09-20 16:45 Europe/Dublin. Original intended failures are preserved in .build/w151-core-red-remediated.log.
+:END:
+
+** GREEN RT151.9 - Save As follows the active image and every availability surface :testdef:
+:PROPERTIES:
+:CUSTOM_ID: rt-151-9-result
+:REVISION: 9fbdea9 plus W151 implementation working tree, 2026-09-20 final GUI remediation.
+:COMMAND: xcodebuild test -project SuperscaleApp/SuperscaleApp.xcodeproj -scheme SuperscaleWithTests -destination 'platform=macOS,arch=arm64' -derivedDataPath .build/w151-gui-preflight -parallel-testing-enabled NO -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_keyboardSaveWritesUnupscaledResultAndMarksLockSaved_W151_RT4 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_saveAllEntryPointsExportEachLockOnce_W151_RT5 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_saveAsFollowsSelectionAcrossMenuCanvasAndCurtain_W151_RT9 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_partialBatchFailureReportsAndRetainsUnsavedLock_W151_RT10 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_suspendedSaveAllRejectsReplacementAndStartsNoProcessing_W151_RT11 > .build/w151-gui-final-five.log 2>&1
+:EVIDENCE: test_saveAsFollowsSelectionAcrossMenuCanvasAndCurtain_W151_RT9 passed in .build/w151-gui-final-five.log. Earlier evidence: Pre-implementation observation: Canvas Save As writes the filtered fixture successfully; File menu Save As fails to open a panel after Original is selected. Native path-field targeting was corrected before this intended failure. Rerun after strengthening independent upscale oracle: .build/w151-gui-conditions-red.log, 2026-09-20 16:30 Europe/Dublin. Single-dialog count/closure and explicit curtain-existence assertions compiled in this rerun.
+:END:
+
+** GREEN RT151.10 - Partial Save All failure reaches the user :testdef:
+:PROPERTIES:
+:CUSTOM_ID: rt-151-10-result
+:REVISION: 9fbdea9 plus W151 implementation working tree, 2026-09-20 final GUI remediation.
+:COMMAND: xcodebuild test -project SuperscaleApp/SuperscaleApp.xcodeproj -scheme SuperscaleWithTests -destination 'platform=macOS,arch=arm64' -derivedDataPath .build/w151-gui-preflight -parallel-testing-enabled NO -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_keyboardSaveWritesUnupscaledResultAndMarksLockSaved_W151_RT4 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_saveAllEntryPointsExportEachLockOnce_W151_RT5 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_saveAsFollowsSelectionAcrossMenuCanvasAndCurtain_W151_RT9 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_partialBatchFailureReportsAndRetainsUnsavedLock_W151_RT10 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_suspendedSaveAllRejectsReplacementAndStartsNoProcessing_W151_RT11 > .build/w151-gui-final-five.log 2>&1
+:EVIDENCE: test_partialBatchFailureReportsAndRetainsUnsavedLock_W151_RT10 passed in .build/w151-gui-final-five.log. Earlier evidence: Pre-implementation observation: Save All button is absent, so the partial-failure path cannot be invoked. Strengthened test rerun reaches this intended failure: .build/w151-gui-red-remediated.log, 2026-09-20 16:23 Europe/Dublin.
+:END:
+
+** GREEN RT151.11 - Save All blocks overlapping work and starts no processing :testdef:
+:PROPERTIES:
+:CUSTOM_ID: rt-151-11-result
+:REVISION: 9fbdea9 plus W151 implementation working tree, 2026-09-20 final GUI remediation.
+:COMMAND: xcodebuild test -project SuperscaleApp/SuperscaleApp.xcodeproj -scheme SuperscaleWithTests -destination 'platform=macOS,arch=arm64' -derivedDataPath .build/w151-gui-preflight -parallel-testing-enabled NO -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_pastingBringsAPictureInOnABlankCanvas_RT144_3_and_RT144_5 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_suspendedSaveAllRejectsReplacementAndStartsNoProcessing_W151_RT11 > .build/w151-gui-visible-menus.log 2>&1
+:EVIDENCE: Strengthened RT151.11 passed in .build/w151-gui-visible-menus.log, including native Open Recent selection after export completes, in addition to all suspended export, saved-state and request-ledger assertions. The unrelated pre-existing menu-paste test in that selection failed and is documented below; no full-suite PASS is claimed for that log.
+:END:
+
+** GREEN RT151.12 - The action gate rejects every replacement route during Save All :testdef:
+:PROPERTIES:
+:CUSTOM_ID: rt-151-12-result
+:REVISION: 9fbdea9 plus W151 implementation working tree, 2026-09-20 16:45 Europe/Dublin.
+:COMMAND: swift test --filter ImageExportTests
+:EVIDENCE: All 12 ImageExportTests pass after implementation; .build/w151-core-green.log, 2026-09-20 16:45 Europe/Dublin. Original intended failures are preserved in .build/w151-core-red-remediated.log.
+:END:
 
 * User tests
 
-** UT151.1 - Validate workspace image actions
+** AMBER UT151.1 - Validate workspace image actions :testdef:
 :PROPERTIES:
 :CUSTOM_ID: ut-151-1-result
+:REASON: Requires delivered application and operator user validation.
 :END:
 
 - *Criterion:* [[file:spec.org::#ac-151-4][AC151.4 - Save the one displayed image at any resolution]], [[file:spec.org::#ac-151-5][AC151.5 - Invoke Save All as one action]], and [[file:spec.org::#ac-151-8][AC151.8 - Resolve destination access once]].
 - *Category:* User test.
 - *Reviewer:* Operator.
-- *Status:* PENDING
+- *Method:* User validation.
 - *Procedure:* In the built Mac application, apply a FAL filter with scale off and save it with =Cmd+S=. Build a chain containing locks with and without cached upscales, press Save All once, and inspect the configured folder and result message. Repeat Save All with an inaccessible configured folder and cancel its chooser.
 - *Expected:* Save As writes the displayed low-resolution FAL result. Save All responds to one click, performs no visible processing, writes one operator-ranked cached image or stored fallback per lock with no per-file dialogue, reports the result, and cancellation of destination access writes nothing.
+
+*** Record history
+
+- The pre-delivery record used =Status: PENDING= and contained no execution evidence. Converted to AMBER on 2026-09-20; procedure, expected outcome, and identifier preserved.
+
+* Delivery checks
+
+** Current GUI execution
+
+After removing both competing image-menu shortcuts, the final clipboard run
+completed at 23:26 Europe/Dublin: six tests, zero failures. This includes all
+three W151 clipboard cases, the existing image Copy and menu availability tests,
+and actual native-menu Paste Image with ordinary-import assertions. Command and
+evidence: the RT151.1-3 records above and =.build/w151-clipboard-host-final.log=.
+The separate initial host-harness run also passed the native-menu case.
+=scripts/run-gui-tests.swift --help= succeeds; an invalid xcodebuild option is
+forwarded and its exit status 64 is preserved (=.build/w151-harness-invalid-option.log=).
+The harness's native action is bounded to eight seconds, the current Superscale
+process, and an existing empty completion file under the test runner's temporary
+root. Final strict lint for the new harness and changed test lines is clean in
+=.build/w151-lint-harness-final.log=.
+
+Native authentication was satisfied for the 21:44 run. All eight GUI cases
+executed; two passed and six failed. Evidence:
+=.build/w151-gui-auth-retry-2.log=. After remediation, the three clipboard cases
+passed in =.build/w151-gui-remediation.log=. The five remaining cases were
+rerun in =.build/w151-gui-final-five.log=; that run completed at 22:04 Europe/Dublin
+with five tests passing and zero failures. All eight W151 GUI regressions now
+have passing execution evidence.
+
+The first fixture corrections account for the existing graph's inclusion of the
+original source in a locked chain, prevent unrelated filter-floor raises from
+adding fixtures, and validate native menu state after opening the menu. The
+known-color upscale assertion decodes the saved sRGB PNG directly, avoiding
+display-profile conversion through =NSImage.cgImage=. Its independent expected
+dimensions and RGB components remain explicit.
+
+- Final Debug application and harness compilation passed as part of the five-case
+  run above. Release rebuilt successfully in =.build/w151-release-reviewed.log=;
+  its executable still contains none of the W151 test activation keys or controls.
+- Final changed-line Swift lint has zero diagnostics with four-space indentation
+  and 110-column formatting; =.build/w151-lint-reviewed.log= retains the unrelated
+  baseline diagnostics. =git diff --check= passes.
+
+** Earlier execution history
+
+*** Related regression checks and baseline comparison
+
+Five existing GUI regressions passed: File-menu route availability, Clear and
+Cmd+N in =.build/w151-gui-regression.log=; image-menu Copy and clipboard command
+availability in =.build/w151-gui-regression-final.log=. The latter two exercised
+the real local Core ML model after adding the model-directory symlink used by
+the project's =make gui= target to this custom build directory. Existing model
+files were reused; no model download or provider call was needed. The same link
+is present in the local Release build.
+
+The additional existing RT144.3/RT144.5 menu-paste test initially failed on both
+this worktree and untouched pre-change commit =9fbdea9= in the isolated detached
+worktree =.build/w151-baseline=: =.build/w151-baseline-paste.log=. XCTest menu
+selection was unreliable: one scoped-query run passed, but subsequent clean runs
+failed to dispatch the action. The application's visible menu imported the
+fixture when activated by the host through System Events. Direct System Events
+invocation inside the sandboxed XCTest runner fails with AppleScript error -600.
+
+The retained test now opens Edit and verifies Paste Image is enabled, then asks
+=scripts/run-gui-tests.swift= to perform that exact native menu action through
+System Events. The test still checks the resulting image and zero prior unsaved
+locks. The first unattended host-harness execution passed in
+=.build/w151-host-menu-harness.log=. All temporary application diagnostics and
+speculative menu changes were removed. No macOS permissions or sandbox settings
+were changed.
+
+The strengthened RT151.11 additionally opens the seeded History fixture through
+the visible recent-session submenu after the export guard clears. It passes in
+=.build/w151-gui-visible-menus.log=. Keyboard paste and native text clipboard
+preservation also passed during the follow-up runs; their original final-behaviour
+evidence is retained above.
+
+*** Initial build and authentication history
+
+- A fresh =test-without-building= invocation with the same eight W151 selectors started at 16:48 Europe/Dublin and failed at 16:49 before executing any case: the runner timed out enabling automation mode. Evidence: =.build/w151-gui-auth-retry.log=. A subsequent read-only =/usr/bin/automationmodetool= check still reports that this device requires user authentication to enable Automation Mode. Authentication was subsequently satisfied for the 21:44 run.
+
+- =make test= completed 2026-09-20 16:44 Europe/Dublin: 608 tests, zero failures, six pre-existing environment skips (installed face model and absent sketch1.png fixture). Evidence: =.build/w151-regression.log=. The final asynchronous destination-boundary adjustment was followed by the focused 12-test run above.
+- Debug application and XCUITest harness build: =xcodebuild build-for-testing -project SuperscaleApp/SuperscaleApp.xcodeproj -scheme SuperscaleWithTests -destination 'platform=macOS,arch=arm64' -derivedDataPath .build/w151-gui-preflight= passed. Evidence: =.build/w151-debug-build.log=.
+- Release application build passed with =xcodebuild build -project SuperscaleApp/SuperscaleApp.xcodeproj -scheme SuperscaleWithTests -configuration Release -destination 'platform=macOS,arch=arm64' -derivedDataPath .build/w151-release=. Evidence: =.build/w151-release.log=. Its executable contains none of the W151 test activation keys or controls.
+- Changed Swift regions formatted using =swift format= (four spaces, 110 columns). Strict lint reports zero diagnostics on changed lines; unrelated baseline diagnostics remain in =.build/w151-lint.log= and =.build/w151-lint-baseline.log=. =git diff --check= passes.
+- Post-implementation GUI command: =xcodebuild test -project SuperscaleApp/SuperscaleApp.xcodeproj -scheme SuperscaleWithTests -destination 'platform=macOS,arch=arm64' -derivedDataPath .build/w151-gui-preflight -parallel-testing-enabled NO -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_keyboardCopyUsesDisplayedPixels_W151_RT1 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_keyboardPasteImportsOnlyOntoBlankCanvas_W151_RT2 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_editablePromptRetainsNativeClipboard_W151_RT3 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_keyboardSaveWritesUnupscaledResultAndMarksLockSaved_W151_RT4 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_saveAllEntryPointsExportEachLockOnce_W151_RT5 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_saveAsFollowsSelectionAcrossMenuCanvasAndCurtain_W151_RT9 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_partialBatchFailureReportsAndRetainsUnsavedLock_W151_RT10 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_suspendedSaveAllRejectsReplacementAndStartsNoProcessing_W151_RT11 > .build/w151-gui-green.log 2>&1=. It built successfully but timed out enabling automation before any case ran. Screenshot =.build/w151-current-screen.png= confirms the native XCTest authentication prompt. Subsequent execution results are recorded above.

@@ -1,10 +1,12 @@
 // ABOUTME: SwiftUI app entry point for Superscale GUI.
 // ABOUTME: Configures the main window and menu commands.
 
-import SwiftUI
 import FalGenerationKit
+import ImageIO
 import SuperscaleKit
 import SuperscaleUXCore
+import SwiftUI
+import UniformTypeIdentifiers
 
 // 🚫 `V2AppPaths` is removed by #116. It computed the application's storage locations, and it was
 // the *second* place they were computed: `MainView` read it from a property initialiser while the
@@ -46,11 +48,23 @@ final class AppCommands: ObservableObject {
     @Published private(set) var copyRequests = 0
     /// Incremented when the user asks to paste a picture in.
     @Published private(set) var pasteRequests = 0
+    @Published private(set) var saveRequests = 0
+    @Published private(set) var saveAllRequests = 0
+    @Published private(set) var recentRequests = 0
+    private(set) var recentSession: GenerationSessionRecord?
+    @Published var isSavingAll = false
+    @Published var hasLocks = false
 
     func requestClear() { clearRequests += 1 }
     func requestOpen() { openRequests += 1 }
     func requestCopy() { copyRequests += 1 }
     func requestPaste() { pasteRequests += 1 }
+    func requestSave() { saveRequests += 1 }
+    func requestSaveAll() { saveAllRequests += 1 }
+    func requestRecent(_ session: GenerationSessionRecord) {
+        recentSession = session
+        recentRequests += 1
+    }
 }
 
 @main
@@ -117,6 +131,11 @@ struct SuperscaleApp: App {
         if let configuredRoot,
            let generatedImagePath = environment["SUPERSCALE_UI_TEST_GENERATED_IMAGE"] {
             let generatedImage = URL(fileURLWithPath: generatedImagePath)
+                if environment["SUPERSCALE_UI_TEST_UPSCALE"] == "fixture" {
+                    upscaleCoordinator = GUIUpscaleCoordinator(
+                        processor: UITestFixtureUpscaleProcessor(
+                            suspended: failingSubsystem == "save-all-suspended"))
+                }
             credentialStorage = UITestCredentialStorage()
             // The generation service is already stubbed here; the verifier is stubbed for the same
             // reason. A GUI test pressing save would otherwise reach `api.fal.ai` for real, which
@@ -176,10 +195,14 @@ struct SuperscaleApp: App {
         .commands {
             CommandGroup(replacing: .saveItem) {
                 Button("Save As…") {
-                    viewModel.saveAs(defaultDirectory: settingsState.outputFolder)
+                    commands.requestSave()
                 }
                 .keyboardShortcut("s", modifiers: [.command])
-                .disabled(viewModel.result == nil)
+                .disabled(viewModel.originalImage == nil)
+                Button("Save All") { commands.requestSaveAll() }
+                    .keyboardShortcut("s", modifiers: [.command, .shift])
+                    .disabled(!commands.hasLocks || commands.isSavingAll)
+                    .accessibilityIdentifier("saveAllCommand")
             }
             // The open panel, reachable whether or not a picture is already loaded.
             //
@@ -238,13 +261,11 @@ struct SuperscaleApp: App {
             // These are additional commands about the picture, not replacements for text editing.
             CommandGroup(after: .pasteboard) {
                 Button("Copy Image") { commands.requestCopy() }
-                    .keyboardShortcut("c", modifiers: [.command])
                     .disabled(viewModel.originalImage == nil)
                     .accessibilityIdentifier("copyImageCommand")
                 Button("Paste Image") { commands.requestPaste() }
-                    .keyboardShortcut("v", modifiers: [.command])
                     // The guard, stated where the user meets it. Enabled only on a blank canvas.
-                    .disabled(viewModel.originalImage != nil)
+                    .disabled(viewModel.originalImage != nil || commands.isSavingAll)
                     .accessibilityIdentifier("pasteImageCommand")
             }
             CommandMenu("Image") {
@@ -281,6 +302,7 @@ struct SuperscaleApp: App {
                     commands.requestClear()
                 }
                 .keyboardShortcut("n", modifiers: [.command])
+                .disabled(commands.isSavingAll)
                 .accessibilityIdentifier("newCanvasCommand")
             }
             // The open panel, reachable whether or not a picture is already loaded.
@@ -293,6 +315,7 @@ struct SuperscaleApp: App {
                     commands.requestOpen()
                 }
                 .keyboardShortcut("o", modifiers: [.command])
+                .disabled(commands.isSavingAll)
                 .accessibilityIdentifier("openImageCommand")
             }
             // Prior sessions reach the user here rather than through a History surface. What a
@@ -304,11 +327,13 @@ struct SuperscaleApp: App {
                         Text("No Recent Sessions")
                     } else {
                         ForEach(recentSessions) { session in
-                            Button(recentTitle(session)) { open(session) }
+                            Button(recentTitle(session)) { commands.requestRecent(session) }
+                                .disabled(commands.isSavingAll)
                         }
                     }
                 }
                 .accessibilityIdentifier("openRecentMenu")
+                .disabled(commands.isSavingAll)
             }
         }
 
@@ -350,21 +375,6 @@ struct SuperscaleApp: App {
         return firstLine.count > 60 ? String(firstLine.prefix(60)) + "…" : firstLine
     }
 
-    private func open(_ session: GenerationSessionRecord) {
-        do {
-            // Resolved first so a session whose image has been deleted reports why. The source
-            // itself comes from the record, which carries its own attribution.
-            _ = try WorkspaceModel.workingImage(for: session)
-            guard let source = session.upscaleSource else {
-                throw WorkspaceError.sessionImageMissing(session.generatedAssetPath ?? "unknown path")
-            }
-            viewModel.upscale(source)
-        } catch {
-            // Session assets live in Application Support, which users clear out. A menu entry
-            // whose image is gone reports why rather than doing nothing.
-            viewModel.report(error)
-        }
-    }
 }
 
 #if DEBUG
@@ -410,13 +420,22 @@ private struct UITestVerificationTransport: FalHTTPTransport {
 /// A type of its own rather than a mutable field on the stub, because `GenerationServing` hands the
 /// service around as a value and a `var` would be counting copies.
 @MainActor
-final class UITestRequestLedger {
+    final class UITestRequestLedger: ObservableObject {
     static let shared = UITestRequestLedger()
-    private(set) var generationRequests = 0
+        @Published private(set) var generationRequests = 0
+        @Published var exportBatches: [[String]] = []
+        @Published var exportOutputs: [String: String] = [:]
+        @Published var attemptedReplacements: [String] = []
+        @Published var acceptedReplacements: [String] = []
+        @Published private(set) var uploadRequests = 0
+        @Published private(set) var upscaleRequests = 0
 
     func recordGenerationRequest() {
         generationRequests += 1
     }
+
+        func recordUploadRequest() { uploadRequests += 1 }
+        func recordUpscaleRequest() { upscaleRequests += 1 }
 }
 
 @MainActor
@@ -438,6 +457,7 @@ private struct UITestGenerationService: GenerationServing {
     /// and nowhere to upload it to. What matters is that a reference URL comes back, because that
     /// is what the request carries.
     func uploadReference(fileURL: URL, fileName: String, apiKey: String) async throws -> URL {
+            UITestRequestLedger.shared.recordUploadRequest()
         if failsUpload {
             throw FalFailure(kind: .provider, diagnostic: "Storage is unavailable. (ui-test)")
         }
@@ -479,7 +499,86 @@ private struct UITestFailingUpscaleProcessor: GUIUpscaleProcessing {
     }
 }
 
-// 🚫 `UITestPricingService` and `UITestAccountService` are removed by #89. They stubbed coordinators
+    /// Local deterministic processor for W151 UI fixtures; it never loads Core ML or a provider.
+    /// A suspended request stays in flight until cancelled, allowing export independence to be tested.
+    private struct UITestFixtureUpscaleProcessor: GUIUpscaleProcessing {
+        let suspended: Bool
+
+        func process(
+            inputURL: URL, options: GUIUpscaleOptions,
+            onProgress: @escaping @Sendable (PipelineProgress) -> Void
+        ) async throws -> GUIUpscaleProcessedImage {
+            await UITestRequestLedger.shared.recordUpscaleRequest()
+            if suspended { try await UITestUpscaleSuspension.shared.wait() }
+            guard let source = CGImageSourceCreateWithURL(inputURL as CFURL, nil),
+                let image = CGImageSourceCreateImageAtIndex(source, 0, nil)
+            else {
+                throw CocoaError(.fileReadCorruptFile)
+            }
+            let size: CGSize
+            switch options.sizing {
+            case .preset(let scale):
+                size = CGSize(width: image.width * scale, height: image.height * scale)
+            case .custom(let width, let height, let stretch):
+                if stretch, let width, let height {
+                    size = CGSize(width: width, height: height)
+                } else if let width {
+                    size = CGSize(width: width, height: image.height * width / image.width)
+                } else if let height {
+                    size = CGSize(width: image.width * height / image.height, height: height)
+                } else {
+                    size = CGSize(width: image.width, height: image.height)
+                }
+            }
+            guard
+                let colorSpace = CGColorSpace(name: CGColorSpace.sRGB),
+                let color = CGColor(colorSpace: colorSpace, components: [0.1, 0.6, 0.2, 1]),
+                let context = CGContext(
+                    data: nil, width: Int(size.width), height: Int(size.height), bitsPerComponent: 8,
+                    bytesPerRow: 0, space: colorSpace,
+                    bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+            else {
+                throw CocoaError(.fileReadCorruptFile)
+            }
+            context.setFillColor(color)
+            context.fill(CGRect(origin: .zero, size: size))
+            let bytes = NSMutableData()
+            guard let rendered = context.makeImage(),
+                let destination = CGImageDestinationCreateWithData(
+                    bytes, UTType.png.identifier as CFString, 1, nil)
+            else {
+                throw CocoaError(.fileWriteUnknown)
+            }
+            CGImageDestinationAddImage(destination, rendered, nil)
+            guard CGImageDestinationFinalize(destination) else { throw CocoaError(.fileWriteUnknown) }
+            return GUIUpscaleProcessedImage(
+                imageData: bytes as Data, preFaceImageData: nil,
+                resolvedModelName: "realesrgan-x4plus", wasAutoDetect: false)
+        }
+    }
+
+    private actor UITestUpscaleSuspension {
+        static let shared = UITestUpscaleSuspension()
+        private var waiters: [UUID: CheckedContinuation<Void, Error>] = [:]
+
+        func wait() async throws {
+            let id = UUID()
+            try await withTaskCancellationHandler {
+                try Task.checkCancellation()
+                try await withCheckedThrowingContinuation { continuation in
+                    waiters[id] = continuation
+                }
+            } onCancel: {
+                Task { await self.cancel(id) }
+            }
+        }
+
+        private func cancel(_ id: UUID) {
+            waiters.removeValue(forKey: id)?.resume(throwing: CancellationError())
+        }
+    }
+
+    // 🚫 `UITestPricingService` and `UITestAccountService` are removed by #89. They stubbed coordinators
 // this issue stopped constructing, so nothing referenced them. AC89.7's third condition is that no
 // pricing or account client is *constructed*, and leaving stubs behind for clients nobody builds is
 // how a later reader concludes the feature is still wired. The real clients remain in
