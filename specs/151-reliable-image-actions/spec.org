@@ -549,3 +549,39 @@ process, and returns a bounded result through a temporary test-owned file. The
 XCUITest case still opens Edit, checks availability, and verifies an ordinary
 image import with no prior lock chain. =make test-gui= runs this host harness;
 other UI interactions continue through XCTest.
+
+* Paired clipboard correction
+
+** Scope 2026-09-24
+
+Restore =Cmd+C= and =Cmd+V= in the active workspace while retaining native
+text editing, menu actions, and the existing blank-canvas paste guard. Saving,
+export policy, and provider behaviour remain outside this increment.
+
+UX validation for this paired increment is user-driven. Automated GUI interaction
+must not run during the paired session; the built application is provided for
+physical keyboard and mouse validation.
+
+The workspace dispatcher must accept a command event without an associated
+window when its own workspace window is key. A key event explicitly addressed
+to another window must not reach the workspace. Modal sheets and editable
+responders retain their native commands.
+
+** OT151.1 - Dispatch windowless clipboard key events :testdef:
+:PROPERTIES:
+:CUSTOM_ID: ot-151-1
+:END:
+
+- *Covers:* [[#ac-151-1][AC151.1 - Copy the displayed image by keyboard]], [[#ac-151-2][AC151.2 - Paste an image only onto a blank canvas]], and [[#ac-151-3][AC151.3 - Preserve text clipboard actions]].
+- *Method:* Bounded local AppKit probe using the production clipboard dispatcher and =NSApplication.sendEvent=. No network or provider operations.
+- *Expected:* Both window-addressed and windowless Command-C and Command-V reach the key workspace exactly once. Editable responders, another window, modal sheets, and other modifier combinations do not invoke image actions.
+
+** UT151.2 - Validate physical clipboard shortcuts :testdef:
+:PROPERTIES:
+:CUSTOM_ID: ut-151-2
+:END:
+
+- *Covers:* [[#ac-151-1][AC151.1 - Copy the displayed image by keyboard]], [[#ac-151-2][AC151.2 - Paste an image only onto a blank canvas]], and [[#ac-151-3][AC151.3 - Preserve text clipboard actions]].
+- *Method:* User validation of the built application.
+- *Procedure:* Paste an image onto the blank canvas using =Cmd+V=; copy the displayed image using =Cmd+C= and paste it into another application. Verify that image paste cannot replace a loaded canvas and that text copy/paste still work in an editable field.
+- *Expected:* Physical shortcuts perform the same image actions as their menus when the canvas owns focus, and native text actions when an editable field owns focus.

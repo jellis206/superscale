@@ -1,7 +1,7 @@
 ---
 title: "Superscale v2: Solution Design and Implementation Guide"
-version: "3.41"
-last-updated: 2026-09-20
+version: "3.42"
+last-updated: 2026-09-24
 ---
 
 # Superscale v2: Solution Design and Implementation Guide
@@ -144,9 +144,12 @@ accident and the cheapest correct answer to an accident is that nothing happens.
 A pasted picture enters as an import does and starts a new chain.
 
 Editable text controls keep native copy and paste. The workspace intercepts image
-shortcuts only when its window owns the event and no editable responder owns the
-command. Clicking the canvas releases text focus. Keyboard and menu image actions
-reach the same workspace handlers, which repeat the blank-canvas paste guard.
+shortcuts only while its window is key, no modal panel is active, and no editable
+responder owns the command. Command events without an associated window use that
+key workspace; events addressed to another window are left alone. Clicking the
+canvas releases text focus. Keyboard and menu image actions reach the same
+workspace handlers, which repeat the blank-canvas paste guard.
+
 
 **Keyboard access to the scale and the face toggle.** `Cmd+2`, `Cmd+4` and
 `Cmd+8` toggle their scale presets, behaving exactly as the buttons do --- the
@@ -1708,6 +1711,10 @@ table on #79 carries every verdict with the author's words.
   applying a filter sends the picture to FAL.
 
 ## Changelog
+
+- **3.42 (2026-09-24):** Routes windowless clipboard shortcuts to the key
+  workspace, preserving text editing and modal-panel isolation.
+
 
 - **3.41 (2026-09-20):** Documents W151 image keyboard routing, displayed-image
   Save As, cache-only Save All, destination policy, saved-state reconciliation,

@@ -5,25 +5,55 @@
 
 * Regression tests
 
-** GREEN RT151.1 - Keyboard copy uses the displayed image :testdef:
+** AMBER RT151.1 - Keyboard copy uses the displayed image :testdef:
 :PROPERTIES:
 :CUSTOM_ID: rt-151-1-result
+:REASON: Current run failed in file-panel setup before clipboard verification; earlier GREEN evidence predates this correction.
+:END:
+
+Current attempt: 2026-09-24, =.build/w151-keybindings/clipboard-tests.log=.
+UX validation for this paired increment is user-driven; no further GUI automation
+is scheduled.
+
+*** Earlier execution evidence
+
+:PROPERTIES:
 :REVISION: 9fbdea9 plus W151 implementation working tree, 2026-09-20 final GUI remediation.
 :COMMAND: swift scripts/run-gui-tests.swift -derivedDataPath .build/w151-gui-preflight -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_keyboardCopyUsesDisplayedPixels_W151_RT1 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_keyboardPasteImportsOnlyOntoBlankCanvas_W151_RT2 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_editablePromptRetainsNativeClipboard_W151_RT3 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_copyingPutsTheDisplayedPictureOnThePasteboard_RT144_1 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_pastingBringsAPictureInOnABlankCanvas_RT144_3_and_RT144_5 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_pasteIsRefusedWithAPictureLoadedAndCopyWithout_RT144_4_and_RT144_6 > .build/w151-clipboard-host-final.log 2>&1
 :EVIDENCE: Final six-case clipboard run passed 2026-09-20 23:26 Europe/Dublin in .build/w151-clipboard-host-final.log. Includes actual visible Paste Image activation and import, image menu availability and W151 native text/keyboard regressions. Earlier evidence: test_keyboardCopyUsesDisplayedPixels_W151_RT1 passed in .build/w151-gui-remediation.log. Earlier evidence: Pre-implementation observation: Cmd+C leaves the clipboard without an image after canvas focus; NSImage unwrap fails. Actual eight-case W151 selection and assertions are recorded in .build/w151-gui-red.log, 2026-09-20 16:06 Europe/Dublin.
 :END:
 
-** GREEN RT151.2 - Keyboard paste respects the blank-canvas guard :testdef:
+** AMBER RT151.2 - Keyboard paste respects the blank-canvas guard :testdef:
 :PROPERTIES:
 :CUSTOM_ID: rt-151-2-result
+:REASON: Current run lost its application accessibility connection after paste; the full regression outcome is inconclusive.
+:END:
+
+Current attempt: 2026-09-24, =.build/w151-keybindings/clipboard-tests.log=.
+UX validation for this paired increment is user-driven; no further GUI automation
+is scheduled.
+
+*** Earlier execution evidence
+
+:PROPERTIES:
 :REVISION: 9fbdea9 plus W151 implementation working tree, 2026-09-20 final GUI remediation.
 :COMMAND: swift scripts/run-gui-tests.swift -derivedDataPath .build/w151-gui-preflight -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_keyboardCopyUsesDisplayedPixels_W151_RT1 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_keyboardPasteImportsOnlyOntoBlankCanvas_W151_RT2 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_editablePromptRetainsNativeClipboard_W151_RT3 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_copyingPutsTheDisplayedPictureOnThePasteboard_RT144_1 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_pastingBringsAPictureInOnABlankCanvas_RT144_3_and_RT144_5 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_pasteIsRefusedWithAPictureLoadedAndCopyWithout_RT144_4_and_RT144_6 > .build/w151-clipboard-host-final.log 2>&1
 :EVIDENCE: Final six-case clipboard run passed 2026-09-20 23:26 Europe/Dublin in .build/w151-clipboard-host-final.log. Includes actual visible Paste Image activation and import, image menu availability and W151 native text/keyboard regressions. Earlier evidence: test_keyboardPasteImportsOnlyOntoBlankCanvas_W151_RT2 passed in .build/w151-gui-remediation.log. Earlier evidence: Pre-implementation observation: Cmd+V does not import an image onto the blank canvas. Actual eight-case W151 selection and assertions are recorded in .build/w151-gui-red.log, 2026-09-20 16:06 Europe/Dublin.
 :END:
 
-** GREEN RT151.3 - Editable text retains native copy and paste :testdef:
+** AMBER RT151.3 - Editable text retains native copy and paste :testdef:
 :PROPERTIES:
 :CUSTOM_ID: rt-151-3-result
+:REASON: Current run failed loading its image fixture before text clipboard verification; earlier GREEN evidence predates this correction.
+:END:
+
+Current attempt: 2026-09-24, =.build/w151-keybindings/clipboard-tests.log=.
+UX validation for this paired increment is user-driven; no further GUI automation
+is scheduled.
+
+*** Earlier execution evidence
+
+:PROPERTIES:
 :REVISION: 9fbdea9 plus W151 implementation working tree, 2026-09-20 final GUI remediation.
 :COMMAND: swift scripts/run-gui-tests.swift -derivedDataPath .build/w151-gui-preflight -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_keyboardCopyUsesDisplayedPixels_W151_RT1 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_keyboardPasteImportsOnlyOntoBlankCanvas_W151_RT2 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_editablePromptRetainsNativeClipboard_W151_RT3 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_copyingPutsTheDisplayedPictureOnThePasteboard_RT144_1 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_pastingBringsAPictureInOnABlankCanvas_RT144_3_and_RT144_5 -only-testing:SuperscaleAppUITests/SuperscaleAppUITests/test_pasteIsRefusedWithAPictureLoadedAndCopyWithout_RT144_4_and_RT144_6 > .build/w151-clipboard-host-final.log 2>&1
 :EVIDENCE: Final six-case clipboard run passed 2026-09-20 23:26 Europe/Dublin in .build/w151-clipboard-host-final.log. Includes actual visible Paste Image activation and import, image menu availability and W151 native text/keyboard regressions. Earlier evidence: test_editablePromptRetainsNativeClipboard_W151_RT3 passed in .build/w151-gui-remediation.log. Earlier evidence: Pre-implementation observation: Native prompt text copy/paste and explicit image menu copy pass before implementation. Preservation test is initially GREEN. Actual eight-case W151 selection and assertions are recorded in .build/w151-gui-red.log, 2026-09-20 16:06 Europe/Dublin.
@@ -103,6 +133,16 @@
 
 * User tests
 
+** AMBER UT151.2 - Validate physical clipboard shortcuts :testdef:
+:PROPERTIES:
+:CUSTOM_ID: ut-151-2-result
+:REASON: Awaiting user validation of the paired clipboard correction in the built application.
+:END:
+
+- *Method:* User validation.
+- *Reviewer:* Operator.
+- *Procedure:* Use physical =Cmd+V= on a blank canvas and =Cmd+C= on a displayed image, then paste the copied image into another application. Check loaded-canvas paste refusal and native text copy/paste.
+
 ** AMBER UT151.1 - Validate workspace image actions :testdef:
 :PROPERTIES:
 :CUSTOM_ID: ut-151-1-result
@@ -121,6 +161,38 @@
 - The pre-delivery record used =Status: PENDING= and contained no execution evidence. Converted to AMBER on 2026-09-20; procedure, expected outcome, and identifier preserved.
 
 * Delivery checks
+
+** Paired clipboard correction 2026-09-24
+
+The Debug application and test harness compiled successfully in
+=.build/w151-keybindings/build-from-project.log=. The three clipboard GUI tests
+subsequently failed during setup or accessibility communication; none is recorded
+as passing for this correction. Their original evidence remains below each record.
+The complete attempt is retained in =.build/w151-keybindings/clipboard-tests.log=.
+
+Swift lint reported the same 73 pre-existing diagnostics on the baseline and
+candidate, with none added by this increment. =git diff --check= passed.
+Architecture, save/export behaviour, and README usage are unaffected.
+
+
+The pre-correction AppKit probe used the production dispatcher from =f2f8b69=
+with a real key window. Window-addressed Command-C and Command-V each dispatched
+once; otherwise identical events with no associated window dispatched neither
+action. This isolates a rejected event shape, not the physical event emitted by
+the user session.
+
+** GREEN OT151.1 - Dispatch windowless clipboard key events :testdef:
+:PROPERTIES:
+:CUSTOM_ID: ot-151-1-result
+:REVISION: f2f8b69 plus the 2026-09-24 MainView.swift clipboard guard correction.
+:EVIDENCE: The bounded AppKit probe passed all seven checks in .build/w151-keybindings/probe.log. Both addressed and windowless commands dispatched once; native text focus, other modifiers, explicitly different windows, inactive workspace, and attached sheet isolation passed.
+:END:
+
+The probe compiled the production =WorkspaceClipboardCommands= declaration and
+sent events through =NSApplication.sendEvent=, without a provider or network
+operation. Its temporary script and original failure log are retained under
+=/var/folders/wn/zk3zl2050rd7qkfgkfzn6rwr0000gp/T/superscale-w151-keys.7q99VGsK6h/=.
+Physical shortcut behaviour remains subject to the separate user test.
 
 ** Current GUI execution
 

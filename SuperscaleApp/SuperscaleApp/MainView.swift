@@ -1570,7 +1570,11 @@ private struct WorkspaceClipboardCommands: NSViewRepresentable {
 
         func install(in view: NSView) {
             monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self, weak view] event in
-                guard let self, let window = view?.window, event.window === window,
+                // Command events can arrive without an associated window. Route those to
+                // the key workspace, while leaving other windows and modal panels alone.
+                guard let self, let window = view?.window, window.isKeyWindow,
+                    event.window == nil || event.window === window,
+                    window.attachedSheet == nil, NSApp.modalWindow == nil,
                     event.modifierFlags.intersection([.command, .control, .option, .shift]) == .command
                 else { return event }
                 if let text = window.firstResponder as? NSTextView, text.isEditable { return event }
