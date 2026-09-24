@@ -1,6 +1,6 @@
 ---
 title: "Superscale v2: Solution Design and Implementation Guide"
-version: "3.42"
+version: "3.43"
 last-updated: 2026-09-24
 ---
 
@@ -149,6 +149,11 @@ responder owns the command. Command events without an associated window use that
 key workspace; events addressed to another window are left alone. Clicking the
 canvas releases text focus. Keyboard and menu image actions reach the same
 workspace handlers, which repeat the blank-canvas paste guard.
+
+Pressing Apply releases prompt focus immediately, making image shortcuts
+available without another canvas click. A filter result arriving later does not
+take focus from text editing resumed during processing.
+
 
 
 **Keyboard access to the scale and the face toggle.** `Cmd+2`, `Cmd+4` and
@@ -1711,6 +1716,10 @@ table on #79 carries every verdict with the author's words.
   applying a filter sends the picture to FAL.
 
 ## Changelog
+
+- **3.43 (2026-09-24):** Returns keyboard focus to the workspace when Apply starts,
+  preserving text focus acquired while the filter request is in flight.
+
 
 - **3.42 (2026-09-24):** Routes windowless clipboard shortcuts to the key
   workspace, preserving text editing and modal-panel isolation.

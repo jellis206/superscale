@@ -567,6 +567,11 @@ window when its own workspace window is key. A key event explicitly addressed
 to another window must not reach the workspace. Modal sheets and editable
 responders retain their native commands.
 
+Pressing Apply ends prompt editing and returns keyboard focus to the workspace
+before starting the filter request. A result arriving later must not interrupt
+text editing that began while the request was in flight.
+
+
 ** OT151.1 - Dispatch windowless clipboard key events :testdef:
 :PROPERTIES:
 :CUSTOM_ID: ot-151-1
@@ -583,5 +588,6 @@ responders retain their native commands.
 
 - *Covers:* [[#ac-151-1][AC151.1 - Copy the displayed image by keyboard]], [[#ac-151-2][AC151.2 - Paste an image only onto a blank canvas]], and [[#ac-151-3][AC151.3 - Preserve text clipboard actions]].
 - *Method:* User validation of the built application.
-- *Procedure:* Paste an image onto the blank canvas using =Cmd+V=; copy the displayed image using =Cmd+C= and paste it into another application. Verify that image paste cannot replace a loaded canvas and that text copy/paste still work in an editable field.
+- *Procedure:* Paste an image onto the blank canvas using =Cmd+V=; copy the displayed image using =Cmd+C= and paste it into another application. Type in the prompt, press Apply, then use =Cmd+C= without clicking the picture. Verify that image paste cannot replace a loaded canvas and that text copy/paste still work in an editable field. If prompt editing resumes during a request, the result must not take that focus away.
+
 - *Expected:* Physical shortcuts perform the same image actions as their menus when the canvas owns focus, and native text actions when an editable field owns focus.

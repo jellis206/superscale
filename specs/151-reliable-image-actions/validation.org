@@ -136,12 +136,12 @@ is scheduled.
 ** AMBER UT151.2 - Validate physical clipboard shortcuts :testdef:
 :PROPERTIES:
 :CUSTOM_ID: ut-151-2-result
-:REASON: Awaiting user validation of the paired clipboard correction in the built application.
+:REASON: Awaiting user validation of the Apply-to-workspace focus transition in the built application.
 :END:
 
 - *Method:* User validation.
 - *Reviewer:* Operator.
-- *Procedure:* Use physical =Cmd+V= on a blank canvas and =Cmd+C= on a displayed image, then paste the copied image into another application. Check loaded-canvas paste refusal and native text copy/paste.
+- *Procedure:* Use physical =Cmd+V= on a blank canvas and =Cmd+C= on a displayed image, then paste the copied image into another application. Type in the prompt, press Apply, then use =Cmd+C= without clicking the canvas. Check loaded-canvas paste refusal and native text copy/paste, including text focus retained if editing resumes during processing.
 
 ** AMBER UT151.1 - Validate workspace image actions :testdef:
 :PROPERTIES:
@@ -161,6 +161,17 @@ is scheduled.
 - The pre-delivery record used =Status: PENDING= and contained no execution evidence. Converted to AMBER on 2026-09-20; procedure, expected outcome, and identifier preserved.
 
 * Delivery checks
+
+** Paired Apply-focus correction 2026-09-24
+
+The Apply handler now releases prompt focus synchronously before starting its
+request. The Debug application compiled successfully in
+=.build/w151-keybindings/apply-focus-build.log=. No GUI automation or interactive
+probe ran for this increment. Physical UX validation remains pending.
+
+Swift lint retained the same 73 baseline diagnostics with no new findings, and
+=git diff --check= passed. The clipboard dispatcher itself is unchanged; its
+earlier AppKit probe evidence remains applicable to event routing only.
 
 ** Paired clipboard correction 2026-09-24
 

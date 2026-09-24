@@ -811,6 +811,9 @@ struct MainView: View {
         // leaving the window equally silent, so the press would still look reasonable to the user
         // and the correctness property would become a tuning constant.
         guard !isSubmittingFilter else { return }
+        // Apply ends prompt editing. Release focus now, not when the asynchronous result
+        // arrives, so returning to the prompt during processing remains uninterrupted.
+        NSApp.keyWindow?.makeFirstResponder(nil)
         isSubmittingFilter = true
         Task {
             // Cleared on every terminal path, including the ones that throw. Leaking it would
