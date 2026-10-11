@@ -1,8 +1,8 @@
 cask "superscale-gui" do
-  version "1.0.4"
-  sha256 "4cc049b41093b533077bffa18f1089cd7d259ca9af43992122ace9bc7d118d05"
+  version "1.0.8"
+  sha256 "3e20c463583e8eeb9a7d1ccebbc887cb4cc5e8a0948aed9b2f946df091359faf"
 
-  url "https://github.com/tigger04/superscale/releases/download/v1.0.4/Superscale.dmg"
+  url "https://github.com/tigger04/superscale/releases/download/v1.0.8/Superscale.dmg"
   name "Superscale"
   desc "AI image upscaling for Apple Silicon"
   homepage "https://github.com/tigger04/superscale"
