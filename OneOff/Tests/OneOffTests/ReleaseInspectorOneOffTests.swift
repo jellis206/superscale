@@ -24,7 +24,7 @@ final class ReleaseInspectorOneOffTests: XCTestCase {
 
     // OT-78.1
     func test_guiReleaseInspectorRejectsSessionAndSensitiveArtefacts_OT78_1() throws {
-        let app = try makeAppFixture(promptPackCount: 86)
+        let app = try makeAppFixture(promptPackCount: 108)
         let metadata = app.appendingPathComponent("Contents/Resources/metadata.json")
         try Data("{\"prompt\":\"private\"}".utf8).write(to: metadata)
 

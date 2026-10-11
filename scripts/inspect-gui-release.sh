@@ -16,8 +16,8 @@ PROMPT_BUNDLE="${RESOURCES_PATH}/Superscale_SuperscaleUXCore.bundle"
 [[ -d "${PROMPT_BUNDLE}" ]] || die "Bundled SuperscaleUXCore resources are missing"
 
 PROMPT_COUNT=$(find "${PROMPT_BUNDLE}" -type f -name 'image-*.md' | wc -l | tr -d ' ')
-[[ "${PROMPT_COUNT}" == "86" ]] || \
-    die "Expected 86 bundled prompt packs, found ${PROMPT_COUNT}"
+[[ "${PROMPT_COUNT}" == "108" ]] || \
+    die "Expected 108 bundled prompt packs, found ${PROMPT_COUNT}"
 
 FORBIDDEN_PATH=$(find "${APP_PATH}" \( \
     -type d \( \
