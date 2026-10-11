@@ -101,7 +101,7 @@ classification; it is provenance, not current state.
 
 - *Specification:* [[file:../specs/151-reliable-image-actions/spec.org][W151 - Reliable Image Actions]]
 
-** ACTIVE W152 - GUI release prompt count :defect:
+** REVIEW W152 - GUI release prompt count :defect:
 :PROPERTIES:
 :CUSTOM_ID: w-152
 :PRIORITY: P1
@@ -112,6 +112,7 @@ classification; it is provenance, not current state.
 - *Specification:* [[file:../specs/152-gui-release-prompt-count/spec.org][W152 - GUI release prompt count]]
 - *Validation:* [[file:../specs/152-gui-release-prompt-count/validation.org][W152 - Release inspector evidence]]
 - *Reviews:* [[file:../specs/152-gui-release-prompt-count/audits.yaml][W152 - Harness-owned reviews]]
+- *Self-review:* [[file:../specs/152-gui-release-prompt-count/self-audit.org][W152 - Authorized self-audit]]
 
 * Legacy Acceptance Criteria (SDLC v1) :legacy:
 :PROPERTIES:

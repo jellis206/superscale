@@ -1,0 +1,50 @@
+#+TITLE: W152 - GUI release count self-audit
+#+DATE: 2026-10-11
+#+STARTUP: overview
+
+* Authority and scope
+- Authorization :: =OK, in the absence of  the audit harness i authorize you to conduct a self audit=.
+- Method :: Author self-review of implementation and retrospective definition,
+  with fresh process-boundary checks. This is not an independent review.
+- Candidate :: =5076169= - GUI release count correction; Git confirms the two
+  affected files are unchanged through =2ef60c3= - retained audit incident.
+- Record ownership :: This operator-authorized self-audit is recorded separately;
+  the harness-owned =audits.yaml= is unchanged.
+
+* Findings
+- *No blocking defect found in the bounded correction.* The production comparison
+  and diagnostic both require 108, and the existing one-off fixture uses 108.
+- The implementation delta contains only those three literal-bearing lines.
+  The release invocation, exclusions and =SKIP_TESTS= behaviour are unchanged.
+- The retrospective specification matches the authorized correction. Its three
+  acceptance criteria are traced to process exit status and diagnostic evidence.
+  No new interface, dependency, access or architecture decision is introduced.
+- The exact count remains a maintenance dependency: a future corpus expansion
+  requires corresponding updates. Replacing this established design is outside
+  the authorized correction.
+
+* Fresh verification
+- Copied the actual repository prompt corpus into a temporary app bundle whose
+  path contains spaces. The inspector accepted all *108 packs* before and after
+  the negative cases.
+- *107 and 109 packs were rejected* with the expected and observed counts.
+- With 108 packs present, synthetic =metadata.json=, =credentials.json= and
+  =account.json= were each rejected and identified individually.
+- With 108 packs present, =models=, =Sessions=, =History= and =Generated=
+  directories were each rejected individually.
+- The inspector was invoked through its fixed repository path and shebang.
+  The owned temporary directory was sent to =trash=.
+- ShellCheck, Git whitespace checks and deterministic delivery readiness passed.
+
+* Limitations and disposition
+- The changed Swift fixture was reviewed but not executed because its existing
+  launcher invokes =/bin/bash=. Direct Bash 5 boundary checks supplied evidence
+  for its sensitive-metadata rejection behaviour.
+- A proposed historical-script invocation through a variable pathname was
+  rejected before execution by the command guard. That execution was abandoned;
+  no fresh pre-change failure is claimed.
+- No full application suite, Xcode build, packaged-app inspection, release or
+  publication was performed. Existing lint limitations remain documented in
+  [[file:validation.org][Validation evidence]].
+- The bounded correction is *ready for operator disposition on this self-review
+  evidence*. No independent gate verdict or operator closure is asserted.
