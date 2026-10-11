@@ -1,0 +1,36 @@
+#+TITLE: W152 - GUI release prompt count validation
+#+STARTUP: overview
+#+TODO: AMBER RED | GREEN
+
+* GREEN OT152.1 - Release inspector boundary checks :testdef:
+:PROPERTIES:
+:CUSTOM_ID: ot152-1
+:REVISION: 5076169 - align GUI release inspection with 108 prompt packs
+:EVIDENCE: Clean 108-pack fixture accepted; 86, 107 and 109 packs rejected; metadata.json rejected with 108 packs.
+:END:
+
+** Execution 2026-10-11
+- Environment :: macOS, inherited environment bootstrapped through =~/.envrc=,
+  Homebrew Bash 5; inspector invoked directly through its shebang.
+- Method :: OS temporary synthetic app bundle, process exit status and output.
+- Clean bundle :: Exit 0, =GUI release inspection passed: 108 prompt packs; no local or sensitive artefacts=.
+- Sensitive metadata :: Nonzero exit, =Forbidden release artefact found:= followed
+  by the synthetic app's =Contents/Resources/metadata.json= path.
+- Incomplete bundle :: Nonzero exit, =Expected 108 bundled prompt packs, found 107=.
+- Other unequal counts :: Nonzero exits, =Expected 108 bundled prompt packs, found 109=
+  and =Expected 108 bundled prompt packs, found 86=.
+- Corpus inventory :: Direct resource-file enumeration found 108 =image-*.md= files.
+- Cleanup :: The allocated temporary tree was sent to =trash=.
+
+** Static checks and limitations
+- =shellcheck scripts/inspect-gui-release.sh= and =git diff --check= passed.
+- SwiftLint returned zero serious violations with two warnings, at lines 58 and
+  65. Running it on the parent revision reproduced both warnings unchanged.
+- =xcrun swift-format lint= produced 66 diagnostics; a comparison with the parent
+  revision after removing only path prefixes was identical. No formatting change
+  is included in this literal correction.
+- The Swift one-off test was not executed: its existing launcher explicitly uses
+  =/bin/bash=, prohibited for this agent on macOS. Direct Bash 5 inspection
+  supplies the sensitive-metadata boundary evidence without altering the launcher.
+- No full regression suite, Xcode build, built application inspection, release,
+  dependency scan or deployment was run. No evidence for those operations is claimed.

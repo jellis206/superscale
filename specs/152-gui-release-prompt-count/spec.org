@@ -1,0 +1,142 @@
+#+TITLE: W152 - GUI release prompt count
+#+SCHEMA: 8
+#+SUBTITLE: Emergency correction specification
+#+STARTUP: overview
+#+OPTIONS: toc:2 num:nil
+#+OPERATOR_SIGNOFF: PENDING
+
+* Synopsis
+:PROPERTIES:
+:CUSTOM_ID: summary
+:END:
+** Outcome
+- GUI release inspection *accepts the current 108-pack corpus*.
+** Before
+- The inspector *required 86 packs* and rejected the current corpus.
+** After
+- A clean bundle with *108 packs passes* the inspector.
+** Changes
+- Update the inspector expectation, diagnostic and existing one-off fixture
+  from *86 to 108*.
+** Unchanged
+- *Release sequencing, SKIP_TESTS and forbidden-artefact checks remain unchanged*.
+** Edge cases
+- An *incorrect count fails*; a 108-pack bundle with *metadata.json fails*.
+** Decisions
+- Retain the *existing exact-count design* for this bounded correction.
+** Next step
+- Emergency review and operator closure; *release publication is outside scope*.
+
+* Context
+:PROPERTIES:
+:CUSTOM_ID: context
+:END:
+** Problem and authority
+- The observed GUI release failed with =Expected 86 bundled prompt packs, found 108=.
+- This record is *retrospective*: the bounded emergency request was the temporary
+  specification before implementation. Original authorization on 2026-10-11:
+  =BYPASS-GATE-7 pls make the correction=, referring to the proposed update of
+  both stale counts to 108 and preservation of forbidden-data rejection.
+- Project profile :: [[file:../../.sdlc/project.yaml][Project profile]].
+- Requirements :: [[file:../../docs/work.org][Work ledger]], AC78.1 - GUI release
+  resources and exclusions, and AC138.1 - expanded filter corpus.
+- Architecture :: [[file:../../docs/ARCHITECTURE.md][Architecture]], Prompt Packs
+  and Testing Strategy. GUI resource ownership and one-off separation continue.
+- Existing regression evidence :: [[file:../../Tests/SuperscaleUXCoreTests/PromptPackTests.swift][Prompt pack tests]]
+  already assert 108. No corpus or loader change is required.
+
+** Scope and constraints
+- *Only the stale literals change* in the release inspector and its existing
+  sensitive-artefact fixture. No new interface, dependency or resource.
+- *No release, upload, signing, installation or Homebrew operation* is included.
+- *SKIP_TESTS semantics stay unchanged*: the release script still invokes the
+  inspector after building, independent of regression prerequisites.
+
+* Acceptance Criteria
+** AC152.1 - Current corpus passes release inspection :ac:
+:PROPERTIES:
+:CUSTOM_ID: ac152-1
+:END:
+- Criterion :: A bundle with the required resource directory and *108 prompt
+  packs*, without forbidden artefacts, *passes inspection*.
+- Proven by :: [[#ot152-1][OT152.1 - Release inspector boundary checks]].
+** AC152.2 - Incorrect counts remain rejected :ac:
+:PROPERTIES:
+:CUSTOM_ID: ac152-2
+:END:
+- Criterion :: A bundle with a count other than 108 *fails inspection* and the
+  diagnostic *reports 108 as expected* and the actual count.
+- Proven by :: [[#ot152-1][OT152.1 - Release inspector boundary checks]].
+** AC152.3 - Sensitive metadata remains rejected :ac:
+:PROPERTIES:
+:CUSTOM_ID: ac152-3
+:END:
+- Criterion :: A 108-pack bundle containing =metadata.json= *fails inspection*
+  and identifies the forbidden file.
+- Proven by :: [[#ot152-1][OT152.1 - Release inspector boundary checks]].
+
+* Test Definitions
+** Evidence selection
+- *No new RT*: this is a literal correction to a release-only inspector with an
+  established one-off verification boundary. Corpus correctness is already
+  covered by the maintained prompt-pack regression tests. Another permanent
+  hard-coded corpus test would duplicate that assertion rather than improve
+  the incident evidence.
+- *No UT*: this correction has no visual or subjective behaviour. Publishing a
+  release is not required to verify the inspector's exit status and diagnostics.
+- The existing OT-78.1 - sensitive artefact rejection fixture is kept consistent
+  with the corpus; the direct check below exercises the same process boundary.
+
+** OT152.1 - Release inspector boundary checks :testdef:
+:PROPERTIES:
+:CUSTOM_ID: ot152-1
+:END:
+- Covers :: [[#ac152-1][AC152.1 - Current corpus passes]],
+  [[#ac152-2][AC152.2 - Incorrect counts rejected]], and
+  [[#ac152-3][AC152.3 - Sensitive metadata rejected]].
+- Setup :: Allocate an OS temporary directory and create
+  =Superscale.app/Contents/Resources/Superscale_SuperscaleUXCore.bundle=.
+  Populate it with 108 synthetic =image-N.md= files.
+- Boundary :: Invoke =scripts/inspect-gui-release.sh= directly through its shebang.
+- Cases :: Clean 108-pack bundle exits 0; adding synthetic =metadata.json= under
+  =Contents/Resources= exits nonzero and names it; removing that metadata and
+  moving one pack outside the app exits nonzero with expected 108, found 107.
+  Check 109 and 86 packs as additional unequal-count cases.
+- Bounds :: Local synthetic files only, no credentials, network or release
+  effects; remove the owned temporary tree using recoverable cleanup.
+- Record :: [[file:validation.org][Validation evidence]]. No persistent test is added.
+
+* Edge Cases
+- The 107, 109 and legacy 86 counts exercise *both sides of exact equality*.
+- Forbidden metadata is checked *with the correct corpus count* so a count
+  failure cannot masquerade as sensitive-data rejection.
+
+* Solution Design
+** Mechanism and architecture
+- Preserve the existing inspector and exact-count comparison. Change its literal
+  and diagnostic to *108*; update =makeAppFixture(promptPackCount:)= to *108* in
+  the existing one-off test. No new component or shared-state mechanism is needed.
+- Implementation review confirms the delta is *three literal-bearing lines*
+  across two files, leaving invocation and exclusions intact.
+** Security impact
+- *No access or secret-handling change*. The forbidden-artefact scan is preserved;
+  the metadata rejection case verifies it remains reachable with 108 packs.
+- Dependencies and built application code are unchanged; *no deployment or
+  dependency vulnerability scan is part of this local literal correction*.
+
+* Delivery Handoff
+:PROPERTIES:
+:CUSTOM_ID: delivery-handoff
+:END:
+- Entry authority :: Emergency authorization recorded under Context; this
+  document does not claim advance definition approval.
+- Required reading :: The linked project profile, architecture, legacy
+  requirements and affected inspector/fixture.
+- Implementation :: Commit =5076169= - align GUI release inspection with 108 packs.
+- Evidence :: [[file:validation.org][Validation results]] and
+  [[file:audits.yaml][Harness-owned reviews]].
+- Documentation impact :: Product usage and architecture are unchanged. The
+  work ledger already records the 108-pack corpus. This specification and its
+  validation record capture the correction without changing historical results.
+- Remaining boundary :: *Full application suites and release publication are not
+  established* by the focused inspector evidence.
