@@ -43,12 +43,17 @@
 - Criterion :: [[file:spec.org::#ac-153-3][AC153.3 - Publication gate]]
 - Runs :: 2026-10-16: Missing identity reported =Missing signing identity=; tampered app failed strict signature verification; unavailable profile failed before Apple upload; unstapled DMG failed =stapler validate=; synthetic =Invalid= JSON reported its submission identifier and exited nonzero. No GitHub upload or cask write was invoked.
 
+* Publication
+
+- 2026-10-16: Annotated tag =v1.0.9= points to revision =11da8773e0abbf5839deae4f480008c5133fec89=. The [[https://github.com/tigger-developer/superscale/releases/tag/v1.0.9][GitHub release]] is published and contains =Superscale.dmg= with SHA-256 =7cb2fc0373a7c123e269211be932b1c6405a8240732a50b3ba34f807811df592=. A fresh release download matched that checksum and passed strict signature and stapled-ticket validation.
+- 2026-10-16: Tap revision =7b3f1c727737649958c3f4b301f5326bbe3f9e1c= updated =Casks/superscale-gui.rb= to version 1.0.9. The [[https://github.com/tigger-developer/homebrew-tap/blob/master/Casks/superscale-gui.rb][published cask]] was fetched and compared byte-for-byte with the reviewed local cask. Homebrew installation and Finder first launch remain the user test below.
+
 * User tests
 
 ** AMBER UT153.1 - Validate downloaded cask launch :testdef:
 :PROPERTIES:
 :CUSTOM_ID: ut-153-1-result
-:REASON: Requires user validation after a published release and fresh cask download.
+:REASON: Fresh Homebrew cask installation and Finder first launch require user validation on a supported Mac.
 :END:
 - Criterion :: [[file:spec.org::#ac-153-4][AC153.4 - First launch from cask]]
 - Method :: User validation on a supported Mac.
