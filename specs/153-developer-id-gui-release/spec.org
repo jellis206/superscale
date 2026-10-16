@@ -3,7 +3,7 @@
 #+SUBTITLE: Unified change specification
 #+STARTUP: overview
 #+OPTIONS: toc:2 num:nil
-#+OPERATOR_SIGNOFF: PENDING
+#+OPERATOR_SIGNOFF: APPROVED 2026-10-16
 
 * Synopsis
 :PROPERTIES:
@@ -210,3 +210,26 @@
 - Definition evidence :: [[file:audits.yaml][=audits.yaml=]].
 - Validation evidence :: [[file:validation.org][=validation.org=]] with one tagged result per defined test.
 - Documentation impact :: Update [[file:../../README.md][README release target]] and [[file:../../docs/RELEASE_CHECKLIST.md][Release checklist]] with the new prerequisites and verification order.
+
+* Hands-off mode decision log
+:PROPERTIES:
+:CUSTOM_ID: hands-off-mode-decision-log
+:VISIBILITY: folded
+:END:
+
+** Hands-off invocation 2026-10-16T05:55:28Z :hands-off:review:
+:PROPERTIES:
+:CUSTOM_ID: hands-off-2026-10-16-055528
+:INVOCATION_TIMESTAMP: 2026-10-16T05:55:28Z
+:END:
+
+*** D153.1 - Notary profile name
+:PROPERTIES:
+:CUSTOM_ID: d-153-1
+:END:
+- Question :: Which local keychain profile name should the release helper use?
+- Decision :: Use =superscale-notary= as the fixed profile name, documented for local setup.
+- Reason :: The signed-off design requires a named profile but leaves its name to implementation. A fixed name makes the release command reproducible without recording credentials.
+- Evidence :: [[#constraints-and-dependencies][Constraints and dependencies]] and [[#solution-design][Solution Design]].
+- Reversibility :: Change the one helper constant and the matching release documentation.
+- Effect :: Local notarization authentication only; the Apple account and stored secret remain outside the repository.

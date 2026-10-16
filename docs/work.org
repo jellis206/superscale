@@ -114,7 +114,7 @@ classification; it is provenance, not current state.
 - *Reviews:* [[file:../specs/152-gui-release-prompt-count/audits.yaml][W152 - Harness-owned reviews]]
 - *Self-review:* [[file:../specs/152-gui-release-prompt-count/self-audit.org][W152 - Authorized self-audit]]
 
-** TODO W153 - Developer ID GUI release :feature:defect:
+** ACTIVE W153 - Developer ID GUI release :feature:defect:
 :PROPERTIES:
 :CUSTOM_ID: w-153
 :PRIORITY: P1
