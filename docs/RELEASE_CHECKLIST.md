@@ -14,6 +14,7 @@ either provider is available in the MVP.
 ## Automated Evidence
 
 - Run the package regression suite without paid network calls: `make test`.
+- Run the Swift dependency security gate: `make vulncheck` (Trivy 0.76.0).
 - Run the SSIM quality gate: `make test-ssim`.
 - Run the GUI regression suite in an exclusive UI-test window: `make test-gui`.
   The display must stay awake and unlocked for the whole run --- wrap it in
@@ -21,7 +22,7 @@ either provider is available in the MVP.
   mid-run fails tests in ways that read as element timeouts.
 - Build the Release app without publishing it, then run
   `make inspect-gui-release APP_PATH=/path/to/Superscale.app`.
-- Confirm the inspector reports 86 prompt packs and no credential, account,
+- Confirm the inspector reports 108 prompt packs and no credential, account,
   session, generated-output, or model artefacts.
 - Confirm `make release` still builds the CLI path and `make release-gui` uses
   the distinct `.app` and DMG path.

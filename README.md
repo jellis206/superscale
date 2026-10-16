@@ -114,6 +114,7 @@ make install
 |---|---|
 | `make build` | Download models (if needed) + build release binary |
 | `make test` | Run regression tests (excludes slow SSIM quality gate) |
+| `make vulncheck` | Scan all three committed Swift package locks with Trivy 0.76.0; fail on vulnerabilities or incomplete coverage |
 | `make test-one-off` | Run one-off tests, which live in the separate `OneOff/` package and are never run by `make test` |
 | `make test-ssim` | Run SSIM quality regression against PyTorch references (~2.5 min) |
 | `make test-gui` | Run the XCUITest suite against the built app. Covers the SwiftUI views, which `make test` does not build (~30 min of test time; give it the machine to itself, and keep the display awake --- a screensaver engaging mid-run fails tests in ways that read as timeouts) |

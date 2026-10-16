@@ -8,6 +8,7 @@
 
 - 2026-10-16, revision =823d0531bb28b2c0b90bb2df5bab4010174d4473=: =make test= passed after the release-packaging fixture was aligned with the inspector's 108 prompt packs. The run reported 406 GUI core tests, 121 Superscale tests with six skips, and 81 FAL kit tests, with no failures. The preceding run at =7ee9d0e= failed because its fixture still contained 86 packs; the focused release-packaging test then passed after the repair.
 - 2026-10-16, same revision: =make test-ssim= passed its one CoreML versus PyTorch quality test. No UI automation was run.
+- 2026-10-16: =make vulncheck= passed with Trivy 0.76.0. The project scan found all three committed Swift package locks, one resolved package in each, and zero reported vulnerabilities. The scanner and its advisory cache were kept under =.build=.
 
 * One-off tests
 
@@ -20,13 +21,15 @@
 - Criterion :: [[file:spec.org::#ac-153-1][AC153.1 - Developer ID app signature]]
 - Runs :: 2026-10-16: =xcodebuild= Release build succeeded. =codesign --verify --deep --strict= accepted the app and DMG. Both report =Developer ID Application: Tadg Paul Ltd (2H98A242M4)=, team =2H98A242M4=, and secure timestamps. The app reports =runtime=; its entitlements have no true =get-task-allow=. The DMG was produced with =--sign-only=, without Apple submission or publication.
 
-** AMBER OT153.2 - Notarize and validate candidates :testdef:
+** GREEN OT153.2 - Notarize and validate candidates :testdef:
 :PROPERTIES:
 :CUSTOM_ID: ot-153-2-result
-:REASON: The first local notarytool invocation stopped before upload because the superscale-notary Keychain profile is absent; no Apple submission occurred.
+:REVISION: 8978ebb04e8fe4ff8854a8e5231cb50b1c2555ae
+:EVIDENCE: 2026-10-16 app and DMG submissions Accepted; both staple validations and strict signatures passed; spctl assessed app as Notarized Developer ID.
 :END:
 - Criterion :: [[file:spec.org::#ac-153-2][AC153.2 - Stapled notarization]]
 - Runs :: 2026-10-16: =notarytool submit= reported "No Keychain password item found for profile: superscale-notary". No submission identifier or ticket exists.
+- Runs :: 2026-10-16: App ZIP submission =434e9137-9364-4441-a9ff-b0d3be2145a7= and DMG submission =599baf2e-6ee1-454c-a294-1241a77385f2= both returned =Accepted=. =stapler validate= succeeded for both. =codesign --verify --deep --strict= succeeded for both. =spctl --assess --type execute -vv= accepted the app with source =Notarized Developer ID= and the =Developer ID Application: Tadg Paul Ltd (2H98A242M4)= origin. The stapled DMG SHA-256 is =4f1f0e926d0b02b26442102c9207d35db43022106ea4ff40e23a8727ce3658fc=. No release upload or cask change occurred.
 
 ** GREEN OT153.3 - Check failed-release boundaries :testdef:
 :PROPERTIES:

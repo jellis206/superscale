@@ -9,8 +9,10 @@ BUILD_DIR := .build/release
 LINK_DIR := $(HOME)/.local/bin
 RELEASE_VERSION ?=
 SKIP_TESTS ?=
+TRIVY ?= trivy
+TRIVY_VERSION := 0.76.0
 
-.PHONY: help build build-debug gui test test-ssim test-gui test-one-off test-visual inspect-gui-release clean install uninstall release release-gui release-models sync convert-models download-models
+.PHONY: help build build-debug gui test test-ssim test-gui test-one-off test-visual vulncheck inspect-gui-release clean install uninstall release release-gui release-models sync convert-models download-models
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -52,6 +54,21 @@ test-gui: ## Run GUI UI tests via XCUITest
 
 test-ssim: ## Run SSIM quality regression against PyTorch references (~2.5 min)
 	swift test --filter SSIM_RT064
+
+vulncheck: ## Scan committed Swift package locks with Trivy 0.76.0
+	@$(TRIVY) --version | grep -Fx 'Version: $(TRIVY_VERSION)'
+	@mkdir -p .build/trivy-cache
+	@$(TRIVY) fs --scanners vuln --exit-code 1 --no-progress --skip-dirs .build \
+		--cache-dir "$(CURDIR)/.build/trivy-cache" --format json \
+		--output "$(CURDIR)/.build/trivy-report.json" .
+	@jq -e '([.Results[]? | select(.Type == "swift") | .Target] | sort) == \
+		(["OneOff/Package.resolved", "Package.resolved", \
+		"SuperscaleApp/SuperscaleApp.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"] | sort) \
+		and all(.Results[]? | select(.Type == "swift"); (.Packages | length) > 0) \
+		and ([.Results[]? | .Vulnerabilities[]?] | length) == 0' .build/trivy-report.json >/dev/null
+	@jq -r '.Results[]? | select(.Type == "swift") | \
+		"\(.Target): \(.Packages | length) package(s), \(.Vulnerabilities // [] | length) vulnerabilities"' \
+		.build/trivy-report.json
 
 test-one-off: ## Run one-off tests (separate package; never run by `make test`)
 ifdef ISSUE
