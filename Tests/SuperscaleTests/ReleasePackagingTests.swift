@@ -26,12 +26,12 @@ final class ReleasePackagingTests: XCTestCase {
 
     // RT-78.1
     func test_guiReleaseInspectorAcceptsCompletePromptPackBundle_RT78_1() throws {
-        let app = try makeAppFixture(promptPackCount: 86)
+        let app = try makeAppFixture(promptPackCount: 108)
 
         let result = try inspect(app)
 
         XCTAssertEqual(result.status, 0, result.output)
-        XCTAssertTrue(result.output.contains("86 prompt packs"), result.output)
+        XCTAssertTrue(result.output.contains("108 prompt packs"), result.output)
     }
 
     private var projectRoot: URL {
