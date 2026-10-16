@@ -9,27 +9,30 @@
 - 2026-10-16, revision =823d0531bb28b2c0b90bb2df5bab4010174d4473=: =make test= passed after the release-packaging fixture was aligned with the inspector's 108 prompt packs. The run reported 406 GUI core tests, 121 Superscale tests with six skips, and 81 FAL kit tests, with no failures. The preceding run at =7ee9d0e= failed because its fixture still contained 86 packs; the focused release-packaging test then passed after the repair.
 - 2026-10-16, same revision: =make test-ssim= passed its one CoreML versus PyTorch quality test. No UI automation was run.
 - 2026-10-16: =make vulncheck= passed with Trivy 0.76.0. The project scan found all three committed Swift package locks, one resolved package in each, and zero reported vulnerabilities. The scanner and its advisory cache were kept under =.build=.
+- 2026-10-16, revision =72c4022b2ba76cb294d2e67e571136531fa6ff53=: =make test= passed for the 1.0.9 version change. =make test-ssim= passed its one quality test. =make vulncheck= passed with Trivy 0.76.0, scanning all three Swift package locks with zero reported vulnerabilities. The Release app build, resource inspection, and release CLI build also passed; the app bundle and CLI each report version 1.0.9. No UI automation was run.
 
 * One-off tests
 
 ** GREEN OT153.1 - Inspect release signature :testdef:
 :PROPERTIES:
 :CUSTOM_ID: ot-153-1-result
-:REVISION: 5ba22b0b88062c53f5f17c94971fc884f027bf93
-:EVIDENCE: 2026-10-16 local arm64 Release build; codesign strict verification, metadata inspection, and entitlement plist check passed for app and sign-only DMG.
+:REVISION: 72c4022b2ba76cb294d2e67e571136531fa6ff53
+:EVIDENCE: 2026-10-16 v1.0.9 Release app and DMG; strict signatures, Developer ID authority, hardened runtime, and secure timestamps verified.
 :END:
 - Criterion :: [[file:spec.org::#ac-153-1][AC153.1 - Developer ID app signature]]
 - Runs :: 2026-10-16: =xcodebuild= Release build succeeded. =codesign --verify --deep --strict= accepted the app and DMG. Both report =Developer ID Application: Tadg Paul Ltd (2H98A242M4)=, team =2H98A242M4=, and secure timestamps. The app reports =runtime=; its entitlements have no true =get-task-allow=. The DMG was produced with =--sign-only=, without Apple submission or publication.
+- Runs :: 2026-10-16, revision =72c4022b2ba76cb294d2e67e571136531fa6ff53=: The v1.0.9 Release app and notarized DMG passed =codesign --verify --deep --strict=. Both carry the named Developer ID authority, team ID, and secure timestamps; the app has hardened runtime and no true =get-task-allow= entitlement. The app inside the mounted DMG reports =CFBundleShortVersionString= 1.0.9 and its signature verifies.
 
 ** GREEN OT153.2 - Notarize and validate candidates :testdef:
 :PROPERTIES:
 :CUSTOM_ID: ot-153-2-result
-:REVISION: 8978ebb04e8fe4ff8854a8e5231cb50b1c2555ae
-:EVIDENCE: 2026-10-16 app and DMG submissions Accepted; both staple validations and strict signatures passed; spctl assessed app as Notarized Developer ID.
+:REVISION: 72c4022b2ba76cb294d2e67e571136531fa6ff53
+:EVIDENCE: 2026-10-16 v1.0.9 app and DMG submissions Accepted; both staple validations and strict signatures passed; spctl assessed app as Notarized Developer ID.
 :END:
 - Criterion :: [[file:spec.org::#ac-153-2][AC153.2 - Stapled notarization]]
 - Runs :: 2026-10-16: =notarytool submit= reported "No Keychain password item found for profile: superscale-notary". No submission identifier or ticket exists.
 - Runs :: 2026-10-16: App ZIP submission =434e9137-9364-4441-a9ff-b0d3be2145a7= and DMG submission =599baf2e-6ee1-454c-a294-1241a77385f2= both returned =Accepted=. =stapler validate= succeeded for both. =codesign --verify --deep --strict= succeeded for both. =spctl --assess --type execute -vv= accepted the app with source =Notarized Developer ID= and the =Developer ID Application: Tadg Paul Ltd (2H98A242M4)= origin. The stapled DMG SHA-256 is =4f1f0e926d0b02b26442102c9207d35db43022106ea4ff40e23a8727ce3658fc=. No release upload or cask change occurred.
+- Runs :: 2026-10-16, v1.0.9: App ZIP submission =d0f16324-6b06-4196-af59-33ddceb08d14= and DMG submission =a614e139-2153-4e55-a752-7a5358f26cd9= both returned =Accepted=. =stapler validate= succeeded for the app, DMG, and app mounted from the DMG. =spctl --assess --type execute -vv= accepted the app with source =Notarized Developer ID=. The stapled DMG SHA-256 is =7cb2fc0373a7c123e269211be932b1c6405a8240732a50b3ba34f807811df592=. No release upload or tap update occurred during this check.
 
 ** GREEN OT153.3 - Check failed-release boundaries :testdef:
 :PROPERTIES:
