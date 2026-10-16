@@ -1,4 +1,8 @@
-<!-- Version: 1.2 | Last updated: 2026-08-25 -->
+---
+title: Superscale v2.0 Release Checklist
+version: "1.3"
+last-updated: 2026-10-16
+---
 
 # Superscale v2.0 Release Checklist
 
@@ -95,6 +99,8 @@ the one-off live tests recorded on #107 and is not re-proven at release.
 
 ## Changelog
 
+- **1.3 (2026-10-16):** Added the Developer ID GUI signing and notarization
+  checks, the Swift dependency security gate, and the current prompt-pack count.
 - **1.2 (2026-08-25):** The provider smoke checks are reconciled with the delivered MVP: the
   text-to-image and pricing/account checks are struck as superseded with their reasons, the three
   surviving checks are renumbered SMOKE-1 to SMOKE-3 against the shipped filter flow, and the GUI

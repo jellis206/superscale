@@ -1,3 +1,9 @@
+---
+title: Superscale
+version: "1.0"
+last-updated: 2026-10-16
+---
+
 # Superscale
 
 ![Superscale logo](docs/sslogo.svg)
@@ -120,7 +126,7 @@ make install
 | `make test-gui` | Run the XCUITest suite against the built app. Covers the SwiftUI views, which `make test` does not build (~30 min of test time; give it the machine to itself, and keep the display awake --- a screensaver engaging mid-run fails tests in ways that read as timeouts) |
 | `make install` | Build + symlink to `~/.local/bin` |
 | `make release` | Tag, build CLI, push, update Homebrew formula (runs both test packs) |
-| `make release-gui` | Build the Developer ID GUI app, notarize and staple the app and DMG, then upload the DMG and update the Homebrew cask. Requires the Taḋg Paul Ltd Developer ID identity and a `superscale-notary` Keychain profile; see the [release checklist](docs/RELEASE_CHECKLIST.md). |
+| `make release-gui` | Build the Developer ID GUI app, notarize and staple the app and DMG, then upload the DMG and update the Homebrew cask. Requires the Tadg Paul Ltd Developer ID identity and a `superscale-notary` Keychain profile; see the [release checklist](docs/RELEASE_CHECKLIST.md). |
 | `make release-models` | Upload model artefacts to GitHub Release |
 | `make download-models` | Download missing models from GitHub release |
 | `make convert-models` | Run PyTorch -> CoreML conversion (dev only) |
@@ -152,3 +158,8 @@ Bundled model weights (Real-ESRGAN) are BSD-3-Clause (Copyright Xintao Wang, 202
 The optional GFPGAN face model is not bundled and contains non-commercial components (StyleGAN2, DFDNet). The licence applies to the model weights, not to output images. See [model licensing](docs/model-licensing.md).
 
 Superscale and the Superscale logo are trademarks of Tadhg O'Brien. See [trademark policy](docs/trademark.md).
+
+## Document changelog
+
+- **1.0 (2026-10-16):** Recorded the Developer ID GUI release process and the
+  Swift dependency security check; introduced document version metadata.
