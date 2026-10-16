@@ -114,6 +114,16 @@ classification; it is provenance, not current state.
 - *Reviews:* [[file:../specs/152-gui-release-prompt-count/audits.yaml][W152 - Harness-owned reviews]]
 - *Self-review:* [[file:../specs/152-gui-release-prompt-count/self-audit.org][W152 - Authorized self-audit]]
 
+** TODO W153 - Developer ID GUI release :feature:defect:
+:PROPERTIES:
+:CUSTOM_ID: w-153
+:PRIORITY: P1
+:SOURCE: operator
+:CREATED: 2026-10-16
+:END:
+
+- *Specification:* [[file:../specs/153-developer-id-gui-release/spec.org][W153 - Developer ID GUI release]]
+
 * Legacy Acceptance Criteria (SDLC v1) :legacy:
 :PROPERTIES:
 :CUSTOM_ID: legacy-acceptance-criteria

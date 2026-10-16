@@ -1,0 +1,212 @@
+#+TITLE: W153 - Developer ID GUI release
+#+SCHEMA: 8
+#+SUBTITLE: Unified change specification
+#+STARTUP: overview
+#+OPTIONS: toc:2 num:nil
+#+OPERATOR_SIGNOFF: PENDING
+
+* Synopsis
+:PROPERTIES:
+:CUSTOM_ID: summary
+:END:
+
+** Outcome
+- The Homebrew cask's GUI app has a *trusted Developer ID signature* and *stapled notarization ticket*.
+** Before
+- The release script *re-signs the app ad hoc* and publishes a DMG without notarization.
+** After
+- The release app and DMG are *notarized and stapled* before publication.
+- *Failed signing or notarization prevents publication* and a cask update.
+** Changes
+- Release signing uses the *Developer ID Application certificate* for Tadg Paul Ltd, team =2H98A242M4=.
+- Release builds enable the *hardened runtime* and exclude debugging entitlements.
+** Unchanged
+- The *CLI release path*, bundled-resource exclusions, model-sharing contract, and cask installation name remain unchanged.
+** Edge cases
+:PROPERTIES:
+:CUSTOM_ID: synopsis-edge-cases
+:END:
+- A *missing certificate or notarization profile* stops the release before GitHub upload or cask changes.
+- A *rejected notarization* retains its diagnostic identifier and stops publication.
+** Decisions
+- Xcode *signs nested code*; the release script does not re-sign the outer app with =--deep=.
+- The app and final DMG each receive a *notary submission* so both tickets can be stapled.
+** Next step
+- Definition review and operator sign-off precede implementation under [[#delivery-handoff][Delivery Handoff]].
+
+-----
+
+* Context
+:PROPERTIES:
+:CUSTOM_ID: context
+:END:
+
+** Problem
+- A GUI app installed from the Homebrew cask is reported as unsafe by macOS. The current release script explicitly applies an ad hoc signature and has no notary submission. The installed copy has not been examined, so the precise Gatekeeper assessment remains unverified.
+** Outcome
+- A fresh cask download carries an app and DMG whose Developer ID signatures and stapled tickets can be verified locally, then receives human first-launch validation.
+** Scope
+*** In scope
+- GUI Release build signing, hardened runtime, notarization, stapling, verification, publication ordering, and release documentation.
+*** Out of scope
+- Publishing a release during implementation, changing the separate tap repository, changing the CLI release, or managing Apple account credentials.
+*** Unchanged
+- Existing bundle inspection and resource exclusions precede packaging; the cask continues to install =Superscale.app=.
+** Authority and starting point
+- Project profile :: [[file:../../.sdlc/project.yaml][Project profile]]
+- Product authority :: [[file:../../README.md][README release target]] and [[file:../../docs/RELEASE_CHECKLIST.md][Release checklist]]
+- Architecture authority :: [[file:../../docs/ARCHITECTURE.md][Application architecture]]
+- Historical requirement :: [[file:../../docs/archive/migrated-tickets/55.md][Archived Developer ID proposal]] and [[file:../../docs/ticket-migration.org][Migration disposition]]; the archive is provenance, not approval.
+- Current implementation :: [[file:../../scripts/release-gui.sh][GUI release script]], [[file:../../SuperscaleApp/SuperscaleApp.xcodeproj/project.pbxproj][Xcode build settings]], and [[file:../../Casks/superscale-gui.rb][Local cask]].
+- External contract :: [[https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution][Apple notarization requirements]] and [[https://developer.apple.com/documentation/security/customizing-the-notarization-workflow][Apple notarytool workflow]].
+** Constraints and dependencies
+:PROPERTIES:
+:CUSTOM_ID: constraints-and-dependencies
+:END:
+- The signing identity is =Developer ID Application: Tadg Paul Ltd (2H98A242M4)=; its team ID matches the Xcode project's =DEVELOPMENT_TEAM= setting.
+- A locally stored =notarytool= keychain profile is required. Secrets and credentials remain outside the repository and logs.
+- Apple notarization is an external, potentially metered operation and is verified only as a bounded one-off, never in =make test= or a persistent build check.
+- The existing shell script exceeds the shell standard's complexity threshold and already integrates Xcode, GitHub, and the tap. Retain the existing release entry point for this bounded change; isolate candidate preparation and validation in one small helper so publication remains visibly downstream.
+** Decisions
+- The app target's Release configuration uses manual signing with =CODE_SIGN_IDENTITY= set to =Developer ID Application: Tadg Paul Ltd (2H98A242M4)=, =DEVELOPMENT_TEAM= set to =2H98A242M4=, =ENABLE_HARDENED_RUNTIME= set to =YES=, =OTHER_CODE_SIGN_FLAGS= including =--timestamp=, and =CODE_SIGN_INJECT_BASE_ENTITLEMENTS= set to =NO=. The Debug configuration and UI-test target are unchanged. Any hardened-runtime exception requires a separate authorized requirement.
+- The script verifies Xcode's app signature and does not overwrite it with an ad hoc or deep signature.
+- Notarize a ZIP containing the signed app, staple and validate the app, then build the DMG. Notarize, staple, and validate the final DMG before hashing or uploading it.
+- Use a named keychain profile for =notarytool=; do not pass passwords or API private keys on the command line or commit them. The first =notarytool submit= checks profile usability; there is no separate profile preflight that contacts Apple.
+** Unresolved blockers
+- None for definition. Delivery must verify the certificate and local notary profile before a live one-off submission.
+
+* Acceptance Criteria
+:PROPERTIES:
+:CUSTOM_ID: acceptance-criteria
+:END:
+
+** AC153.1 - Developer ID app signature :ac:
+:PROPERTIES:
+:CUSTOM_ID: ac-153-1
+:END:
+- Criterion :: A GUI release candidate is *signed by Developer ID Application: Tadg Paul Ltd (2H98A242M4)* with a secure timestamp and hardened runtime, including valid nested code, and has no enabled debugging entitlement; its DMG is signed by the same identity with a secure timestamp.
+- Proven by :: [[#ot-153-1][OT153.1 - Inspect release signature]]
+** AC153.2 - Stapled notarization :ac:
+:PROPERTIES:
+:CUSTOM_ID: ac-153-2
+:END:
+- Criterion :: The released app and DMG each have an *accepted notarization* and a *valid stapled ticket*.
+- Proven by :: [[#ot-153-2][OT153.2 - Notarize and validate candidates]]
+** AC153.3 - Publication gate :ac:
+:PROPERTIES:
+:CUSTOM_ID: ac-153-3
+:END:
+- Criterion :: A missing signing identity, unusable notary profile, invalid signature, rejected submission, or failed stapling *prevents GitHub release upload and cask modification* and reports an actionable failure.
+- Proven by :: [[#ot-153-3][OT153.3 - Check failed-release boundaries]]
+** AC153.4 - First launch from cask :ac:
+:PROPERTIES:
+:CUSTOM_ID: ac-153-4
+:END:
+- Criterion :: A fresh installation of the published cask *opens without the unsafe-app trash prompt* on a supported Mac.
+- Proven by :: [[#ut-153-1][UT153.1 - Validate downloaded cask launch]]
+
+* Test Definitions
+:PROPERTIES:
+:CUSTOM_ID: test-definitions
+:END:
+
+- Test choice :: Real signing, Apple notarization, and Gatekeeper assessment depend on local Keychain and Apple's live service. Synthetic checks would not prove these outcomes. The bounded OTs and human UT provide direct artefact evidence; no persistent RT is justified for this change.
+
+** OT153.1 - Inspect release signature :testdef:
+:PROPERTIES:
+:CUSTOM_ID: ot-153-1
+:END:
+- Covers :: [[#ac-153-1][AC153.1 - Developer ID app signature]]
+- Boundary :: Locally built Release =Superscale.app= before publication.
+- Procedure :: Build once using the release signing configuration; inspect the app and nested code with =codesign=, including authority, timestamp, runtime flags, entitlements, and strict verification. Inspect the prepared DMG signature and timestamp with =codesign=.
+- Expected :: The named Developer ID authority is present on app and DMG; timestamps and app runtime are enabled; signatures verify; =get-task-allow= is absent or false.
+- Bounds :: One local candidate, no release upload or Apple submission.
+- Record :: Dated output and revision in =validation.org=.
+** OT153.2 - Notarize and validate candidates :testdef:
+:PROPERTIES:
+:CUSTOM_ID: ot-153-2
+:END:
+- Covers :: [[#ac-153-2][AC153.2 - Stapled notarization]]
+- Boundary :: Apple's live notary service and local signed app and DMG.
+- Procedure :: Submit one app ZIP and one final DMG using the keychain profile and =--wait=; require accepted status; staple and validate the app before DMG packaging, then staple and validate the DMG; assess the app with =spctl=.
+- Expected :: Both submissions are accepted; both tickets validate; Gatekeeper assessment accepts the app.
+- Bounds :: At most two submissions and no automatic retry; no public upload; retain submission identifiers and diagnostic logs without credentials.
+- Record :: Dated submission identifiers, status, and local verification in =validation.org=.
+** OT153.3 - Check failed-release boundaries :testdef:
+:PROPERTIES:
+:CUSTOM_ID: ot-153-3
+:END:
+- Covers :: [[#ac-153-3][AC153.3 - Publication gate]]
+- Boundary :: GUI release entry point with local preflight failure and a controlled failed notary invocation.
+- Procedure :: Invoke the candidate-preparation helper with (1) an unavailable signing identity, (2) an unavailable keychain profile, (3) a locally tampered app, and (4) an invalid local stapling target. Feed an =Invalid= JSON notary result through its status-check function using a synthetic file. Verify the full release entry point calls publication only after successful helper completion by a focused review of that boundary.
+- Expected :: Each local failure is nonzero and diagnostic; the invalid notary status is rejected; no GitHub upload or cask write occurs.
+- Bounds :: One local case per failure condition, no successful Apple submission or GitHub mutation; a missing-profile call may fail locally within =notarytool= before upload.
+- Record :: Dated results and revision in =validation.org=.
+** UT153.1 - Validate downloaded cask launch :testdef:
+:PROPERTIES:
+:CUSTOM_ID: ut-153-1
+:END:
+- Covers :: [[#ac-153-4][AC153.4 - First launch from cask]]
+- Validation method :: User validation on a supported Mac.
+- Procedure :: After an authorized release, install the published cask from a fresh download and open the app through Finder.
+- Expected :: The app opens without the unsafe-app trash prompt and identifies the expected developer.
+- Record :: Dated revision, environment, and observed result in =validation.org=.
+
+* Edge Cases
+:PROPERTIES:
+:CUSTOM_ID: edge-cases
+:END:
+
+** Unavailable identity or profile
+- Condition :: The required certificate or keychain profile is unavailable.
+- Required behaviour :: The release exits before upload or cask modification with a diagnostic identifying the missing prerequisite.
+- Covered by :: [[#ac-153-3][AC153.3 - Publication gate]] and [[#ot-153-3][OT153.3 - Check failed-release boundaries]].
+** Notary rejection or stapling failure
+- Condition :: Apple rejects a submission or stapling/validation fails.
+- Required behaviour :: The release exits without publishing and retains the submission identifier for diagnosis.
+- Covered by :: [[#ac-153-3][AC153.3 - Publication gate]] and [[#ot-153-3][OT153.3 - Check failed-release boundaries]].
+
+* Solution Design
+:PROPERTIES:
+:CUSTOM_ID: solution-design
+:END:
+
+** Architecture context
+- Relevant components :: The Xcode target produces the GUI bundle; =scripts/release-gui.sh= inspects, packages, uploads, and updates the local and tap cask.
+- Ownership boundary :: This repository owns the app and its release script. Apple owns certificate trust and notarization; the external tap repository is updated only by an authorized release invocation.
+** High-level design
+- Configure only the app target's Release signing as stated under Context / Decisions. Keep Debug development signing and the UI-test target intact; do not add hardened-runtime exception entitlements.
+- Before building, check the required local signing identity without printing secrets. Let the first notary submission establish keychain-profile usability.
+- After building and resource inspection, verify the Xcode-produced signature and entitlements. Package the app in a temporary ZIP, submit once with =notarytool --wait=, require acceptance, then staple and validate the app.
+- Copy the stapled app to DMG staging; create the DMG, sign it with the Developer ID identity using =--timestamp= and a distinct =com.tadgpaul.superscale.dmg= identifier, and verify the signature. Submit it once, require acceptance, staple and validate it. Calculate SHA-256 only after stapling, since stapling changes the DMG bytes.
+- Run GitHub upload and cask generation only after every prior check succeeds. Keep temporary files in OS-allocated directories and clean only the exact temporary paths created by this invocation.
+- The candidate-preparation helper accepts an app path and an output DMG path, and owns signing verification, notarization, stapling, and the final DMG. It exposes a status-check operation for =notarytool= JSON output so an =Invalid= result can be checked locally. =release-gui.sh= calls the helper and enters its existing GitHub and cask phase only on success. Do not run the publishing phase during implementation verification.
+** Design decisions and verification
+- Decision :: Use Xcode target signing instead of =codesign --force --deep= on the finished app.
+- Rationale :: Xcode signs nested code inside out, while post-build deep signing can mask incorrect nested signatures.
+- Verification :: [[#ot-153-1][OT153.1 - Inspect release signature]] and implementation review of the Release build settings.
+- Decision :: Submit the app ZIP and DMG separately.
+- Rationale :: The app must be stapled before it is sealed inside the read-only DMG; the final DMG must also be stapled before hashing.
+- Verification :: [[#ot-153-2][OT153.2 - Notarize and validate candidates]].
+- Decision :: Sign the DMG with the same Developer ID identity and a separate identifier before its notary submission.
+- Verification :: [[#ot-153-1][OT153.1 - Inspect release signature]].
+** Routine details left to implementation
+- Use the existing script's conventions for output and temporary paths; choose a fixed, documented keychain profile name.
+** Architecture impact
+*** Security impact
+- Threat boundary :: The release changes from an ad hoc local signature to an Apple-verifiable Developer ID and notary ticket.
+- Data and secrets :: The private signing key and notary credentials stay in Keychain; no secret values enter the repository, command output, or release artefacts.
+- Access :: Signing and notarization use the local authorized developer account; GitHub and tap write access is unchanged.
+- Conclusion :: Publication must fail closed if signing or notarization cannot be established.
+
+* Delivery Handoff
+:PROPERTIES:
+:CUSTOM_ID: delivery-handoff
+:END:
+
+- Required reading :: [[file:../../scripts/release-gui.sh][GUI release script]], [[file:../../SuperscaleApp/SuperscaleApp.xcodeproj/project.pbxproj][Xcode project]], [[file:../../docs/RELEASE_CHECKLIST.md][Release checklist]], and the Apple contracts linked above.
+- Entry conditions :: Operator sign-off, current definition-gate evidence in [[file:audits.yaml][=audits.yaml=]], and the local prerequisites in [[#constraints-and-dependencies][Constraints and dependencies]].
+- First implementation step :: With no RT justified, implement the defined flow and execute the bounded OTs before delivery-code review; leave the UT pending until an authorized release.
+- Definition evidence :: [[file:audits.yaml][=audits.yaml=]].
+- Validation evidence :: [[file:validation.org][=validation.org=]] with one tagged result per defined test.
+- Documentation impact :: Update [[file:../../README.md][README release target]] and [[file:../../docs/RELEASE_CHECKLIST.md][Release checklist]] with the new prerequisites and verification order.
