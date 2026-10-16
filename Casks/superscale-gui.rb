@@ -1,6 +1,6 @@
 cask "superscale-gui" do
   version "1.0.8"
-  sha256 "3e20c463583e8eeb9a7d1ccebbc887cb4cc5e8a0948aed9b2f946df091359faf"
+  sha256 "dcdc20fce83073d0c57cef543dd56e7cb6ab76ac49e8aeefc92323a69b82910c"
 
   url "https://github.com/tigger04/superscale/releases/download/v1.0.8/Superscale.dmg"
   name "Superscale"
