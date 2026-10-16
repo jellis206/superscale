@@ -6,26 +6,31 @@
 
 * One-off tests
 
-** AMBER OT153.1 - Inspect release signature :testdef:
+** GREEN OT153.1 - Inspect release signature :testdef:
 :PROPERTIES:
 :CUSTOM_ID: ot-153-1-result
-:REASON: Awaiting local Release build and signed DMG inspection.
+:REVISION: 5ba22b0b88062c53f5f17c94971fc884f027bf93
+:EVIDENCE: 2026-10-16 local arm64 Release build; codesign strict verification, metadata inspection, and entitlement plist check passed for app and sign-only DMG.
 :END:
 - Criterion :: [[file:spec.org::#ac-153-1][AC153.1 - Developer ID app signature]]
+- Runs :: 2026-10-16: =xcodebuild= Release build succeeded. =codesign --verify --deep --strict= accepted the app and DMG. Both report =Developer ID Application: Tadg Paul Ltd (2H98A242M4)=, team =2H98A242M4=, and secure timestamps. The app reports =runtime=; its entitlements have no true =get-task-allow=. The DMG was produced with =--sign-only=, without Apple submission or publication.
 
 ** AMBER OT153.2 - Notarize and validate candidates :testdef:
 :PROPERTIES:
 :CUSTOM_ID: ot-153-2-result
-:REASON: Awaiting bounded live Apple notarization of app ZIP and DMG.
+:REASON: The first local notarytool invocation stopped before upload because the superscale-notary Keychain profile is absent; no Apple submission occurred.
 :END:
 - Criterion :: [[file:spec.org::#ac-153-2][AC153.2 - Stapled notarization]]
+- Runs :: 2026-10-16: =notarytool submit= reported "No Keychain password item found for profile: superscale-notary". No submission identifier or ticket exists.
 
-** AMBER OT153.3 - Check failed-release boundaries :testdef:
+** GREEN OT153.3 - Check failed-release boundaries :testdef:
 :PROPERTIES:
 :CUSTOM_ID: ot-153-3-result
-:REASON: Awaiting local failure-boundary checks.
+:REVISION: 5ba22b0b88062c53f5f17c94971fc884f027bf93
+:EVIDENCE: 2026-10-16 local failure checks each exited nonzero before publication; release entry point review confirms helper precedes GitHub and cask phases.
 :END:
 - Criterion :: [[file:spec.org::#ac-153-3][AC153.3 - Publication gate]]
+- Runs :: 2026-10-16: Missing identity reported =Missing signing identity=; tampered app failed strict signature verification; unavailable profile failed before Apple upload; unstapled DMG failed =stapler validate=; synthetic =Invalid= JSON reported its submission identifier and exited nonzero. No GitHub upload or cask write was invoked.
 
 * User tests
 
