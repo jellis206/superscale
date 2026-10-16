@@ -4,6 +4,11 @@
 #+OPTIONS: toc:2 num:nil
 #+TODO: AMBER RED | GREEN
 
+* Delivery checks
+
+- 2026-10-16, revision =823d0531bb28b2c0b90bb2df5bab4010174d4473=: =make test= passed after the release-packaging fixture was aligned with the inspector's 108 prompt packs. The run reported 406 GUI core tests, 121 Superscale tests with six skips, and 81 FAL kit tests, with no failures. The preceding run at =7ee9d0e= failed because its fixture still contained 86 packs; the focused release-packaging test then passed after the repair.
+- 2026-10-16, same revision: =make test-ssim= passed its one CoreML versus PyTorch quality test. No UI automation was run.
+
 * One-off tests
 
 ** GREEN OT153.1 - Inspect release signature :testdef:
