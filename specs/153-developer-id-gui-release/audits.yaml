@@ -1048,3 +1048,554 @@ audits:
             - **Conditional identity setting.** The Release target in `project.pbxproj` has `"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development"`. An unconditional `CODE_SIGN_IDENTITY` will not override it, so delivery must replace that conditional key. OT153.1 would catch a miss.
             - **Shell standard.** The helper language is unspecified, and the existing script carries `IFS=$'\n\t'`, which SHELL.md forbids. The retain-shell decision records no revisit trigger. The delivery-code gate should confirm the helper and any touched lines conform. Remove the global `IFS` override only if it can be done within scope.
           updated: "2026-10-16T05:49:56Z"
+    - readiness_check: delivery-code
+      work_item: W153
+      gate: implementation
+      session_id: 20261016_124337_5a6b4d
+      standards_contract: 1
+      standards_delivered:
+        - path: /Users/tigger/.agents/sdlc/ARCHITECTURE.md
+          sha256: 43bf54d9d5cf5930807ea6ba084ccbae5793bae4312b62a743c215e6df6a9e96
+          bytes: 8169
+        - path: /Users/tigger/.agents/sdlc/AUDITS.md
+          sha256: 521aed142ee9541d060baf6aa869037bbdea338caf7d739aefeb44d54a541294
+          bytes: 19282
+        - path: /Users/tigger/.agents/sdlc/CODING.md
+          sha256: c4311413740c0a4f7e6b8ffa5bada9d4cd537cab17b94474f286c1151e05fac8
+          bytes: 13793
+        - path: /Users/tigger/.agents/sdlc/DOCUMENTATION.md
+          sha256: 98e32fea598efeb6f1b5e14b5b4c5e515fd7d80167b3183093117935e5418de5
+          bytes: 7840
+        - path: /Users/tigger/.agents/sdlc/GIT.md
+          sha256: 978ce055b576d128a2e21eed7cf969773adc84a04962fc0d9a0299457c90e68f
+          bytes: 7822
+        - path: /Users/tigger/.agents/sdlc/MAIN.md
+          sha256: 97e08827ce6ec7713a914e1871b961207f6454f84ac61591cc321aaa57388ad8
+          bytes: 13075
+        - path: /Users/tigger/.agents/sdlc/MARKDOWN.md
+          sha256: 59f3d6416de8226c11914ece1eb42720b70f75a83d40e45cc47355048e5f0fb9
+          bytes: 1357
+        - path: /Users/tigger/.agents/sdlc/ORGMODE.md
+          sha256: 0d2dbee2f0e0db1ff89a7ff315ab19d361e57e944a321905d0f4ed44db7465ab
+          bytes: 2989
+        - path: /Users/tigger/.agents/sdlc/SECURITY.md
+          sha256: 149da81b261468fdca44d970ffe6fa321a0f97fb09ef7405364710931d0f1867
+          bytes: 5042
+        - path: /Users/tigger/.agents/sdlc/TESTING.md
+          sha256: c6a78a4bcfbac35ecfce7c442983f3c2dac8799d3bdb530d8fef99808381b70f
+          bytes: 16769
+        - path: /Users/tigger/.agents/sdlc/technologies/PYTHON.md
+          sha256: 3a0ca19f3ab1a99fd809561c7a1d67d8a31dde8dd5a74cc989355e7daab9f61d
+          bytes: 6272
+        - path: /Users/tigger/.agents/sdlc/technologies/SHELL.md
+          sha256: e7c3ad8d6ceb8b571abd3d6b36ef2e358c71691136e729cbed87cd5abadfd94d
+          bytes: 12345
+        - path: /Users/tigger/.agents/sdlc/technologies/SWIFT.md
+          sha256: 64830d92ac9bd5d3ef51aeb722dde09b758cff6f04dedb23b493cb356a3b3de9
+          bytes: 5212
+      harness: hermes
+      provider: kimi-coding
+      model: kimi-for-coding
+      configured:
+        harness: hermes
+        provider: kimi-coding
+        model: kimi-for-coding
+      external_round: 2
+      status: passed
+      updated: "2026-10-16T11:48:51Z"
+      revision: 8978ebb04e8fe4ff8854a8e5231cb50b1c2555ae
+      verdict: PASS
+      response: |-
+        GATE: delivery-code
+        REVISION: 8978ebb04e8fe4ff8854a8e5231cb50b1c2555ae
+        VERDICT: PASS
+
+        Prior findings resolved:
+
+        1. README.md identity name corrected — the release-gui row now reads "Requires the Tadg Paul Ltd Developer ID identity", matching the actual keychain identity "Developer ID Application: Tadg Paul Ltd (2H98A242M4)".
+
+        2. Both changed documents now carry the metadata DOCUMENTATION.md and MARKDOWN.md require. README.md has YAML frontmatter (title, version "1.0", last-updated 2026-10-16) and a document changelog recording the Developer ID release-process update. RELEASE_CHECKLIST.md has frontmatter (version "1.3", last-updated 2026-10-16) and a 1.3 changelog entry recording the Developer ID signing and notarization checks, the Swift dependency security gate, and the current prompt-pack count. The stale "Version: 1.2 | Last updated: 2026-08-25" header is gone.
+
+        No new findings: the added frontmatter and changelog prose follow the impersonal factual voice; no audit state, verdicts, or session identity appear in either document. All other evidence is unchanged from the prior round — OT153.1/153.2/153.3 remain GREEN with dated evidence, UT153.1 remains explicitly AMBER (permitted), and the release scripts, Xcode signing configuration, cask, and tests are byte-identical to the candidate already assessed.
+      history:
+        - standards_delivered:
+            - path: /Users/tigger/.agents/sdlc/ARCHITECTURE.md
+              sha256: 43bf54d9d5cf5930807ea6ba084ccbae5793bae4312b62a743c215e6df6a9e96
+              bytes: 8169
+            - path: /Users/tigger/.agents/sdlc/AUDITS.md
+              sha256: 521aed142ee9541d060baf6aa869037bbdea338caf7d739aefeb44d54a541294
+              bytes: 19282
+            - path: /Users/tigger/.agents/sdlc/CODING.md
+              sha256: c4311413740c0a4f7e6b8ffa5bada9d4cd537cab17b94474f286c1151e05fac8
+              bytes: 13793
+            - path: /Users/tigger/.agents/sdlc/DOCUMENTATION.md
+              sha256: 98e32fea598efeb6f1b5e14b5b4c5e515fd7d80167b3183093117935e5418de5
+              bytes: 7840
+            - path: /Users/tigger/.agents/sdlc/GIT.md
+              sha256: 978ce055b576d128a2e21eed7cf969773adc84a04962fc0d9a0299457c90e68f
+              bytes: 7822
+            - path: /Users/tigger/.agents/sdlc/MAIN.md
+              sha256: 97e08827ce6ec7713a914e1871b961207f6454f84ac61591cc321aaa57388ad8
+              bytes: 13075
+            - path: /Users/tigger/.agents/sdlc/MARKDOWN.md
+              sha256: 59f3d6416de8226c11914ece1eb42720b70f75a83d40e45cc47355048e5f0fb9
+              bytes: 1357
+            - path: /Users/tigger/.agents/sdlc/ORGMODE.md
+              sha256: 0d2dbee2f0e0db1ff89a7ff315ab19d361e57e944a321905d0f4ed44db7465ab
+              bytes: 2989
+            - path: /Users/tigger/.agents/sdlc/SECURITY.md
+              sha256: 149da81b261468fdca44d970ffe6fa321a0f97fb09ef7405364710931d0f1867
+              bytes: 5042
+            - path: /Users/tigger/.agents/sdlc/TESTING.md
+              sha256: c6a78a4bcfbac35ecfce7c442983f3c2dac8799d3bdb530d8fef99808381b70f
+              bytes: 16769
+            - path: /Users/tigger/.agents/sdlc/technologies/PYTHON.md
+              sha256: 3a0ca19f3ab1a99fd809561c7a1d67d8a31dde8dd5a74cc989355e7daab9f61d
+              bytes: 6272
+            - path: /Users/tigger/.agents/sdlc/technologies/SHELL.md
+              sha256: e7c3ad8d6ceb8b571abd3d6b36ef2e358c71691136e729cbed87cd5abadfd94d
+              bytes: 12345
+            - path: /Users/tigger/.agents/sdlc/technologies/SWIFT.md
+              sha256: 64830d92ac9bd5d3ef51aeb722dde09b758cff6f04dedb23b493cb356a3b3de9
+              bytes: 5212
+          diagnostic: /Users/tigger/code/tigoss/superscale/.sdlc/audit-diagnostics/audit-1134350555.log
+          readiness_check: delivery-code
+          cache_key: sha256:7799a07bd686b8ddafc4d5ba9d7adbacf179b848d5b140585760fd300a423bdc
+          session_id: 20261016_124337_5a6b4d
+          harness: hermes
+          provider: kimi-coding
+          model: kimi-for-coding
+          evidence:
+            - path: /Users/tigger/.agents/sdlc/ARCHITECTURE.md
+              sha256: 43bf54d9d5cf5930807ea6ba084ccbae5793bae4312b62a743c215e6df6a9e96
+              bytes: 8169
+            - path: /Users/tigger/.agents/sdlc/AUDITS.md
+              sha256: 521aed142ee9541d060baf6aa869037bbdea338caf7d739aefeb44d54a541294
+              bytes: 19282
+            - path: /Users/tigger/.agents/sdlc/CHANGELOG.md
+              sha256: 2384009fbc28cea6fceab0d3fbb7810d1067a0da28c169b4e9386c0e6745ef56
+              bytes: 4424
+            - path: /Users/tigger/.agents/sdlc/CODING.md
+              sha256: c4311413740c0a4f7e6b8ffa5bada9d4cd537cab17b94474f286c1151e05fac8
+              bytes: 13793
+            - path: /Users/tigger/.agents/sdlc/DOCUMENTATION.md
+              sha256: 98e32fea598efeb6f1b5e14b5b4c5e515fd7d80167b3183093117935e5418de5
+              bytes: 7840
+            - path: /Users/tigger/.agents/sdlc/EMERGENCY.md
+              sha256: 2c6ad74ef4b63c6b5a21c98e201ec949c1bd99866ebd2852d1dd9da117d4a8f9
+              bytes: 4846
+            - path: /Users/tigger/.agents/sdlc/GIT.md
+              sha256: 978ce055b576d128a2e21eed7cf969773adc84a04962fc0d9a0299457c90e68f
+              bytes: 7822
+            - path: /Users/tigger/.agents/sdlc/HARNESS.md
+              sha256: 2277702bcb4c0c4ca81551b3df235d556909062fb1bc036323e243b7b40b61c2
+              bytes: 34821
+            - path: /Users/tigger/.agents/sdlc/ISSUES.md
+              sha256: 5d9e863d7fbd9741c7fa1a0987e3417f82d3a4b7c095bb35cfb4c593a51e4cc2
+              bytes: 16642
+            - path: /Users/tigger/.agents/sdlc/LEARNINGS.md
+              sha256: 520513130332f468ab1f3185569b4cba7067f2968a4cb389623b02a228c2e68d
+              bytes: 52377
+            - path: /Users/tigger/.agents/sdlc/MAIN.md
+              sha256: 97e08827ce6ec7713a914e1871b961207f6454f84ac61591cc321aaa57388ad8
+              bytes: 13075
+            - path: /Users/tigger/.agents/sdlc/MARKDOWN.md
+              sha256: 59f3d6416de8226c11914ece1eb42720b70f75a83d40e45cc47355048e5f0fb9
+              bytes: 1357
+            - path: /Users/tigger/.agents/sdlc/ORG-SCHEMA.md
+              sha256: 4c93e9ebfd051a1caa3a3a456ef20228c4403f3ca00726ed1ac4c93676ac26cc
+              bytes: 4915
+            - path: /Users/tigger/.agents/sdlc/ORGMODE.md
+              sha256: 0d2dbee2f0e0db1ff89a7ff315ab19d361e57e944a321905d0f4ed44db7465ab
+              bytes: 2989
+            - path: /Users/tigger/.agents/sdlc/PAIRING.md
+              sha256: 38ee20da8e16aba810c035600e6f5ca948d9a706f33c1179ebbf2fbc9d1ad034
+              bytes: 6050
+            - path: /Users/tigger/.agents/sdlc/README.md
+              sha256: e7aa5b4c951ecea7e7420105fa7c87987bf0e6cc08d10cc099a36ad7fed7b5aa
+              bytes: 12191
+            - path: /Users/tigger/.agents/sdlc/SECURITY.md
+              sha256: 149da81b261468fdca44d970ffe6fa321a0f97fb09ef7405364710931d0f1867
+              bytes: 5042
+            - path: /Users/tigger/.agents/sdlc/SPIKE-AUDIT.md
+              sha256: 73e36e3cb0b27ed469239b67de7efc4d64a0b71845d28e3b5bdee3d72a9baaf5
+              bytes: 1822
+            - path: /Users/tigger/.agents/sdlc/STANDALONE-AUDIT.md
+              sha256: f4c22a6759cd1ebf9211ccd860cc5e5cc3d322c5bd4c72a91b14c43ea19507c0
+              bytes: 2917
+            - path: /Users/tigger/.agents/sdlc/TESTING.md
+              sha256: c6a78a4bcfbac35ecfce7c442983f3c2dac8799d3bdb530d8fef99808381b70f
+              bytes: 16769
+            - path: /Users/tigger/.agents/sdlc/THIRD_PARTY_NOTICES.md
+              sha256: bf9038abaefa7b03b66845fa0c9f125b282438f58f57a51c971c52407bd14b1a
+              bytes: 1812
+            - path: /Users/tigger/.agents/sdlc/docs/ACs.md
+              sha256: 9a59f4feeb496a6604923c7c7210df38f7b307a26e8a0e11e87f6210072611bf
+              bytes: 1557
+            - path: /Users/tigger/.agents/sdlc/prompts/discover-project-authorities.md
+              sha256: 7c6f62a3c8c13636dc37c9156216058c9f31153d1683a4b3b9d37a66bd3e8b6d
+              bytes: 1869
+            - path: /Users/tigger/.agents/sdlc/prompts/discover-project-technologies.md
+              sha256: 7dafb2828f52034d4af6042462f6ec373f5c7fdca8af1633caef675800a62366
+              bytes: 2715
+            - path: /Users/tigger/.agents/sdlc/prompts/normalize-legacy-acs.md
+              sha256: 44489c47c457ed857dba026da6304553f8d3a12f204952a4997c457c974fcd83
+              bytes: 2403
+            - path: /Users/tigger/.agents/sdlc/technologies/API.md
+              sha256: ed09a85c302d19670236a5d94ac79dd8f03cd8b265177a09924f955708a072c0
+              bytes: 10920
+            - path: /Users/tigger/.agents/sdlc/technologies/FISH.md
+              sha256: 0b71b362e3981f3f1ed60a045aad0f5b2b65cdeb2ec0a636a1d6cdb8aaf0c1a1
+              bytes: 13628
+            - path: /Users/tigger/.agents/sdlc/technologies/GO.md
+              sha256: c71d389d7b8e576756f2a2843f77a5a2626e9300704b05cd6f8aa4fcdcc3f952
+              bytes: 7316
+            - path: /Users/tigger/.agents/sdlc/technologies/HUGO.md
+              sha256: 9f97dce924b1da88fc3c1e66851e96d8b421a0ffcc0bced8067dff0bf23f0e74
+              bytes: 4321
+            - path: /Users/tigger/.agents/sdlc/technologies/JAVASCRIPT.md
+              sha256: 69b7d16d81a059ee3de1e370e9bbeaeae7b7538bc6689f63c04b95e35b11d54b
+              bytes: 7523
+            - path: /Users/tigger/.agents/sdlc/technologies/LUA.md
+              sha256: f64aad076563bced181623daeef3c5ee28b82968fbd6e11ebe67d19045a62e8b
+              bytes: 10783
+            - path: /Users/tigger/.agents/sdlc/technologies/NODE.md
+              sha256: f593fef2fdbdc081afbb51db388e296fb13cbfd3e95432aafcb7674acd5ba31c
+              bytes: 5098
+            - path: /Users/tigger/.agents/sdlc/technologies/PERL.md
+              sha256: 8f3cbdf5e0c5cf0c8eaa3228e36c0e77e94a697798ae613e1b81a523391b48e4
+              bytes: 3098
+            - path: /Users/tigger/.agents/sdlc/technologies/PYTHON.md
+              sha256: 3a0ca19f3ab1a99fd809561c7a1d67d8a31dde8dd5a74cc989355e7daab9f61d
+              bytes: 6272
+            - path: /Users/tigger/.agents/sdlc/technologies/RUST.md
+              sha256: a05725c8cbd6e8306bbc39b4d197f1e1c0dd9230d43cb8e67dcede388f4c34ba
+              bytes: 18482
+            - path: /Users/tigger/.agents/sdlc/technologies/SHELL.md
+              sha256: e7c3ad8d6ceb8b571abd3d6b36ef2e358c71691136e729cbed87cd5abadfd94d
+              bytes: 12345
+            - path: /Users/tigger/.agents/sdlc/technologies/SWIFT.md
+              sha256: 64830d92ac9bd5d3ef51aeb722dde09b758cff6f04dedb23b493cb356a3b3de9
+              bytes: 5212
+            - path: /Users/tigger/.agents/sdlc/technologies/WEB.md
+              sha256: fd6d48f27772f9384719b9bbe59efb62240a8adbd5d7f87b3e0dfb0452485381
+              bytes: 10438
+            - path: /Users/tigger/.agents/sdlc/templates/AGENTS-or-CLAUDE.example.md
+              sha256: d4d5614d8f9d441b7eff45f0e0f2aa1ce5b1a39cda43a55cb7c6e37c956d1087
+              bytes: 4814
+            - path: /Users/tigger/code/tigoss/superscale/.sdlc/project.yaml
+              sha256: f814dce0e4e2b7805773a5051975e2e02b1577570212ec7d82633eb2556ce905
+              bytes: 485
+            - path: /Users/tigger/code/tigoss/superscale/Casks/superscale-gui.rb
+              sha256: 5d0c7cd82743a69bdee74cdd39e6be62b7032b71372e2c2f03fa4a83e2f68637
+              bytes: 1412
+            - path: /Users/tigger/code/tigoss/superscale/Makefile
+              sha256: a553eff48439827526322276b0f86b6a54f06b77b3c8a682c0d04dc1d1fbfb9d
+              bytes: 6965
+            - path: /Users/tigger/code/tigoss/superscale/OneOff/Package.resolved
+              sha256: 402f2f5f6fe24ec09912a170823e8ab65c8ace1855c409fc0ba0e14590c07a89
+              bytes: 324
+            - path: /Users/tigger/code/tigoss/superscale/OneOff/Tests/OneOffTests/ReleaseInspectorOneOffTests.swift
+              sha256: 408db44b16a9d5a0a1f2f2630553b46f8ccf8a9097865e8443d719bcd056fccd
+              bytes: 3356
+            - path: /Users/tigger/code/tigoss/superscale/Package.resolved
+              sha256: b94c8d537a48f012c8ab65edf4caa3eafe18d3f69aabaa7c8be11f53b5a29430
+              bytes: 324
+            - path: /Users/tigger/code/tigoss/superscale/README.md
+              sha256: cd25287f1d6eb6bb0fd404ec485c6e91c77a8859a74cb025c06445aa00bb32e4
+              bytes: 7933
+            - path: /Users/tigger/code/tigoss/superscale/SuperscaleApp/SuperscaleApp.xcodeproj/project.pbxproj
+              sha256: 7fda2934366be84a398255fc2b7839993d461b4f75d2b80ae5456b33e99d8290
+              bytes: 19730
+            - path: /Users/tigger/code/tigoss/superscale/SuperscaleApp/SuperscaleApp.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+              sha256: 10c73a572c56b2aeafc1b4b2b02361332b22305adbe1368f66d182e55324711c
+              bytes: 409
+            - path: /Users/tigger/code/tigoss/superscale/SuperscaleApp/SuperscaleApp/Superscale.entitlements
+              sha256: 99daef167cdc678891a0b49601b6a34a0fae7240c2aa8bd44a753edc131c7d6d
+              bytes: 241
+            - path: /Users/tigger/code/tigoss/superscale/Tests/SuperscaleTests/ReleasePackagingTests.swift
+              sha256: bfdd6fa6e4348c3ca04f235af640e21c1a0f6845baef6aaf3aef723535ec3da1
+              bytes: 2796
+            - path: /Users/tigger/code/tigoss/superscale/docs/ARCHITECTURE.md
+              sha256: bde26a2f670f0c094d2d09b6121b2d6ee83182c26c6d3fb1636078f6bb3243a8
+              bytes: 20940
+            - path: /Users/tigger/code/tigoss/superscale/docs/RELEASE_CHECKLIST.md
+              sha256: ff6383c9a13f090f9def75ba34425c90326791ec1a2bd265716e2bf9114fe3cc
+              bytes: 5738
+            - path: /Users/tigger/code/tigoss/superscale/docs/work.org
+              sha256: 733a4a0c3d292dc7d4f217120aef18b66fdad0121c7209a108d339326626db91
+              bytes: 396430
+            - path: /Users/tigger/code/tigoss/superscale/scripts/inspect-gui-release.sh
+              sha256: bd6b095940b17098e794cd48d569d7ac4a09d465e5ee446ef72e9edf5741b54a
+              bytes: 1438
+            - path: /Users/tigger/code/tigoss/superscale/scripts/prepare-gui-release.sh
+              sha256: fd723a6a8d77538d66524b9880987ce8b8c36d6c5116a0679c0330bac609caa1
+              bytes: 5053
+            - path: /Users/tigger/code/tigoss/superscale/scripts/release-gui.sh
+              sha256: 83adbb054696ea81ae327a35d173e7e30147a79ae99b69ab5bc16a99b6d39d07
+              bytes: 5998
+            - path: /Users/tigger/code/tigoss/superscale/specs/153-developer-id-gui-release/spec.org
+              sha256: 30dd14e478beefbd146073e0f3fe955550a91c32b5737b12f7eaceec1a7d585b
+              bytes: 18189
+            - path: /Users/tigger/code/tigoss/superscale/specs/153-developer-id-gui-release/validation.org
+              sha256: f84e606f4e91ec83deebcd3c07912b96d7b811595a23182f9968a6eb7aca1671
+              bytes: 3943
+          round: 1
+          revision: 8978ebb04e8fe4ff8854a8e5231cb50b1c2555ae
+          verdict: FAIL
+          response: |-
+            GATE: delivery-code
+            REVISION: 8978ebb04e8fe4ff8854a8e5231cb50b1c2555ae
+            VERDICT: FAIL
+
+            Findings:
+
+            1. README.md names the wrong signing identity in the changed release instructions. The Makefile target table (updated for W153) reads "Requires the Taḋg Paul Ltd Developer ID identity". The actual keychain identity is "Developer ID Application: Tadg Paul Ltd (2H98A242M4)" — no fada, no "h" (confirmed in the Xcode Release configuration, scripts/prepare-gui-release.sh, and docs/RELEASE_CHECKLIST.md). An operator following the README would search Keychain for an identity that does not exist. Required remediation: correct the identity name in README.md to "Tadg Paul Ltd". This is a factual error in a document this change materially updated, not a style preference.
+
+            2. README.md and docs/RELEASE_CHECKLIST.md were materially updated by this change but do not carry the metadata DOCUMENTATION.md and MARKDOWN.md require of materially updated Markdown documents (YAML frontmatter with title, version, last-updated, and a concise changelog). RELEASE_CHECKLIST.md is affirmatively stale: its header comment still records "Version: 1.2 | Last updated: 2026-08-25" and its changelog ends at 1.2 (2026-08-25), yet it now contains the Developer ID GUI release section added 2026-10-16 — the document misrepresents its own currency and records no changelog entry for a significant revision. Required remediation: add the required frontmatter to both documents (or otherwise current version metadata per the project's established format, with the version incremented), and add a RELEASE_CHECKLIST.md changelog entry recording the Developer ID release section.
+
+            What passed on this candidate:
+
+            - RT/OT evidence: validation.org records current GREEN for OT153.1, OT153.2, OT153.3 with revisions, commands, submission identifiers, and dated observations; UT153.1 is explicitly AMBER with reason, permitted at this gate. Delivery checks (make test, make test-ssim, make vulncheck) recorded GREEN at the current revision.
+            - Design conformance: pbxproj Release config implements the signed-off decisions exactly (manual Developer ID signing, hardened runtime, --timestamp, CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO; Debug and UI-test target untouched). prepare-gui-release.sh implements the helper contract (signature verification without re-signing the app, app ZIP notarization before DMG packaging, DMG signing with distinct identifier, fail-closed notary status check exposed for synthetic Invalid JSON). release-gui.sh gates GitHub upload and cask mutation behind helper success.
+            - No duplicated audit verdicts, rounds, or session IDs in spec.org or validation.org; approval and execution records only.
+            - Shell scripts in the delta use the mandatory safety header, mktemp-scoped cleanup, format-aware JSON handling (jq/plutil), no eval/string commands, and arithmetic in assignment form.
+          updated: "2026-10-16T11:43:36Z"
+        - standards_delivered:
+            - path: /Users/tigger/.agents/sdlc/ARCHITECTURE.md
+              sha256: 43bf54d9d5cf5930807ea6ba084ccbae5793bae4312b62a743c215e6df6a9e96
+              bytes: 8169
+            - path: /Users/tigger/.agents/sdlc/AUDITS.md
+              sha256: 521aed142ee9541d060baf6aa869037bbdea338caf7d739aefeb44d54a541294
+              bytes: 19282
+            - path: /Users/tigger/.agents/sdlc/CODING.md
+              sha256: c4311413740c0a4f7e6b8ffa5bada9d4cd537cab17b94474f286c1151e05fac8
+              bytes: 13793
+            - path: /Users/tigger/.agents/sdlc/DOCUMENTATION.md
+              sha256: 98e32fea598efeb6f1b5e14b5b4c5e515fd7d80167b3183093117935e5418de5
+              bytes: 7840
+            - path: /Users/tigger/.agents/sdlc/GIT.md
+              sha256: 978ce055b576d128a2e21eed7cf969773adc84a04962fc0d9a0299457c90e68f
+              bytes: 7822
+            - path: /Users/tigger/.agents/sdlc/MAIN.md
+              sha256: 97e08827ce6ec7713a914e1871b961207f6454f84ac61591cc321aaa57388ad8
+              bytes: 13075
+            - path: /Users/tigger/.agents/sdlc/MARKDOWN.md
+              sha256: 59f3d6416de8226c11914ece1eb42720b70f75a83d40e45cc47355048e5f0fb9
+              bytes: 1357
+            - path: /Users/tigger/.agents/sdlc/ORGMODE.md
+              sha256: 0d2dbee2f0e0db1ff89a7ff315ab19d361e57e944a321905d0f4ed44db7465ab
+              bytes: 2989
+            - path: /Users/tigger/.agents/sdlc/SECURITY.md
+              sha256: 149da81b261468fdca44d970ffe6fa321a0f97fb09ef7405364710931d0f1867
+              bytes: 5042
+            - path: /Users/tigger/.agents/sdlc/TESTING.md
+              sha256: c6a78a4bcfbac35ecfce7c442983f3c2dac8799d3bdb530d8fef99808381b70f
+              bytes: 16769
+            - path: /Users/tigger/.agents/sdlc/technologies/PYTHON.md
+              sha256: 3a0ca19f3ab1a99fd809561c7a1d67d8a31dde8dd5a74cc989355e7daab9f61d
+              bytes: 6272
+            - path: /Users/tigger/.agents/sdlc/technologies/SHELL.md
+              sha256: e7c3ad8d6ceb8b571abd3d6b36ef2e358c71691136e729cbed87cd5abadfd94d
+              bytes: 12345
+            - path: /Users/tigger/.agents/sdlc/technologies/SWIFT.md
+              sha256: 64830d92ac9bd5d3ef51aeb722dde09b758cff6f04dedb23b493cb356a3b3de9
+              bytes: 5212
+          diagnostic: /Users/tigger/code/tigoss/superscale/.sdlc/audit-diagnostics/audit-2805071402.log
+          readiness_check: delivery-code
+          cache_key: sha256:52e3f315bb3178db212a45effab6593a680adeeeac60aba51a3e967d5a8541f2
+          session_id: 20261016_124337_5a6b4d
+          harness: hermes
+          provider: kimi-coding
+          model: kimi-for-coding
+          evidence:
+            - path: /Users/tigger/.agents/sdlc/ARCHITECTURE.md
+              sha256: 43bf54d9d5cf5930807ea6ba084ccbae5793bae4312b62a743c215e6df6a9e96
+              bytes: 8169
+            - path: /Users/tigger/.agents/sdlc/AUDITS.md
+              sha256: 521aed142ee9541d060baf6aa869037bbdea338caf7d739aefeb44d54a541294
+              bytes: 19282
+            - path: /Users/tigger/.agents/sdlc/CHANGELOG.md
+              sha256: 2384009fbc28cea6fceab0d3fbb7810d1067a0da28c169b4e9386c0e6745ef56
+              bytes: 4424
+            - path: /Users/tigger/.agents/sdlc/CODING.md
+              sha256: c4311413740c0a4f7e6b8ffa5bada9d4cd537cab17b94474f286c1151e05fac8
+              bytes: 13793
+            - path: /Users/tigger/.agents/sdlc/DOCUMENTATION.md
+              sha256: 98e32fea598efeb6f1b5e14b5b4c5e515fd7d80167b3183093117935e5418de5
+              bytes: 7840
+            - path: /Users/tigger/.agents/sdlc/EMERGENCY.md
+              sha256: 2c6ad74ef4b63c6b5a21c98e201ec949c1bd99866ebd2852d1dd9da117d4a8f9
+              bytes: 4846
+            - path: /Users/tigger/.agents/sdlc/GIT.md
+              sha256: 978ce055b576d128a2e21eed7cf969773adc84a04962fc0d9a0299457c90e68f
+              bytes: 7822
+            - path: /Users/tigger/.agents/sdlc/HARNESS.md
+              sha256: 2277702bcb4c0c4ca81551b3df235d556909062fb1bc036323e243b7b40b61c2
+              bytes: 34821
+            - path: /Users/tigger/.agents/sdlc/ISSUES.md
+              sha256: 5d9e863d7fbd9741c7fa1a0987e3417f82d3a4b7c095bb35cfb4c593a51e4cc2
+              bytes: 16642
+            - path: /Users/tigger/.agents/sdlc/LEARNINGS.md
+              sha256: 520513130332f468ab1f3185569b4cba7067f2968a4cb389623b02a228c2e68d
+              bytes: 52377
+            - path: /Users/tigger/.agents/sdlc/MAIN.md
+              sha256: 97e08827ce6ec7713a914e1871b961207f6454f84ac61591cc321aaa57388ad8
+              bytes: 13075
+            - path: /Users/tigger/.agents/sdlc/MARKDOWN.md
+              sha256: 59f3d6416de8226c11914ece1eb42720b70f75a83d40e45cc47355048e5f0fb9
+              bytes: 1357
+            - path: /Users/tigger/.agents/sdlc/ORG-SCHEMA.md
+              sha256: 4c93e9ebfd051a1caa3a3a456ef20228c4403f3ca00726ed1ac4c93676ac26cc
+              bytes: 4915
+            - path: /Users/tigger/.agents/sdlc/ORGMODE.md
+              sha256: 0d2dbee2f0e0db1ff89a7ff315ab19d361e57e944a321905d0f4ed44db7465ab
+              bytes: 2989
+            - path: /Users/tigger/.agents/sdlc/PAIRING.md
+              sha256: 38ee20da8e16aba810c035600e6f5ca948d9a706f33c1179ebbf2fbc9d1ad034
+              bytes: 6050
+            - path: /Users/tigger/.agents/sdlc/README.md
+              sha256: e7aa5b4c951ecea7e7420105fa7c87987bf0e6cc08d10cc099a36ad7fed7b5aa
+              bytes: 12191
+            - path: /Users/tigger/.agents/sdlc/SECURITY.md
+              sha256: 149da81b261468fdca44d970ffe6fa321a0f97fb09ef7405364710931d0f1867
+              bytes: 5042
+            - path: /Users/tigger/.agents/sdlc/SPIKE-AUDIT.md
+              sha256: 73e36e3cb0b27ed469239b67de7efc4d64a0b71845d28e3b5bdee3d72a9baaf5
+              bytes: 1822
+            - path: /Users/tigger/.agents/sdlc/STANDALONE-AUDIT.md
+              sha256: f4c22a6759cd1ebf9211ccd860cc5e5cc3d322c5bd4c72a91b14c43ea19507c0
+              bytes: 2917
+            - path: /Users/tigger/.agents/sdlc/TESTING.md
+              sha256: c6a78a4bcfbac35ecfce7c442983f3c2dac8799d3bdb530d8fef99808381b70f
+              bytes: 16769
+            - path: /Users/tigger/.agents/sdlc/THIRD_PARTY_NOTICES.md
+              sha256: bf9038abaefa7b03b66845fa0c9f125b282438f58f57a51c971c52407bd14b1a
+              bytes: 1812
+            - path: /Users/tigger/.agents/sdlc/docs/ACs.md
+              sha256: 9a59f4feeb496a6604923c7c7210df38f7b307a26e8a0e11e87f6210072611bf
+              bytes: 1557
+            - path: /Users/tigger/.agents/sdlc/prompts/discover-project-authorities.md
+              sha256: 7c6f62a3c8c13636dc37c9156216058c9f31153d1683a4b3b9d37a66bd3e8b6d
+              bytes: 1869
+            - path: /Users/tigger/.agents/sdlc/prompts/discover-project-technologies.md
+              sha256: 7dafb2828f52034d4af6042462f6ec373f5c7fdca8af1633caef675800a62366
+              bytes: 2715
+            - path: /Users/tigger/.agents/sdlc/prompts/normalize-legacy-acs.md
+              sha256: 44489c47c457ed857dba026da6304553f8d3a12f204952a4997c457c974fcd83
+              bytes: 2403
+            - path: /Users/tigger/.agents/sdlc/technologies/API.md
+              sha256: ed09a85c302d19670236a5d94ac79dd8f03cd8b265177a09924f955708a072c0
+              bytes: 10920
+            - path: /Users/tigger/.agents/sdlc/technologies/FISH.md
+              sha256: 0b71b362e3981f3f1ed60a045aad0f5b2b65cdeb2ec0a636a1d6cdb8aaf0c1a1
+              bytes: 13628
+            - path: /Users/tigger/.agents/sdlc/technologies/GO.md
+              sha256: c71d389d7b8e576756f2a2843f77a5a2626e9300704b05cd6f8aa4fcdcc3f952
+              bytes: 7316
+            - path: /Users/tigger/.agents/sdlc/technologies/HUGO.md
+              sha256: 9f97dce924b1da88fc3c1e66851e96d8b421a0ffcc0bced8067dff0bf23f0e74
+              bytes: 4321
+            - path: /Users/tigger/.agents/sdlc/technologies/JAVASCRIPT.md
+              sha256: 69b7d16d81a059ee3de1e370e9bbeaeae7b7538bc6689f63c04b95e35b11d54b
+              bytes: 7523
+            - path: /Users/tigger/.agents/sdlc/technologies/LUA.md
+              sha256: f64aad076563bced181623daeef3c5ee28b82968fbd6e11ebe67d19045a62e8b
+              bytes: 10783
+            - path: /Users/tigger/.agents/sdlc/technologies/NODE.md
+              sha256: f593fef2fdbdc081afbb51db388e296fb13cbfd3e95432aafcb7674acd5ba31c
+              bytes: 5098
+            - path: /Users/tigger/.agents/sdlc/technologies/PERL.md
+              sha256: 8f3cbdf5e0c5cf0c8eaa3228e36c0e77e94a697798ae613e1b81a523391b48e4
+              bytes: 3098
+            - path: /Users/tigger/.agents/sdlc/technologies/PYTHON.md
+              sha256: 3a0ca19f3ab1a99fd809561c7a1d67d8a31dde8dd5a74cc989355e7daab9f61d
+              bytes: 6272
+            - path: /Users/tigger/.agents/sdlc/technologies/RUST.md
+              sha256: a05725c8cbd6e8306bbc39b4d197f1e1c0dd9230d43cb8e67dcede388f4c34ba
+              bytes: 18482
+            - path: /Users/tigger/.agents/sdlc/technologies/SHELL.md
+              sha256: e7c3ad8d6ceb8b571abd3d6b36ef2e358c71691136e729cbed87cd5abadfd94d
+              bytes: 12345
+            - path: /Users/tigger/.agents/sdlc/technologies/SWIFT.md
+              sha256: 64830d92ac9bd5d3ef51aeb722dde09b758cff6f04dedb23b493cb356a3b3de9
+              bytes: 5212
+            - path: /Users/tigger/.agents/sdlc/technologies/WEB.md
+              sha256: fd6d48f27772f9384719b9bbe59efb62240a8adbd5d7f87b3e0dfb0452485381
+              bytes: 10438
+            - path: /Users/tigger/.agents/sdlc/templates/AGENTS-or-CLAUDE.example.md
+              sha256: d4d5614d8f9d441b7eff45f0e0f2aa1ce5b1a39cda43a55cb7c6e37c956d1087
+              bytes: 4814
+            - path: /Users/tigger/code/tigoss/superscale/.sdlc/project.yaml
+              sha256: f814dce0e4e2b7805773a5051975e2e02b1577570212ec7d82633eb2556ce905
+              bytes: 485
+            - path: /Users/tigger/code/tigoss/superscale/Casks/superscale-gui.rb
+              sha256: 5d0c7cd82743a69bdee74cdd39e6be62b7032b71372e2c2f03fa4a83e2f68637
+              bytes: 1412
+            - path: /Users/tigger/code/tigoss/superscale/Makefile
+              sha256: a553eff48439827526322276b0f86b6a54f06b77b3c8a682c0d04dc1d1fbfb9d
+              bytes: 6965
+            - path: /Users/tigger/code/tigoss/superscale/OneOff/Package.resolved
+              sha256: 402f2f5f6fe24ec09912a170823e8ab65c8ace1855c409fc0ba0e14590c07a89
+              bytes: 324
+            - path: /Users/tigger/code/tigoss/superscale/OneOff/Tests/OneOffTests/ReleaseInspectorOneOffTests.swift
+              sha256: 408db44b16a9d5a0a1f2f2630553b46f8ccf8a9097865e8443d719bcd056fccd
+              bytes: 3356
+            - path: /Users/tigger/code/tigoss/superscale/Package.resolved
+              sha256: b94c8d537a48f012c8ab65edf4caa3eafe18d3f69aabaa7c8be11f53b5a29430
+              bytes: 324
+            - path: /Users/tigger/code/tigoss/superscale/README.md
+              sha256: 9d341c64244ca9f19d989846bcf5256b16d90dc463d5052caddf7587db10b239
+              bytes: 8173
+            - path: /Users/tigger/code/tigoss/superscale/SuperscaleApp/SuperscaleApp.xcodeproj/project.pbxproj
+              sha256: 7fda2934366be84a398255fc2b7839993d461b4f75d2b80ae5456b33e99d8290
+              bytes: 19730
+            - path: /Users/tigger/code/tigoss/superscale/SuperscaleApp/SuperscaleApp.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+              sha256: 10c73a572c56b2aeafc1b4b2b02361332b22305adbe1368f66d182e55324711c
+              bytes: 409
+            - path: /Users/tigger/code/tigoss/superscale/SuperscaleApp/SuperscaleApp/Superscale.entitlements
+              sha256: 99daef167cdc678891a0b49601b6a34a0fae7240c2aa8bd44a753edc131c7d6d
+              bytes: 241
+            - path: /Users/tigger/code/tigoss/superscale/Tests/SuperscaleTests/ReleasePackagingTests.swift
+              sha256: bfdd6fa6e4348c3ca04f235af640e21c1a0f6845baef6aaf3aef723535ec3da1
+              bytes: 2796
+            - path: /Users/tigger/code/tigoss/superscale/docs/ARCHITECTURE.md
+              sha256: bde26a2f670f0c094d2d09b6121b2d6ee83182c26c6d3fb1636078f6bb3243a8
+              bytes: 20940
+            - path: /Users/tigger/code/tigoss/superscale/docs/RELEASE_CHECKLIST.md
+              sha256: 834b2cd33ea28176696b4aa2e64c2f0d537beb7ec688a990a633624f75d68c02
+              bytes: 5935
+            - path: /Users/tigger/code/tigoss/superscale/docs/work.org
+              sha256: 733a4a0c3d292dc7d4f217120aef18b66fdad0121c7209a108d339326626db91
+              bytes: 396430
+            - path: /Users/tigger/code/tigoss/superscale/scripts/inspect-gui-release.sh
+              sha256: bd6b095940b17098e794cd48d569d7ac4a09d465e5ee446ef72e9edf5741b54a
+              bytes: 1438
+            - path: /Users/tigger/code/tigoss/superscale/scripts/prepare-gui-release.sh
+              sha256: fd723a6a8d77538d66524b9880987ce8b8c36d6c5116a0679c0330bac609caa1
+              bytes: 5053
+            - path: /Users/tigger/code/tigoss/superscale/scripts/release-gui.sh
+              sha256: 83adbb054696ea81ae327a35d173e7e30147a79ae99b69ab5bc16a99b6d39d07
+              bytes: 5998
+            - path: /Users/tigger/code/tigoss/superscale/specs/153-developer-id-gui-release/spec.org
+              sha256: 30dd14e478beefbd146073e0f3fe955550a91c32b5737b12f7eaceec1a7d585b
+              bytes: 18189
+            - path: /Users/tigger/code/tigoss/superscale/specs/153-developer-id-gui-release/validation.org
+              sha256: f84e606f4e91ec83deebcd3c07912b96d7b811595a23182f9968a6eb7aca1671
+              bytes: 3943
+          round: 2
+          revision: 8978ebb04e8fe4ff8854a8e5231cb50b1c2555ae
+          verdict: PASS
+          response: |-
+            GATE: delivery-code
+            REVISION: 8978ebb04e8fe4ff8854a8e5231cb50b1c2555ae
+            VERDICT: PASS
+
+            Prior findings resolved:
+
+            1. README.md identity name corrected — the release-gui row now reads "Requires the Tadg Paul Ltd Developer ID identity", matching the actual keychain identity "Developer ID Application: Tadg Paul Ltd (2H98A242M4)".
+
+            2. Both changed documents now carry the metadata DOCUMENTATION.md and MARKDOWN.md require. README.md has YAML frontmatter (title, version "1.0", last-updated 2026-10-16) and a document changelog recording the Developer ID release-process update. RELEASE_CHECKLIST.md has frontmatter (version "1.3", last-updated 2026-10-16) and a 1.3 changelog entry recording the Developer ID signing and notarization checks, the Swift dependency security gate, and the current prompt-pack count. The stale "Version: 1.2 | Last updated: 2026-08-25" header is gone.
+
+            No new findings: the added frontmatter and changelog prose follow the impersonal factual voice; no audit state, verdicts, or session identity appear in either document. All other evidence is unchanged from the prior round — OT153.1/153.2/153.3 remain GREEN with dated evidence, UT153.1 remains explicitly AMBER (permitted), and the release scripts, Xcode signing configuration, cask, and tests are byte-identical to the candidate already assessed.
+          updated: "2026-10-16T11:48:15Z"
