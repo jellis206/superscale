@@ -1,0 +1,38 @@
+#+TITLE: W153 - Developer ID GUI release validation
+#+SCHEMA: 2
+#+STARTUP: content
+#+OPTIONS: toc:2 num:nil
+#+TODO: AMBER RED | GREEN
+
+* One-off tests
+
+** AMBER OT153.1 - Inspect release signature :testdef:
+:PROPERTIES:
+:CUSTOM_ID: ot-153-1-result
+:REASON: Awaiting local Release build and signed DMG inspection.
+:END:
+- Criterion :: [[file:spec.org::#ac-153-1][AC153.1 - Developer ID app signature]]
+
+** AMBER OT153.2 - Notarize and validate candidates :testdef:
+:PROPERTIES:
+:CUSTOM_ID: ot-153-2-result
+:REASON: Awaiting bounded live Apple notarization of app ZIP and DMG.
+:END:
+- Criterion :: [[file:spec.org::#ac-153-2][AC153.2 - Stapled notarization]]
+
+** AMBER OT153.3 - Check failed-release boundaries :testdef:
+:PROPERTIES:
+:CUSTOM_ID: ot-153-3-result
+:REASON: Awaiting local failure-boundary checks.
+:END:
+- Criterion :: [[file:spec.org::#ac-153-3][AC153.3 - Publication gate]]
+
+* User tests
+
+** AMBER UT153.1 - Validate downloaded cask launch :testdef:
+:PROPERTIES:
+:CUSTOM_ID: ut-153-1-result
+:REASON: Requires user validation after a published release and fresh cask download.
+:END:
+- Criterion :: [[file:spec.org::#ac-153-4][AC153.4 - First launch from cask]]
+- Method :: User validation on a supported Mac.

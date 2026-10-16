@@ -119,7 +119,7 @@ make install
 | `make test-gui` | Run the XCUITest suite against the built app. Covers the SwiftUI views, which `make test` does not build (~30 min of test time; give it the machine to itself, and keep the display awake --- a screensaver engaging mid-run fails tests in ways that read as timeouts) |
 | `make install` | Build + symlink to `~/.local/bin` |
 | `make release` | Tag, build CLI, push, update Homebrew formula (runs both test packs) |
-| `make release-gui` | Build GUI .app, package DMG, update Homebrew cask |
+| `make release-gui` | Build the Developer ID GUI app, notarize and staple the app and DMG, then upload the DMG and update the Homebrew cask. Requires the Taḋg Paul Ltd Developer ID identity and a `superscale-notary` Keychain profile; see the [release checklist](docs/RELEASE_CHECKLIST.md). |
 | `make release-models` | Upload model artefacts to GitHub Release |
 | `make download-models` | Download missing models from GitHub release |
 | `make convert-models` | Run PyTorch -> CoreML conversion (dev only) |

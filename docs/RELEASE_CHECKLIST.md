@@ -26,6 +26,27 @@ either provider is available in the MVP.
 - Confirm `make release` still builds the CLI path and `make release-gui` uses
   the distinct `.app` and DMG path.
 
+### Developer ID GUI release
+
+- Confirm the local Keychain has `Developer ID Application: Tadg Paul Ltd
+  (2H98A242M4)`. The certificate and private key stay in Keychain. The Xcode
+  Release configuration selects this identity; the certificate fingerprint is
+  not pinned in the project.
+- Store Apple notary credentials under the local Keychain profile
+  `superscale-notary` using `xcrun notarytool store-credentials`. Keep passwords
+  and API keys out of the repository and shell history.
+- Build the Release app and inspect its bundled resources. Verify its Developer
+  ID signature, secure timestamp, hardened runtime, nested code, and absence of
+  `get-task-allow` before submitting a ZIP to Apple.
+- Require Apple's `Accepted` result, then staple and validate the app ticket.
+  Package that app in the DMG, sign the DMG with the same Developer ID identity,
+  and verify its signature and secure timestamp.
+- Require a second `Accepted` result for the DMG, then staple and validate its
+  ticket. Calculate the SHA-256 after stapling. Only then upload the DMG and
+  update the cask. A signing, submission, or stapling failure stops publication.
+- After publication, install the cask from a fresh download and open the app
+  through Finder. Record the first-launch result as user validation for W153.
+
 ### Licence exclusion of the face model
 
 **AC1.5** requires the GFPGAN weights to be excluded from git, the Homebrew

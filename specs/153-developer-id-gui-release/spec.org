@@ -233,3 +233,20 @@
 - Evidence :: [[#constraints-and-dependencies][Constraints and dependencies]] and [[#solution-design][Solution Design]].
 - Reversibility :: Change the one helper constant and the matching release documentation.
 - Effect :: Local notarization authentication only; the Apple account and stored secret remain outside the repository.
+
+** Hands-off invocation 2026-10-16T07:02:39Z :hands-off:review:
+:PROPERTIES:
+:CUSTOM_ID: hands-off-2026-10-16-070239
+:INVOCATION_TIMESTAMP: 2026-10-16T07:02:39Z
+:END:
+
+*** D153.2 - Release authorization and verification boundary
+:PROPERTIES:
+:CUSTOM_ID: d-153-2
+:END:
+- Question :: Does the operator's approval to attempt publication change the W153 implementation verification boundary?
+- Decision :: Keep implementation verification unpublished as specified. After delivery review, the operator has separately authorized up to ten publication attempts using the named Developer ID identity. This does not change the two-submission OT153.2 bound or authorize a different signing identity.
+- Reason :: The release is an operational action after candidate verification; changing the signed-off acceptance criteria is unnecessary.
+- Evidence :: Operator instruction on 2026-10-16, "You may attempt up to 10 times to publish a release using this dev/cert id"; [[#solution-design][Solution Design]].
+- Reversibility :: No publication has occurred in this invocation; publication remains gated by signing and notarization.
+- Effect :: Current local credential absence stops the live OT before an Apple upload and leaves publication pending.
