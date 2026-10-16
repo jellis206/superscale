@@ -15,19 +15,29 @@
 		F1000006 /* ProgressOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2000006 /* ProgressOverlay.swift */; };
 		F1000007 /* ComparisonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2000007 /* ComparisonView.swift */; };
 		F1000008 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F2000008 /* Assets.xcassets */; };
-		F100000E /* LICENCE_NVIDIA.txt in Resources */ = {isa = PBXBuildFile; fileRef = F200000E /* LICENCE_NVIDIA.txt */; };
-		F100000F /* LICENCE_CC_BY_NC_SA.txt in Resources */ = {isa = PBXBuildFile; fileRef = F200000F /* LICENCE_CC_BY_NC_SA.txt */; };
 		F1000009 /* ScalePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F200000A /* ScalePicker.swift */; };
 		F100000B /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F200000B /* AboutView.swift */; };
 		F100000C /* InfoPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F200000C /* InfoPanel.swift */; };
 		F100000D /* FaceModelDownloadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F200000D /* FaceModelDownloadView.swift */; };
+		F100000E /* LICENCE_NVIDIA.txt in Resources */ = {isa = PBXBuildFile; fileRef = F200000E /* LICENCE_NVIDIA.txt */; };
+		F100000F /* LICENCE_CC_BY_NC_SA.txt in Resources */ = {isa = PBXBuildFile; fileRef = F200000F /* LICENCE_CC_BY_NC_SA.txt */; };
+		F1000010 /* SuperscaleKit in Frameworks */ = {isa = PBXBuildFile; productRef = F5000001 /* SuperscaleKit */; };
+		F1000011 /* SuperscaleUXCore in Frameworks */ = {isa = PBXBuildFile; productRef = F5000003 /* SuperscaleUXCore */; };
 		F1000012 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2000012 /* SettingsView.swift */; };
 		F1000013 /* FilterPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2000013 /* FilterPanel.swift */; };
 		F1000014 /* LockChainStrip.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2000014 /* LockChainStrip.swift */; };
-		F1000010 /* SuperscaleKit in Frameworks */ = {isa = PBXBuildFile; productRef = F5000001 /* SuperscaleKit */; };
-		F1000011 /* SuperscaleUXCore in Frameworks */ = {isa = PBXBuildFile; productRef = F5000003 /* SuperscaleUXCore */; };
 		F1000030 /* SuperscaleAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2000030 /* SuperscaleAppUITests.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		FA000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F7000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F6000001;
+			remoteInfo = SuperscaleApp;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		F2000001 /* SuperscaleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuperscaleApp.swift; sourceTree = "<group>"; };
@@ -48,9 +58,9 @@
 		F2000012 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		F2000013 /* FilterPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterPanel.swift; sourceTree = "<group>"; };
 		F2000014 /* LockChainStrip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockChainStrip.swift; sourceTree = "<group>"; };
-		F2000030 /* SuperscaleAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuperscaleAppUITests.swift; sourceTree = "<group>"; };
-		F2000021 /* SuperscaleAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SuperscaleAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F2000020 /* Superscale.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Superscale.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F2000021 /* SuperscaleAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SuperscaleAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F2000030 /* SuperscaleAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuperscaleAppUITests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,6 +109,15 @@
 			path = SuperscaleApp;
 			sourceTree = "<group>";
 		};
+		F4000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F2000020 /* Superscale.app */,
+				F2000021 /* SuperscaleAppUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		F4000004 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
@@ -116,21 +135,12 @@
 			path = SuperscaleAppUITests;
 			sourceTree = "<group>";
 		};
-		F4000003 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				F2000020 /* Superscale.app */,
-				F2000021 /* SuperscaleAppUITests.xctest */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		F6000001 /* Superscale */ = {
+		F6000001 /* SuperscaleApp */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F8000003 /* Build configuration list for PBXNativeTarget "Superscale" */;
+			buildConfigurationList = F8000003 /* Build configuration list for PBXNativeTarget "SuperscaleApp" */;
 			buildPhases = (
 				F3000002 /* Sources */,
 				F3000001 /* Frameworks */,
@@ -151,7 +161,7 @@
 		};
 		F6000002 /* SuperscaleAppUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F8000005;
+			buildConfigurationList = F8000005 /* Build configuration list for PBXNativeTarget "SuperscaleAppUITests" */;
 			buildPhases = (
 				F3000010 /* Sources */,
 			);
@@ -166,24 +176,6 @@
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
-
-/* Begin PBXTargetDependency section */
-		F9000001 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = F6000001 /* Superscale */;
-			targetProxy = FA000001 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
-
-/* Begin PBXContainerItemProxy section */
-		FA000001 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F7000001 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = F6000001;
-			remoteInfo = SuperscaleApp;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXProject section */
 		F7000001 /* Project object */ = {
@@ -209,7 +201,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				F6000001 /* Superscale */,
+				F6000001 /* SuperscaleApp */,
 				F6000002 /* SuperscaleAppUITests */,
 			);
 		};
@@ -260,6 +252,14 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		F9000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F6000001 /* SuperscaleApp */;
+			targetProxy = FA000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
 		F8000010 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -293,7 +293,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = SuperscaleApp/Superscale.entitlements;
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2H98A242M4;
@@ -433,7 +433,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		F8000003 /* Build configuration list for PBXNativeTarget "Superscale" */ = {
+		F8000003 /* Build configuration list for PBXNativeTarget "SuperscaleApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F8000010 /* Debug */,
