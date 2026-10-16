@@ -10,7 +10,7 @@ struct Superscale: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "superscale",
         abstract: "AI image upscaling for Apple Silicon.",
-        version: "v1.0.8 Superscale by Tadhg O'Brien",
+        version: "v1.0.9 Superscale by Tadhg O'Brien",
         helpNames: []
     )
 
