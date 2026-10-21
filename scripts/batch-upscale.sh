@@ -4,6 +4,8 @@
 #
 #   scripts/batch-upscale.sh DIR [MODEL]
 #
+# MODEL is a full model name or any unique piece of one (gan-x4 for
+# realesrgan-x4plus); default realesr-general-wdn-x4v3.
 # Writes DIR-upped next to DIR, each output named like its original. An existing
 # DIR-upped is moved to the Trash and rebuilt. Takes JPEG, PNG, HEIC/HEIF and
 # TIFF (any extension case); JPEG/PNG keep their format, everything else
@@ -20,6 +22,18 @@ LOG="$OUT.logs"
 
 [[ -d "$IN" ]] || { echo "not a directory: $IN" >&2; exit 2; }
 command -v superscale >/dev/null || { echo "superscale not on PATH" >&2; exit 2; }
+
+# MODEL may be any unique substring of a model name (wdn, gan-x4, x2).
+models=$(superscale --list-models | awk '/^Models:/{on=1; next} on && NF==0{exit} on{print $1}')
+if ! grep -qxF -- "$MODEL" <<<"$models"; then
+  matches=$(grep -F -- "$MODEL" <<<"$models")
+  [[ -n "$matches" && $(wc -l <<<"$matches") -eq 1 ]] || {
+    echo "model '$MODEL' matches ${matches:+several: }$(tr '\n' ' ' <<<"${matches:-nothing. Models: $models}")" >&2
+    exit 2
+  }
+  MODEL="$matches"
+fi
+echo "Model: $MODEL  Scale: ${SCALE}x"
 for old in "$OUT" "$LOG"; do
   [[ -e "$old" ]] && { trash "$old" || exit 1; }
 done
