@@ -20,6 +20,10 @@
 # An existing output folder is moved to the Trash and rebuilt, unless it holds
 # more than 32 files: then you are asked whether to trash it or resume, which
 # skips everything already in it. Logs go to <output folder>.logs/.
+#
+# More than 32 images to do, or any video, runs JOBS (default 3) superscale
+# processes at once. They share one Neural Engine: on an M-series Mac 3 ran
+# the default model 2.6x faster than 1, and more than 3 added nothing.
 # Face enhancement is always off.
 set -uo pipefail
 
@@ -37,6 +41,7 @@ set -- "${args[@]+"${args[@]}"}"
 IN="${1%/}"
 MODEL="${2:-realesr-general-wdn-x4v3}"
 SCALE="${SCALE:-2}"
+JOBS="${JOBS:-3}"
 
 [[ -d "$IN" ]] || { echo "not a directory: $IN" >&2; exit 2; }
 command -v superscale >/dev/null || { echo "superscale not on PATH" >&2; exit 2; }
@@ -113,20 +118,45 @@ done_before() {
 if ((IMAGES)); then
   OUT="$IN-upped" LOG="$IN-upped.logs"
   prepare "$OUT"
+  # superscale writes stem_<scale>x.<ext>, and only as PNG/JPEG; for other
+  # inputs that is PNG data under the input's extension, so rename to .png.
+  image_dest() {
+    local name="${1##*/}"
+    if [[ "${name##*.}" =~ ^([jJ][pP][eE]?[gG]|[pP][nN][gG])$ ]]; then
+      echo "$OUT/$name"
+    else
+      echo "$OUT/${name%.*}.png"
+    fi
+  }
+  upscale_image() {
+    local name="${1##*/}"
+    superscale -m "$MODEL" -s "$SCALE" --no-face-enhance -o "$OUT" "$1" >>"$LOG/process.log" 2>&1 &&
+      mv -- "$OUT/${name%.*}_${SCALE}x.${name##*.}" "$(image_dest "$1")"
+  }
+
+  pending=()
   while IFS= read -r -d '' photo; do
     total=$((total + 1))
-    name=$(basename "$photo")
-    stem="${name%.*}" ext="${name##*.}"
-    # superscale writes stem_<scale>x.<ext>, and only as PNG/JPEG; for other
-    # inputs that is PNG data under the input's extension, so rename to .png.
-    final="$OUT/$name"
-    [[ "$ext" =~ ^([jJ][pP][eE]?[gG]|[pP][nN][gG])$ ]] || final="$OUT/$stem.png"
-    done_before "$final" && continue
-    echo "[$total] $name"
-    superscale -m "$MODEL" -s "$SCALE" --no-face-enhance -o "$OUT" "$photo" >>"$LOG/process.log" 2>&1 &&
-      mv -- "$OUT/${stem}_${SCALE}x.$ext" "$final"
-    record "$name" $?
+    done_before "$(image_dest "$photo")" || pending+=("$photo")
   done < <(list jpg jpeg png heic heif tif tiff)
+  n=${#pending[@]} workers=1
+  ((n > 32)) && workers=$JOBS
+  ((n)) && echo "Upscaling $n image(s), $workers at a time"
+  # Each worker takes every $workers-th image and reports "<status> <path>".
+  k=0
+  while read -r status photo; do
+    k=$((k + 1))
+    echo "[$k/$n] ${photo##*/}"
+    record "${photo##*/}" "$status"
+  done < <(
+    for ((w = 0; w < workers; w++)); do
+      (for ((j = w; j < n; j += workers)); do
+        upscale_image "${pending[j]}"
+        echo "$? ${pending[j]}"
+      done) &
+    done
+    wait
+  )
 
   copied=0
   while IFS= read -r -d '' video; do
@@ -153,7 +183,16 @@ upscale_video() { # $1 = source video, $2 = destination
     echo "  ${size% } is already 4K, copying"
     cp -- "$1" "$tmp/$name" || return 1
   else
-    superscale -m "$MODEL" --width 3840 --height 2160 --no-face-enhance -o "$tmp/up" "$tmp"/in/*.jpg >&2 &&
+    # Frames are split across $JOBS superscale processes.
+    local all=("$tmp"/in/*.jpg) chunk pids=() w j pid ok=1
+    for ((w = 0; w < JOBS && w < frames; w++)); do
+      chunk=()
+      for ((j = w; j < frames; j += JOBS)); do chunk+=("${all[j]}"); done
+      superscale -m "$MODEL" --width 3840 --height 2160 --no-face-enhance -o "$tmp/up" "${chunk[@]}" >&2 &
+      pids+=($!)
+    done
+    for pid in "${pids[@]}"; do wait "$pid" || ok=0; done
+    ((ok)) &&
       ffmpeg -nostdin -v error -framerate "$fps" -pattern_type glob -i "$tmp/up/*.jpg" -i "$1" \
         -map 0:v -map '1:a?' -vf 'scale=trunc(iw/2)*2:trunc(ih/2)*2' \
         -c:v libx264 -crf 18 -preset medium -pix_fmt yuv420p -c:a copy -shortest \
