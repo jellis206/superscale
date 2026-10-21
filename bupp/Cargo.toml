@@ -1,0 +1,12 @@
+[package]
+name = "bupp"
+version = "0.1.0"
+edition = "2024"
+description = "Batch-upscale a folder of photos and videos with superscale"
+license = "Apache-2.0"
+publish = false
+
+[dependencies]
+anyhow = "1"
+clap = { version = "4", features = ["derive", "env"] }
+ctrlc = "3"
