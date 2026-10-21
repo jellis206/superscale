@@ -1,30 +1,34 @@
 #!/usr/bin/env bash
-# ABOUTME: Upscales every image, then every video, in a folder into a sibling
-# ABOUTME: "<folder>-upped" mirror, logging failures without stopping the batch.
+# ABOUTME: Upscales every image in a folder into a sibling "<folder>-upped" mirror,
+# ABOUTME: and optionally every video into "<folder>-upped-videos".
 #
-#   scripts/batch-upscale.sh [-v|--videos] DIR [MODEL]
+#   scripts/batch-upscale.sh [-v|--videos] [-V|--videos-only] DIR [MODEL]
 #
 # MODEL is a full model name or any unique piece of one (gan-x4 for
 # realesrgan-x4plus); default realesr-general-wdn-x4v3.
-# Writes DIR-upped next to DIR, each output named like its original. An existing
-# DIR-upped is moved to the Trash and rebuilt. Logs go to DIR-upped.logs/.
 #
-# Pass 1, images: JPEG, PNG, HEIC/HEIF, TIFF (any extension case), scaled by
-# SCALE (default 2). JPEG/PNG keep their format; everything else becomes PNG
-# (photo.HEIC -> photo.png).
-# Pass 2, videos: MP4, MOV, M4V are copied as-is unless -v is given. With -v,
-# every frame is upscaled to fit 3840x2160 (a 4K TV; SCALE is ignored) and
-# re-encoded as H.264 with the original audio; videos already that size are
-# still copied. -v needs ffmpeg, and frames in $TMPDIR take a few GB per minute
-# of video (about 20 minutes of processing per minute of 30 fps video).
+# Images -> DIR-upped (skipped with -V): JPEG, PNG, HEIC/HEIF, TIFF (any
+# extension case), scaled by SCALE (default 2), each named like its original.
+# JPEG/PNG keep their format; everything else becomes PNG (photo.HEIC ->
+# photo.png). MP4/MOV/M4V are copied in unchanged, so the folder is a full mirror.
+#
+# Videos -> DIR-upped-videos (with -v or -V): every frame is upscaled to fit
+# 3840x2160 (a 4K TV; SCALE is ignored) and re-encoded as H.264 with the
+# original audio; videos already that size are copied. Needs ffmpeg; frames in
+# $TMPDIR take a few GB, and about 20 minutes, per minute of 30 fps video.
+#
+# An existing output folder is moved to the Trash and rebuilt, unless it holds
+# more than 32 files: then you are asked whether to trash it or resume, which
+# skips everything already in it. Logs go to <output folder>.logs/.
 # Face enhancement is always off.
 set -uo pipefail
 
-VIDEOS=0
+IMAGES=1 VIDEOS=0
 args=()
 for a; do
   case "$a" in
   -v | --v | --videos) VIDEOS=1 ;;
+  -V | --videos-only) VIDEOS=1 IMAGES=0 ;;
   *) args+=("$a") ;;
   esac
 done
@@ -33,11 +37,13 @@ set -- "${args[@]+"${args[@]}"}"
 IN="${1%/}"
 MODEL="${2:-realesr-general-wdn-x4v3}"
 SCALE="${SCALE:-2}"
-OUT="$IN-upped"
-LOG="$OUT.logs"
 
 [[ -d "$IN" ]] || { echo "not a directory: $IN" >&2; exit 2; }
 command -v superscale >/dev/null || { echo "superscale not on PATH" >&2; exit 2; }
+if ((VIDEOS)) && ! command -v ffmpeg >/dev/null; then
+  echo "ffmpeg not found (brew install ffmpeg)" >&2
+  exit 2
+fi
 
 # MODEL may be any unique substring of a model name (wdn, gan-x4, x2).
 models=$(superscale --list-models | awk '/^Models:/{on=1; next} on && NF==0{exit} on{print $1}')
@@ -50,17 +56,39 @@ if ! grep -qxF -- "$MODEL" <<<"$models"; then
   MODEL="$matches"
 fi
 echo "Model: $MODEL  Scale: ${SCALE}x"
-for old in "$OUT" "$LOG"; do
-  [[ -e "$old" ]] && { trash "$old" || exit 1; }
-done
-mkdir -p "$OUT" "$LOG"
+
+# Make output folder $1 (and its .logs) ready. Sets RESUME=1 when picking up
+# an earlier run instead of starting over.
+prepare() {
+  local n ans
+  RESUME=0
+  if [[ -e "$1" ]]; then
+    n=$(find "$1" -maxdepth 1 -type f | wc -l | tr -d ' ')
+    if ((n > 32)); then
+      if ! { : </dev/tty; } 2>/dev/null ||
+        ! read -r -p "$1 already has $n files. [r]esume, [d]elete and start over, or [q]uit? " ans </dev/tty; then
+        echo "no terminal to ask, resuming" >&2
+        ans=r
+      fi
+      case "$ans" in
+      r | R) RESUME=1 ;;
+      d | D) trash "$1" || exit 1 ;;
+      *) exit 1 ;;
+      esac
+    else
+      trash "$1" || exit 1
+    fi
+  fi
+  if [[ -e "$1.logs" ]] && ((!RESUME)); then trash "$1.logs" || exit 1; fi
+  mkdir -p "$1" "$1.logs"
+}
 
 # Keep the Mac awake until this script exits.
 caffeinate -i -w $$ &
 tmp=""
 trap '[[ -n "$tmp" ]] && rm -rf "$tmp"' EXIT
 
-total=0 done_=0 failed=0
+total=0 done_=0 skipped=0 failed=0
 record() { # $1 = name, $2 = exit status of the upscale
   if (($2 == 0)); then
     done_=$((done_ + 1))
@@ -76,27 +104,45 @@ list() { # files in IN with any of the given extensions, sorted
   for ext; do args+=(-o -iname "*.$ext"); done
   find "$IN" -maxdepth 1 -type f \( "${args[@]:1}" \) -print0 | sort -z
 }
+# On resume, true (and counted) when $1 already exists.
+done_before() {
+  ((RESUME)) && [[ -e "$1" ]] && skipped=$((skipped + 1))
+}
 
-# ---- pass 1: images ----
-while IFS= read -r -d '' photo; do
-  total=$((total + 1))
-  name=$(basename "$photo")
-  stem="${name%.*}" ext="${name##*.}"
-  # superscale writes stem_<scale>x.<ext>, and only as PNG/JPEG; for other
-  # inputs that is PNG data under the input's extension, so rename to .png.
-  final="$OUT/$name"
-  [[ "$ext" =~ ^([jJ][pP][eE]?[gG]|[pP][nN][gG])$ ]] || final="$OUT/$stem.png"
-  echo "[$total] $name"
-  superscale -m "$MODEL" -s "$SCALE" --no-face-enhance -o "$OUT" "$photo" >>"$LOG/process.log" 2>&1 &&
-    mv -- "$OUT/${stem}_${SCALE}x.$ext" "$final"
-  record "$name" $?
-done < <(list jpg jpeg png heic heif tif tiff)
+# ---- images -> DIR-upped ----
+if ((IMAGES)); then
+  OUT="$IN-upped" LOG="$IN-upped.logs"
+  prepare "$OUT"
+  while IFS= read -r -d '' photo; do
+    total=$((total + 1))
+    name=$(basename "$photo")
+    stem="${name%.*}" ext="${name##*.}"
+    # superscale writes stem_<scale>x.<ext>, and only as PNG/JPEG; for other
+    # inputs that is PNG data under the input's extension, so rename to .png.
+    final="$OUT/$name"
+    [[ "$ext" =~ ^([jJ][pP][eE]?[gG]|[pP][nN][gG])$ ]] || final="$OUT/$stem.png"
+    done_before "$final" && continue
+    echo "[$total] $name"
+    superscale -m "$MODEL" -s "$SCALE" --no-face-enhance -o "$OUT" "$photo" >>"$LOG/process.log" 2>&1 &&
+      mv -- "$OUT/${stem}_${SCALE}x.$ext" "$final"
+    record "$name" $?
+  done < <(list jpg jpeg png heic heif tif tiff)
 
-# ---- pass 2: videos ----
+  copied=0
+  while IFS= read -r -d '' video; do
+    dest="$OUT/$(basename "$video")"
+    [[ -e "$dest" ]] && continue
+    cp -- "$video" "$dest.part" && mv -- "$dest.part" "$dest" && copied=$((copied + 1))
+  done < <(list mp4 mov m4v)
+  ((copied)) && echo "Copied $copied video(s) as-is"
+fi
+
+# ---- videos -> DIR-upped-videos ----
 # ponytail: frames go through 8-bit JPEG, so HDR (iPhone HLG/Dolby Vision) video
 # loses its HDR look; add a tonemap filter to the extract step if that matters.
 upscale_video() { # $1 = source video, $2 = destination
-  local fps size frames start=$SECONDS
+  local fps size frames start=$SECONDS name
+  name=$(basename "$2")
   tmp=$(mktemp -d) && mkdir "$tmp/in" "$tmp/up" || return 1
   fps=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of csv=p=0 "$1") &&
     ffmpeg -nostdin -v error -i "$1" -vf "fps=$fps" -q:v 2 "$tmp/in/f%06d.jpg" || return 1
@@ -105,40 +151,38 @@ upscale_video() { # $1 = source video, $2 = destination
   size=$(sips -g pixelWidth -g pixelHeight "$tmp/in/f000001.jpg" | awk 'NR>1{printf "%s ", $2}')
   if awk -v s="$size" 'BEGIN{split(s, d, " "); exit !(d[1] >= 3840 || d[2] >= 2160)}'; then
     echo "  ${size% } is already 4K, copying"
-    cp -- "$1" "$2"
+    cp -- "$1" "$tmp/$name" || return 1
   else
     superscale -m "$MODEL" --width 3840 --height 2160 --no-face-enhance -o "$tmp/up" "$tmp"/in/*.jpg >&2 &&
       ffmpeg -nostdin -v error -framerate "$fps" -pattern_type glob -i "$tmp/up/*.jpg" -i "$1" \
         -map 0:v -map '1:a?' -vf 'scale=trunc(iw/2)*2:trunc(ih/2)*2' \
         -c:v libx264 -crf 18 -preset medium -pix_fmt yuv420p -c:a copy -shortest \
-        -movflags +faststart "$2" || return 1
+        -movflags +faststart "$tmp/$name" || return 1
     local secs=$((SECONDS - start))
     echo "  $frames frames, ${size% } -> $(sips -g pixelWidth -g pixelHeight "$tmp/up/f000001_"*.jpg |
       awk 'NR>1{printf "%s ", $2}')in ${secs}s ($(awk -v f="$frames" -v s="$secs" 'BEGIN{printf "%.1f", f / (s ? s : 1)}') fps)"
   fi
+  # Built in tmp and moved in whole, so an interrupted run never leaves a
+  # partial video that resume would mistake for a finished one.
+  mv -- "$tmp/$name" "$2" || return 1
   rm -rf "$tmp"
   tmp=""
 }
 
-if ((VIDEOS)) && [[ -n "$(list mp4 mov m4v | tr -d '\0')" ]] && ! command -v ffmpeg >/dev/null; then
-  echo "ffmpeg not found, copying videos instead (brew install ffmpeg)" >&2
-  VIDEOS=0
-fi
-copied=0
-while IFS= read -r -d '' video; do
-  name=$(basename "$video")
-  if ((VIDEOS)); then
+if ((VIDEOS)); then
+  OUT="$IN-upped-videos" LOG="$IN-upped-videos.logs"
+  prepare "$OUT"
+  while IFS= read -r -d '' video; do
     total=$((total + 1))
+    name=$(basename "$video")
+    done_before "$OUT/$name" && continue
     echo "[$total] $name"
     upscale_video "$video" "$OUT/$name" 2>>"$LOG/process.log"
     record "$name" $?
-  else
-    cp -- "$video" "$OUT/$name" && copied=$((copied + 1))
-  fi
-done < <(list mp4 mov m4v)
-((copied)) && echo "Copied $copied video(s) as-is (pass -v to upscale them)"
+  done < <(list mp4 mov m4v)
+fi
 
 echo
-echo "Found $total, upscaled $done_, failed $failed"
-echo "Output: $OUT  Logs: $LOG"
+echo "Found $total, upscaled $done_, already done $skipped, failed $failed"
+echo "Output: $IN-upped$( ((IMAGES)) || echo -videos)$( ((IMAGES && VIDEOS)) && echo " and $IN-upped-videos")"
 ((failed == 0))
