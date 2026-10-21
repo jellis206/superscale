@@ -222,6 +222,6 @@ if ((VIDEOS)); then
 fi
 
 echo
-echo "Found $total, upscaled $done_, already done $skipped, failed $failed"
+echo "Found $total, upscaled $done_, already done $skipped, failed $failed in $((SECONDS / 3600))h $((SECONDS % 3600 / 60))m $((SECONDS % 60))s"
 echo "Output: $IN-upped$( ((IMAGES)) || echo -videos)$( ((IMAGES && VIDEOS)) && echo " and $IN-upped-videos")"
 ((failed == 0))
