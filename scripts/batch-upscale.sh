@@ -2,7 +2,7 @@
 # ABOUTME: Upscales every image, then every video, in a folder into a sibling
 # ABOUTME: "<folder>-upped" mirror, logging failures without stopping the batch.
 #
-#   scripts/batch-upscale.sh DIR [MODEL]
+#   scripts/batch-upscale.sh [-v|--videos] DIR [MODEL]
 #
 # MODEL is a full model name or any unique piece of one (gan-x4 for
 # realesrgan-x4plus); default realesr-general-wdn-x4v3.
@@ -12,13 +12,23 @@
 # Pass 1, images: JPEG, PNG, HEIC/HEIF, TIFF (any extension case), scaled by
 # SCALE (default 2). JPEG/PNG keep their format; everything else becomes PNG
 # (photo.HEIC -> photo.png).
-# Pass 2, videos: MP4, MOV, M4V. Every frame is upscaled to fit 3840x2160 (a 4K
-# TV; SCALE is ignored) and re-encoded as H.264 with the original audio. Videos
-# already that size are copied as-is. Needs ffmpeg, and frames in $TMPDIR take
-# a few GB per minute of video.
+# Pass 2, videos: MP4, MOV, M4V are copied as-is unless -v is given. With -v,
+# every frame is upscaled to fit 3840x2160 (a 4K TV; SCALE is ignored) and
+# re-encoded as H.264 with the original audio; videos already that size are
+# still copied. -v needs ffmpeg, and frames in $TMPDIR take a few GB per minute
+# of video (about 20 minutes of processing per minute of 30 fps video).
 # Face enhancement is always off.
 set -uo pipefail
 
+VIDEOS=0
+args=()
+for a; do
+  case "$a" in
+  -v | --v | --videos) VIDEOS=1 ;;
+  *) args+=("$a") ;;
+  esac
+done
+set -- "${args[@]+"${args[@]}"}"
 [[ $# -ge 1 ]] || { sed -n 5p "$0" | sed 's/^# *//' >&2; exit 2; }
 IN="${1%/}"
 MODEL="${2:-realesr-general-wdn-x4v3}"
@@ -110,17 +120,23 @@ upscale_video() { # $1 = source video, $2 = destination
   tmp=""
 }
 
-if [[ -n "$(list mp4 mov m4v | tr -d '\0')" ]] && ! command -v ffmpeg >/dev/null; then
-  echo "ffmpeg not found, skipping videos (brew install ffmpeg)" >&2
-else
-  while IFS= read -r -d '' video; do
+if ((VIDEOS)) && [[ -n "$(list mp4 mov m4v | tr -d '\0')" ]] && ! command -v ffmpeg >/dev/null; then
+  echo "ffmpeg not found, copying videos instead (brew install ffmpeg)" >&2
+  VIDEOS=0
+fi
+copied=0
+while IFS= read -r -d '' video; do
+  name=$(basename "$video")
+  if ((VIDEOS)); then
     total=$((total + 1))
-    name=$(basename "$video")
     echo "[$total] $name"
     upscale_video "$video" "$OUT/$name" 2>>"$LOG/process.log"
     record "$name" $?
-  done < <(list mp4 mov m4v)
-fi
+  else
+    cp -- "$video" "$OUT/$name" && copied=$((copied + 1))
+  fi
+done < <(list mp4 mov m4v)
+((copied)) && echo "Copied $copied video(s) as-is (pass -v to upscale them)"
 
 echo
 echo "Found $total, upscaled $done_, failed $failed"
