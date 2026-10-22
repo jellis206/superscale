@@ -146,12 +146,16 @@ final class ImageIOTests: XCTestCase {
     ///
     /// - Parameter resolution: the dpi to record, or nothing to record none at all. A PNG with no
     ///   `pHYs` chunk is the commonest real file and takes a different path through `ImageIO`.
+    ///
+    /// - Parameter orientation: an EXIF orientation to record. The left half of the stored pixels
+    ///   is red and the right half blue, so where red ends up shows which way it was turned.
     private func writeImage(
         width: Int, height: Int,
         resolution: (horizontal: Double, vertical: Double)?,
         type: CFString,
         named name: String,
-        in directory: URL
+        in directory: URL,
+        orientation: Int? = nil
     ) throws -> URL {
         let context = try XCTUnwrap(
             CGContext(
@@ -160,6 +164,12 @@ final class ImageIOTests: XCTestCase {
                 bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue))
         context.setFillColor(CGColor(red: 0.3, green: 0.5, blue: 0.7, alpha: 1))
         context.fill(CGRect(x: 0, y: 0, width: width, height: height))
+        if orientation != nil {
+            context.setFillColor(CGColor(red: 1, green: 0, blue: 0, alpha: 1))
+            context.fill(CGRect(x: 0, y: 0, width: width / 2, height: height))
+            context.setFillColor(CGColor(red: 0, green: 0, blue: 1, alpha: 1))
+            context.fill(CGRect(x: width / 2, y: 0, width: width - width / 2, height: height))
+        }
         let image = try XCTUnwrap(context.makeImage())
 
         let url = directory.appendingPathComponent(name)
@@ -170,6 +180,9 @@ final class ImageIOTests: XCTestCase {
         if let resolution {
             properties[kCGImagePropertyDPIWidth] = resolution.horizontal
             properties[kCGImagePropertyDPIHeight] = resolution.vertical
+        }
+        if let orientation {
+            properties[kCGImagePropertyOrientation] = orientation
         }
         CGImageDestinationAddImage(destination, image, properties as CFDictionary)
         XCTAssertTrue(CGImageDestinationFinalize(destination), "the fixture was written")
@@ -279,5 +292,50 @@ final class ImageIOTests: XCTestCase {
         let loaded = try ImageLoader.load(from: url)
         XCTAssertEqual(loaded.image.width, 1920)
         XCTAssertEqual(loaded.image.height, 1080)
+    }
+
+    // MARK: - Orientation
+
+    // A camera stores a portrait sideways and records orientation 6 ("turn 90° clockwise to
+    // view") instead of rotating the pixels. Loading must apply it, or the upscale, which carries
+    // no orientation, comes out sideways.
+    func test_aPictureRecordingAnOrientationLoadsUpright() throws {
+        let directory = try scratchDirectory()
+        let url = try writeImage(
+            width: 40, height: 20, resolution: nil,
+            type: "public.jpeg" as CFString, named: "portrait.jpg", in: directory,
+            orientation: 6)
+
+        let loaded = try ImageLoader.load(from: url).image
+        XCTAssertEqual(loaded.width, 20, "turned to portrait")
+        XCTAssertEqual(loaded.height, 40)
+        // Turning clockwise brings the stored left (red) half to the top.
+        let (top, bottom) = try (rgb(of: loaded, x: 10, y: 5), rgb(of: loaded, x: 10, y: 35))
+        XCTAssertGreaterThan(top.red, 200, "top is red: \(top)")
+        XCTAssertGreaterThan(bottom.blue, 200, "bottom is blue: \(bottom)")
+    }
+
+    // The writer only makes PNG and JPEG, so a HEIC or TIFF input must not get its own extension
+    // on what is really a PNG.
+    func test_outputFilenameNamesTheFormatActuallyWritten() {
+        XCTAssertEqual(ImageWriter.outputFilename(for: "/a/photo.jpg", scale: 2), "photo_2x.jpg")
+        XCTAssertEqual(ImageWriter.outputFilename(for: "/a/photo.JPEG", scale: 4), "photo_4x.JPEG")
+        XCTAssertEqual(ImageWriter.outputFilename(for: "/a/shot.png", scale: 2.4), "shot_2.4x.png")
+        XCTAssertEqual(ImageWriter.outputFilename(for: "/a/IMG_1.HEIC", scale: 2), "IMG_1_2x.png")
+        XCTAssertEqual(ImageWriter.outputFilename(for: "/a/scan.tiff", scale: 2), "scan_2x.png")
+        XCTAssertEqual(ImageWriter.outputFilename(for: "/a/bare", scale: 2), "bare_2x.png")
+    }
+
+    /// The colour of one pixel, `y` counted from the top.
+    private func rgb(of image: CGImage, x: Int, y: Int) throws -> (red: UInt8, green: UInt8, blue: UInt8) {
+        var pixels = [UInt8](repeating: 0, count: image.width * image.height * 4)
+        let context = try XCTUnwrap(
+            CGContext(
+                data: &pixels, width: image.width, height: image.height, bitsPerComponent: 8,
+                bytesPerRow: image.width * 4, space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue))
+        context.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
+        let i = (y * image.width + x) * 4
+        return (pixels[i], pixels[i + 1], pixels[i + 2])
     }
 }

@@ -33,10 +33,10 @@ public enum ImageDimensions {
     /// the window. Properties come from the file's header and cost none of it.
     ///
     /// `kCGImagePropertyPixelWidth` is the stored pixel count, unaffected by the resolution that
-    /// caused this issue. It is also uncorrected for EXIF orientation — and so is
-    /// `CGImageSourceCreateImageAtIndex`, which is what `SuperscaleKit` upscales. A rotated
-    /// photograph therefore measures as the pipeline will actually treat it. An
-    /// orientation-correcting source would look more careful and would disagree with the pixels.
+    /// caused this issue. It is also uncorrected for EXIF orientation, while `ImageLoader` turns a
+    /// picture upright before `SuperscaleKit` upscales it. So the axes are swapped here for the
+    /// quarter-turn orientations (5-8), and a rotated photograph measures as the pipeline will
+    /// actually treat it.
     public static func pixelSize(of url: URL) -> CGSize {
         guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
             let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil)
@@ -45,6 +45,9 @@ public enum ImageDimensions {
             let height = properties[kCGImagePropertyPixelHeight] as? Int
         else { return .zero }
 
-        return CGSize(width: width, height: height)
+        let orientation = properties[kCGImagePropertyOrientation] as? Int ?? 1
+        return (5...8).contains(orientation)
+            ? CGSize(width: height, height: width)
+            : CGSize(width: width, height: height)
     }
 }

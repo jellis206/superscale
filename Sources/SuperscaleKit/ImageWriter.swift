@@ -83,11 +83,12 @@ public enum ImageWriter {
     /// Generate an output filename from an input filename.
     ///
     /// Appends `_{scale}x` before the extension. Integer scales produce `_4x`,
-    /// fractional scales produce `_2.4x`.
+    /// fractional scales produce `_2.4x`. Inputs in a format this writer can't
+    /// produce (HEIC, TIFF) are written as PNG, so they get a `.png` name.
     public static func outputFilename(for inputPath: String, scale: Double) -> String {
         let url = URL(fileURLWithPath: inputPath)
         let stem = url.deletingPathExtension().lastPathComponent
-        let ext = url.pathExtension.isEmpty ? "png" : url.pathExtension
+        let ext = OutputFormat.from(extension: url.pathExtension) == nil ? "png" : url.pathExtension
         let scaleStr: String
         if scale == scale.rounded(.towardZero) && scale >= 1 {
             scaleStr = "\(Int(scale))x"

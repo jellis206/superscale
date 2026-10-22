@@ -31,7 +31,7 @@ public enum ImageLoader {
         guard let source = CGImageSourceCreateWithURL(url as CFURL, nil) else {
             throw ImageIOError.cannotReadFile(url.path)
         }
-        guard let cgImage = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
+        guard let cgImage = decodeUpright(source) else {
             throw ImageIOError.cannotDecodeImage(url.path)
         }
 
@@ -51,6 +51,28 @@ public enum ImageLoader {
             colorSpace: colorSpace,
             hasAlpha: hasAlpha
         )
+    }
+
+    /// The first image, turned the way it is meant to be seen.
+    ///
+    /// Cameras store a portrait sideways and record an EXIF/HEIF orientation rather than rotating
+    /// the pixels. `CGImageSourceCreateImageAtIndex` ignores the orientation, and the written
+    /// upscale carries none, so it came out sideways. The thumbnail call is ImageIO's one decode
+    /// that applies it; at the full long edge it is the whole picture, not a reduction.
+    private static func decodeUpright(_ source: CGImageSource) -> CGImage? {
+        let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any]
+        guard let orientation = properties?[kCGImagePropertyOrientation] as? Int, orientation != 1,
+              let width = properties?[kCGImagePropertyPixelWidth] as? Int,
+              let height = properties?[kCGImagePropertyPixelHeight] as? Int
+        else {
+            return CGImageSourceCreateImageAtIndex(source, 0, nil)
+        }
+        let options: [CFString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceThumbnailMaxPixelSize: max(width, height),
+        ]
+        return CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary)
     }
 
     /// Extract the alpha channel from an image as a greyscale CGImage.

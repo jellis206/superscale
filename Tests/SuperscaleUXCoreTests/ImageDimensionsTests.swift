@@ -36,7 +36,8 @@ final class ImageDimensionsTests: XCTestCase {
         width: Int, height: Int,
         resolution: (horizontal: Double, vertical: Double)?,
         named name: String,
-        in directory: URL
+        in directory: URL,
+        orientation: Int? = nil
     ) throws -> URL {
         let context = try XCTUnwrap(
             CGContext(
@@ -56,6 +57,9 @@ final class ImageDimensionsTests: XCTestCase {
         if let resolution {
             properties[kCGImagePropertyDPIWidth] = resolution.horizontal
             properties[kCGImagePropertyDPIHeight] = resolution.vertical
+        }
+        if let orientation {
+            properties[kCGImagePropertyOrientation] = orientation
         }
         CGImageDestinationAddImage(destination, image, properties as CFDictionary)
         XCTAssertTrue(CGImageDestinationFinalize(destination), "the fixture was written")
@@ -119,5 +123,20 @@ final class ImageDimensionsTests: XCTestCase {
 
         XCTAssertEqual(
             ImageDimensions.pixelSize(of: url), CGSize(width: 640, height: 960))
+    }
+
+    /// A sideways-stored portrait measures upright, as `ImageLoader` loads it, and a picture
+    /// merely mirrored keeps its axes.
+    func test_aRecordedQuarterTurnSwapsTheAxes() throws {
+        let directory = try scratchDirectory()
+        let turned = try writeImage(
+            width: 1200, height: 900, resolution: nil, named: "turned.png", in: directory,
+            orientation: 6)
+        let mirrored = try writeImage(
+            width: 1210, height: 905, resolution: nil, named: "mirrored.png", in: directory,
+            orientation: 2)
+
+        XCTAssertEqual(ImageDimensions.pixelSize(of: turned), CGSize(width: 900, height: 1200))
+        XCTAssertEqual(ImageDimensions.pixelSize(of: mirrored), CGSize(width: 1210, height: 905))
     }
 }
