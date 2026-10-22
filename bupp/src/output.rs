@@ -1,62 +1,81 @@
 //! Output folders (`DIR-upped`, `DIR-upped-videos`), their logs, and temp dirs.
 
+use std::collections::{HashMap, HashSet};
 use std::fs::{self, OpenOptions};
-use std::io::{BufRead, BufReader, Write};
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output as ProcessOutput};
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicUsize, Ordering};
+use std::time::UNIX_EPOCH;
 
 use anyhow::{Context, Result, bail};
 
-/// A folder with more files than this is never trashed without asking.
-const ASK_ABOVE: usize = 32;
+/// In the logs folder: one "name<TAB>size<TAB>mtime" line per source whose
+/// upscale was made or confirmed. Appended as files finish, so an interrupted
+/// run keeps what it did; a later line for the same name wins.
+const STAMPS: &str = "stamps.log";
 
 pub struct OutputDir {
     pub dir: PathBuf,
     logs: PathBuf,
-    /// Picking up an earlier run: files already in `dir` are done.
-    pub resume: bool,
     log_lock: Mutex<()>,
+    /// Source name to "size<TAB>mtime" as of the last run.
+    stamps: HashMap<String, String>,
 }
 
 impl OutputDir {
-    /// Gets `dir` ready to write into. An existing folder is trashed, unless it
-    /// has more than 32 files: then the user picks resume, delete, or quit.
-    pub fn prepare(dir: PathBuf) -> Result<Self> {
+    /// Gets `dir` ready to write into. Unless `keep`, an existing folder and its
+    /// logs go to the Trash first.
+    pub fn prepare(dir: PathBuf, keep: bool) -> Result<Self> {
         let logs = PathBuf::from(format!("{}.logs", dir.display()));
-        let mut resume = false;
-        if dir.exists() {
-            let files = count_files(&dir)?;
-            if files <= ASK_ABOVE {
-                trash(&dir)?;
-            } else {
-                let question = format!(
-                    "{} already has {files} files. [r]esume, [d]elete and start over, or [q]uit? ",
-                    dir.display()
-                );
-                match ask(&question).as_deref() {
-                    None => {
-                        eprintln!("no terminal to ask, resuming");
-                        resume = true;
-                    }
-                    Some("r") => resume = true,
-                    Some("d") => trash(&dir)?,
-                    Some(_) => bail!("quit"),
+        if !keep {
+            for path in [&dir, &logs] {
+                if path.exists() {
+                    trash(path)?;
                 }
             }
         }
-        if logs.exists() && !resume {
-            trash(&logs)?;
-        }
         fs::create_dir_all(&dir)?;
         fs::create_dir_all(&logs)?;
-        Ok(OutputDir { dir, logs, resume, log_lock: Mutex::new(()) })
+        let stamps = fs::read_to_string(logs.join(STAMPS))
+            .unwrap_or_default()
+            .lines()
+            .filter_map(|l| l.split_once('\t'))
+            .map(|(name, stamp)| (name.to_string(), stamp.to_string()))
+            .collect();
+        Ok(OutputDir { dir, logs, log_lock: Mutex::new(()), stamps })
     }
 
-    /// True when resuming and `path` is already there.
-    pub fn done_before(&self, path: &Path) -> bool {
-        self.resume && path.exists()
+    /// True when `src` has the same size and modified time as when its upscale
+    /// was last made or confirmed, so there's no need to look at the pixels.
+    pub fn same_as_last_run(&self, src: &Path) -> bool {
+        stamp(src).is_some_and(|s| self.stamps.get(&file_name(src)) == Some(&s))
+    }
+
+    /// Notes that `src`'s upscale is up to date with `src` as it is now.
+    pub fn remember(&self, src: &Path) {
+        if let Some(s) = stamp(src) {
+            self.append(STAMPS, &format!("{}\t{s}\n", file_name(src)));
+        }
+    }
+
+    /// Trashes files left from an earlier run whose source is gone, so the
+    /// folder stays a mirror. `wanted` holds the file names to keep.
+    pub fn trash_others(&self, wanted: &HashSet<String>) -> Result<()> {
+        let mut gone = 0;
+        for entry in fs::read_dir(&self.dir)? {
+            let path = entry?.path();
+            let name = file_name(&path);
+            if path.is_file() && !name.starts_with('.') && !wanted.contains(&name) {
+                trash(&path)?;
+                gone += 1;
+            }
+        }
+        if gone > 0 {
+            println!("Moved {gone} file(s) whose source is gone to the Trash");
+        }
+        Ok(())
     }
 
     /// Appends a command and everything it printed to process.log, in one piece
@@ -95,21 +114,18 @@ impl OutputDir {
     }
 }
 
+/// "size<TAB>mtime in nanoseconds" of a file.
+fn stamp(path: &Path) -> Option<String> {
+    let meta = fs::metadata(path).ok()?;
+    let nanos = meta.modified().ok()?.duration_since(UNIX_EPOCH).ok()?.as_nanos();
+    Some(format!("{}\t{nanos}", meta.len()))
+}
+
 /// Runs `command`, logging it and its output. True if it succeeded.
 pub fn run_logged(out: &OutputDir, mut command: Command) -> bool {
     let result = command.output();
     out.log_command(&command, &result);
     matches!(result, Ok(o) if o.status.success())
-}
-
-fn count_files(dir: &Path) -> Result<usize> {
-    let mut n = 0;
-    for entry in fs::read_dir(dir)? {
-        if entry?.file_type()?.is_file() {
-            n += 1;
-        }
-    }
-    Ok(n)
 }
 
 /// Moves `path` to the Trash, so a replaced folder can still be recovered.
@@ -119,15 +135,6 @@ fn trash(path: &Path) -> Result<()> {
         bail!("could not move {} to the Trash", path.display());
     }
     Ok(())
-}
-
-/// Asks on the terminal, even when stdin is redirected. None without one.
-fn ask(question: &str) -> Option<String> {
-    let mut tty = OpenOptions::new().read(true).write(true).open("/dev/tty").ok()?;
-    tty.write_all(question.as_bytes()).ok()?;
-    let mut answer = String::new();
-    BufReader::new(tty).read_line(&mut answer).ok()?;
-    Some(answer.trim().to_lowercase())
 }
 
 /// Moves a file, falling back to copy + delete across volumes.

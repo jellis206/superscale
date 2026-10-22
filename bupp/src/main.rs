@@ -1,10 +1,12 @@
 //! bupp: batch-upscale a folder of photos (and optionally videos) with
 //! superscale, into sibling `DIR-upped` / `DIR-upped-videos` folders.
 
+mod detect;
 mod output;
 mod pool;
 mod video;
 
+use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use std::process::{Command, ExitCode};
 use std::time::Instant;
@@ -17,14 +19,16 @@ use pool::Workers;
 
 const IMAGE_EXTENSIONS: &[&str] = &["jpg", "jpeg", "png", "heic", "heif", "tif", "tiff"];
 const VIDEO_EXTENSIONS: &[&str] = &["mp4", "mov", "m4v"];
-/// Image batches this small run one at a time.
-const PARALLEL_ABOVE: usize = 32;
+/// Image batches this small run one at a time, and are redone from scratch
+/// rather than compared with the last run.
+const SMALL_BATCH: usize = 32;
 
 /// Upscale every image in DIR into DIR-upped (named like the originals, videos
 /// copied in unchanged), and with -v/-V every video into DIR-upped-videos.
 ///
-/// An existing output folder is moved to the Trash, unless it has more than 32
-/// files: then you choose to resume (skip what's there), delete, or quit.
+/// Run again on the same DIR and only new or changed files are redone: each
+/// existing upscale is compared with its source (for more than 32 images, and
+/// for any videos), and outputs whose source is gone go to the Trash.
 #[derive(Parser)]
 struct Args {
     /// Folder of photos and videos.
@@ -50,22 +54,27 @@ struct Args {
     /// add workers while each one makes it at least 10% faster.
     #[arg(short, long, env = "JOBS")]
     jobs: Option<usize>,
+
+    /// Move existing output folders to the Trash and redo everything.
+    #[arg(short, long)]
+    fresh: bool,
 }
 
 #[derive(Default)]
 struct Tally {
     found: usize,
     upscaled: usize,
-    skipped: usize,
+    unchanged: usize,
     failed: usize,
     /// Most superscale processes that ran at once.
     peak_workers: usize,
 }
 
 impl Tally {
-    fn record(&mut self, out: &OutputDir, name: &str, ok: bool) {
-        out.record(name, ok);
+    fn record(&mut self, out: &OutputDir, src: &Path, ok: bool) {
+        out.record(&file_name(src), ok);
         if ok {
+            out.remember(src);
             self.upscaled += 1;
         } else {
             self.failed += 1;
@@ -95,7 +104,8 @@ fn run(args: Args) -> Result<bool> {
     }
     let do_images = !args.videos_only;
     let do_videos = args.videos || args.videos_only;
-    if do_videos && Command::new("ffmpeg").arg("-version").output().is_err() {
+    // Videos need it, and so does comparing with an earlier run.
+    if (do_videos || !args.fresh) && Command::new("ffmpeg").arg("-version").output().is_err() {
         bail!("ffmpeg not found (brew install ffmpeg)");
     }
     // Resolved before anything is trashed, so a typo can't cost a folder.
@@ -115,23 +125,30 @@ fn run(args: Args) -> Result<bool> {
     let mut tally = Tally::default();
     let mut outputs = Vec::new();
 
+    let photos = output::list_files(&args.dir, IMAGE_EXTENSIONS)?;
+    let videos = output::list_files(&args.dir, VIDEO_EXTENSIONS)?;
     if do_images {
-        let out = OutputDir::prepare(PathBuf::from(format!("{base}-upped")))?;
-        upscale_images(&args.dir, &out, &model, args.scale, &mut workers, &mut tally)?;
-        copy_videos(&args.dir, &out)?;
+        let keep = !args.fresh && photos.len() > SMALL_BATCH;
+        let out = OutputDir::prepare(PathBuf::from(format!("{base}-upped")), keep)?;
+        let mut wanted: HashSet<String> = photos.iter().map(|p| file_name(&image_dest(&out, p))).collect();
+        wanted.extend(videos.iter().map(|v| file_name(v)));
+        out.trash_others(&wanted)?;
+        upscale_images(photos, &out, &model, args.scale, &mut workers, &mut tally)?;
+        copy_videos(&videos, &out)?;
         outputs.push(out.dir.clone());
     }
     if do_videos {
-        let out = OutputDir::prepare(PathBuf::from(format!("{base}-upped-videos")))?;
-        upscale_videos(&args.dir, &out, &model, &mut workers, &mut tally)?;
+        let out = OutputDir::prepare(PathBuf::from(format!("{base}-upped-videos")), !args.fresh)?;
+        out.trash_others(&videos.iter().map(|v| file_name(v)).collect())?;
+        upscale_videos(&videos, &out, &model, &mut workers, &mut tally)?;
         outputs.push(out.dir.clone());
     }
 
     let secs = started.elapsed().as_secs();
-    let Tally { found, upscaled, skipped, failed, peak_workers } = tally;
+    let Tally { found, upscaled, unchanged, failed, peak_workers } = tally;
     println!();
     println!(
-        "Found {found}, upscaled {upscaled}, already done {skipped}, failed {failed} in {}h {}m {}s (up to {peak_workers} workers)",
+        "Found {found}, upscaled {upscaled}, unchanged {unchanged}, failed {failed} in {}h {}m {}s (up to {peak_workers} workers)",
         secs / 3600,
         secs % 3600 / 60,
         secs % 60,
@@ -185,17 +202,42 @@ fn image_dest(out: &OutputDir, photo: &Path) -> PathBuf {
 }
 
 fn upscale_images(
-    dir: &Path,
+    photos: Vec<PathBuf>,
     out: &OutputDir,
     model: &str,
     scale: f64,
     workers: &mut Workers,
     tally: &mut Tally,
 ) -> Result<()> {
-    let photos = output::list_files(dir, IMAGE_EXTENSIONS)?;
     tally.found += photos.len();
-    let pending: Vec<PathBuf> = photos.into_iter().filter(|p| !out.done_before(&image_dest(out, p))).collect();
-    tally.skipped += tally.found - pending.len();
+    // Upscales left from an earlier run (only kept for big batches) are kept
+    // when their source's size and mtime haven't moved, else compared with it;
+    // the rest go straight to the queue.
+    let (earlier, mut pending): (Vec<_>, Vec<_>) = photos.into_iter().partition(|p| image_dest(out, p).exists());
+    let (untouched, earlier): (Vec<_>, Vec<_>) = earlier.into_iter().partition(|p| out.same_as_last_run(p));
+    tally.unchanged += untouched.len();
+    if !earlier.is_empty() {
+        println!("Comparing {} image(s) with their upscales", earlier.len());
+        // Decoding a 2x iPhone upscale (98 MP) peaks near 800 MB, so at most 8.
+        let decoders = std::thread::available_parallelism().map_or(4, |n| n.get()).min(8);
+        pool::run(
+            earlier,
+            &mut Workers::fixed(decoders),
+            |photo| {
+                let same = detect::image_unchanged(out, &photo, &image_dest(out, &photo));
+                (photo, same)
+            },
+            |(photo, same), _| {
+                if same {
+                    out.remember(&photo);
+                    tally.unchanged += 1;
+                } else {
+                    pending.push(photo);
+                }
+            },
+        );
+        pending.sort();
+    }
     let total = pending.len();
     if total == 0 {
         return Ok(());
@@ -205,7 +247,7 @@ fn upscale_images(
     // so whatever superscale names its file, exactly one comes out to move.
     let scratch = TempDir::new_in(&out.dir)?;
     let mut one_at_a_time = Workers::fixed(1);
-    let workers = if total > PARALLEL_ABOVE { workers } else { &mut one_at_a_time };
+    let workers = if total > SMALL_BATCH { workers } else { &mut one_at_a_time };
     println!("Upscaling {total} image(s)");
     let mut finished = 0;
     pool::run(
@@ -221,7 +263,7 @@ fn upscale_images(
             finished += 1;
             tally.peak_workers = tally.peak_workers.max(running);
             println!("[{finished}/{total}] {}  ({running} workers)", file_name(&photo));
-            tally.record(out, &file_name(&photo), ok);
+            tally.record(out, &photo, ok);
         },
     );
     Ok(())
@@ -240,13 +282,15 @@ fn upscale_image(photo: &Path, scratch: &Path, out: &OutputDir, model: &str, sca
     Ok(())
 }
 
-/// Copies videos into the image mirror unchanged, so it has everything.
-fn copy_videos(dir: &Path, out: &OutputDir) -> Result<()> {
+/// Copies videos into the image mirror unchanged, so it has everything. A copy
+/// already there is redone only if its size no longer matches.
+fn copy_videos(videos: &[PathBuf], out: &OutputDir) -> Result<()> {
+    let size = |p: &Path| std::fs::metadata(p).map(|m| m.len()).ok();
     let mut copied = 0;
-    for video in output::list_files(dir, VIDEO_EXTENSIONS)? {
-        let dest = out.dir.join(file_name(&video));
-        if !dest.exists() {
-            output::copy_whole(&video, &dest)?;
+    for video in videos {
+        let dest = out.dir.join(file_name(video));
+        if size(&dest) != size(video) {
+            output::copy_whole(video, &dest)?;
             copied += 1;
         }
     }
@@ -256,22 +300,28 @@ fn copy_videos(dir: &Path, out: &OutputDir) -> Result<()> {
     Ok(())
 }
 
-fn upscale_videos(dir: &Path, out: &OutputDir, model: &str, workers: &mut Workers, tally: &mut Tally) -> Result<()> {
-    let videos = output::list_files(dir, VIDEO_EXTENSIONS)?;
+fn upscale_videos(videos: &[PathBuf], out: &OutputDir, model: &str, workers: &mut Workers, tally: &mut Tally) -> Result<()> {
     tally.found += videos.len();
     for (i, video) in videos.iter().enumerate() {
         let name = file_name(video);
         let dest = out.dir.join(&name);
-        if out.done_before(&dest) {
-            tally.skipped += 1;
-            continue;
+        if dest.exists() {
+            if out.same_as_last_run(video) {
+                tally.unchanged += 1;
+                continue;
+            }
+            if detect::video_unchanged(out, video, &dest) {
+                out.remember(video);
+                tally.unchanged += 1;
+                continue;
+            }
         }
         println!("[{}/{}] {name}", i + 1, videos.len());
         let result = video::upscale(video, &dest, model, out, workers);
         if let Err(e) = &result {
             out.log(&format!("{}: {e:#}", video.display()));
         }
-        tally.record(out, &name, result.is_ok());
+        tally.record(out, video, result.is_ok());
         tally.peak_workers = tally.peak_workers.max(workers.count());
     }
     Ok(())
